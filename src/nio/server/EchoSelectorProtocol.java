@@ -31,11 +31,11 @@ public class EchoSelectorProtocol implements TCPProtocol {
         SocketChannel hostChan = SocketChannel.open(new InetSocketAddress(defaultHost, defaultPort));
 		hostChan.configureBlocking(false); // Must be nonblocking to register
 		System.out.println("Creating connection ->"+hostChan.socket().getRemoteSocketAddress());
-		//hostChan.register(key.selector(), SelectionKey.OP_READ, ByteBuffer.allocate(bufSize));
+		hostChan.register(key.selector(), SelectionKey.OP_READ, ByteBuffer.allocate(bufSize));
 		System.out.println("client:"+clntChan);
 		System.out.println("host:"+hostChan);
-		cMap.put(clntChan, clntChan);
-		cMap.put(clntChan, clntChan);
+		cMap.put(hostChan, clntChan);
+		cMap.put(clntChan, hostChan);
     }
 
     public void handleRead(SelectionKey key) throws IOException {
@@ -47,7 +47,7 @@ public class EchoSelectorProtocol implements TCPProtocol {
         if (bytesRead == -1) { // Did the other end close?
             clntChan.close();
         } else if (bytesRead > 0) {
-        	System.out.println("read ("+BufferUtils.bufferToString(buf)+")");
+        	System.out.println("READ: "+BufferUtils.bufferToString(buf)+")");
         	ByteBuffer echo=ByteBuffer.wrap(buf.array());
         	other.write(echo);
         	other.register(key.selector(), SelectionKey.OP_WRITE|SelectionKey.OP_READ,echo);
@@ -66,7 +66,7 @@ public class EchoSelectorProtocol implements TCPProtocol {
         ByteBuffer buf = (ByteBuffer) key.attachment();
         buf.flip(); // Prepare buffer for writing
         SocketChannel clntChan = (SocketChannel) key.channel();
-        System.out.println("write ("+BufferUtils.bufferToString(buf)+")");
+        //System.out.println("write ("+BufferUtils.bufferToString(buf)+")");
         clntChan.write(buf);
         if (!buf.hasRemaining()) { // Buffer completely written?
             // Nothing left, so no longer interested in writes
