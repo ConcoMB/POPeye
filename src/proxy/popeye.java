@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -13,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 
 public class POPeye {
@@ -27,20 +27,16 @@ public class POPeye {
 	private State state; 
 	private static final String OK="+OK", ERR = "-ERR", END=".", welcomeLine = "+OK POPeye at your service\n";
 
-	
+
 	private Map<String, User> users;
 	BufferedWriter log;
-	
+
 	public POPeye() throws IOException{
-		users=new HashMap(users);
-		loadServers();
-		loadStatistics();
-		
-		
+		loadUsers();
 		log = new BufferedWriter(new FileWriter("./log.txt"));
 	}
 
-	
+
 
 	public void begin() throws IOException {
 		state = State.AUTHORIZATION;
@@ -49,9 +45,9 @@ public class POPeye {
 		InputStream inCli = new ByteArrayInputStream(buff), inServ;
 		OutputStream outCli = new ByteArrayOutputStream(), outServ;
 		out.write(welcomeLine.getBytes());
-		
+
 		boolean userAccepted=false;
-		
+
 		while(true){
 			String read, resp, user;
 			String command[] = read.split(" ");
@@ -78,18 +74,18 @@ public class POPeye {
 				if(serverName==null){
 					serverName=defaultServer;
 				}
-				
+
 				setServer(serverName);
-				
+
 				outServ.write(read);
 				resp = inServ.read();
-				
+
 				if(resp.startsWith(OK)){
-					users.get(user).getStatistics().addSuccessfulAccess();
+					//users.get(user).addSuccessfulAccess();
 					userAccepted=true;
 					log.write("OK!\n");
-				}else if(resp.sartsWith(ERR)){
-					statistics.get(user).addAccessFailure();
+				}else if(resp.startsWith(ERR)){
+					users.get(user).getStats().addAccessFailure();
 				}
 				outCli.write(resp);
 				break;
@@ -107,18 +103,18 @@ public class POPeye {
 						outServ.write("QUIT\n");
 						resp=ERR+ "POPeye doesn't let you log in, screw you\n";
 						log.write("Access blocked by POPeye\n");
-						statistics.get(user).addAccessFailure();
+						users.get(user).getStats().addAccessFailure();
 					}else{
 						log.write(user+ "logged in\n");
 						state=State.TRANSACTION;
-						statistics.get(user).addSuccessfulAccess();
+						users.get(user).addSuccessfulAccess();
 					}
 				}else if(resp.startsWith(ERR)){
-					statistics.get(user).addAccessFailure();
+					users.get(user).getStats().addAccessFailure();
 				}
 				outCli.write(resp);	
 				break;
-			
+
 			case LIST:
 				if(state!=State.TRANSACTION || command.length>2){
 					//ERROR
@@ -159,8 +155,8 @@ public class POPeye {
 					//TODO not sure
 					bytes+=s.length();
 				}
-				statistics.get(user).addBytes(bytes);
-				statistics.get(user).readEmail();
+				users.get(user).getStats().addBytes(bytes);
+				users.get(user).getStats().readEmail();
 				break;
 			case DELE :
 				if(state!=State.TRANSACTION || command.length!=2){
@@ -181,10 +177,10 @@ public class POPeye {
 				if(cantErase(message)){
 					log.write("Permission to erase dennied\n");
 					outCli.write(ERR+" POPeye says you can't erase that!\n");
-					statistics.get(user).addErsaseFailure();
+					users.get(user).getStats().addErsaseFailure();
 				}else{
 					log.write("Marking message as deleted\n");
-					statistics.get(user).eraseEmail();
+					users.get(user).getStats().eraseEmail();
 					outServ.write(read);
 					resp = inServ.read();
 					outCli.write(resp);
@@ -257,48 +253,92 @@ public class POPeye {
 		//TODO podria esta en un finally
 		end();
 	}
-	
+
+	private boolean loginRestricted(String user) {
+		return users.get(user).accessIsBlocked();
+	}
+
+
+
 	private void end() throws IOException{
 		log.close();
 		saveStatistics();
 	}
-	
-	private void loadServers() throws IOException{
-		servers=new HashMap<String,String>();
 
+	private String loadServer(String user) throws IOException{
 		Properties properties=new Properties();
 		try {
 			InputStream is= getClass().getClassLoader().getResourceAsStream("./servers.properties");
-		    properties.load(is);
+			properties.load(is);
 		} catch (IOException ex) {
-		    ex.printStackTrace();
-		    throw new IOException();
+			ex.printStackTrace();
+			throw new IOException();
 		}
-		for(Entry<Object, Object> e: properties.entrySet()){
-			servers.put((String)e.getKey(), (String)e.getValue());
-		}
+		return properties.getProperty(user);
 	}
-	
-	private void loadStatistics() throws IOException {
-		statistics = new HashMap<String, Statistics>();
 
-		BufferedReader stt = new BufferedReader(new FileReader("./statistics.txt"));
-		String line = stt.readLine();
-		while(line!=null){
-			String[] split = line.split("=");
-			String user = split[0];
-			Statistics s = new Statistics(split[1]);
-			statistics.put(user, s);
-			line = stt.readLine();
+	private Statistics loadStatistics(String name) throws IOException {
+		BufferedReader stt;
+		try{
+			stt = new BufferedReader(new FileReader("./statistics_"+name+".txt"));
+		}catch(FileNotFoundException e){
+			return null;
 		}
+		Statistics s=  new Statistics(stt.readLine());
 		stt.close();
+		return s;
 	}
-	
+
 	private void saveStatistics() throws IOException{
-		BufferedWriter stt = new BufferedWriter(new FileWriter("./statistics.txt"));
-		for(Entry<String, Statistics> e: statistics.entrySet()){
-			stt.write(e.getKey()+"="+e.getValue().getFullStatistics());
+		for(User u: users.values()){
+			BufferedWriter stt = new BufferedWriter(new FileWriter("./statistics_"+u.getName()+".txt"));
+			stt.write(u.getStats().getFullStatistics());
+			stt.close();
 		}
-		stt.close();
+	}
+
+	private void loadUsers() throws IOException{
+		users=new HashMap<String, User>();
+		BufferedReader u = new BufferedReader(new FileReader("./users.txt"));
+		String name = u.readLine();
+		while(name!=null){
+			Statistics stats = loadStatistics(name);
+			String server = loadServer(name);
+			QuantityDenial quantityDenial= loadQuantityDenial(name);
+			HourDenial hourDenial = loadHourDenial(name);
+			EraseConditions eraseConds = loadEraseConditions(name);
+			User user = new User(name, stats, server, quantityDenial, hourDenial, eraseConds);
+			users.put(name,user);
+			name = u.readLine();
+		}
+		u.close();
+	}
+
+
+
+	private HourDenial loadHourDenial(String name) throws IOException {
+		BufferedReader b;
+		try{
+			b = new BufferedReader(new FileReader("./hourDenial_"+name+".txt"));
+		}catch(FileNotFoundException e){
+			return null;
+		}
+		HourDenial d=  new HourDenial(b.readLine());
+		b.close();
+		return d;
+	}
+
+
+
+	private QuantityDenial loadQuantityDenial(String name) throws NumberFormatException, IOException {
+		BufferedReader b;
+		try{
+			b = new BufferedReader(new FileReader("./quantityDenial_"+name+".txt"));
+		}catch(FileNotFoundException e){
+			return null;
+		}
+		QuantityDenial d=  new QuantityDenial(Integer.valueOf(b.readLine()));
+		b.close();
+		return d;
 	}
 }

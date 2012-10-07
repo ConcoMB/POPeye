@@ -4,7 +4,7 @@ public class User {
 
 	private Statistics stats;
 	private String name,server;
-	private AccessDenial accessDenial;
+	private QuantityDenial quantityDenial;
 	private HourDenial hourDenial;
 	private EraseConditions eraseConditions;
 	
@@ -15,12 +15,12 @@ public class User {
 		stats=new Statistics();
 	}
 	
-	public User(String name,Statistics stats, String server, AccessDenial accessDenial,
+	public User(String name,Statistics stats, String server, QuantityDenial quantityDenial,
 			HourDenial hourDenial, EraseConditions eraseConditions) {
 		this.stats = stats;
 		this.name=name;
 		this.server = server;
-		this.accessDenial = accessDenial;
+		this.quantityDenial = quantityDenial;
 		this.hourDenial = hourDenial;
 		this.eraseConditions = eraseConditions;
 	}
@@ -32,8 +32,8 @@ public class User {
 	public String getServer() {
 		return server;
 	}
-	public AccessDenial getAccessDenial() {
-		return accessDenial;
+	public QuantityDenial getQuantityDenial() {
+		return quantityDenial;
 	}
 	public HourDenial getHourDenial() {
 		return hourDenial;
@@ -55,6 +55,26 @@ public class User {
 		}
 		User u = (User)o;
 		return this.name.equals(u.name);
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public boolean accessIsBlocked() {
+		if(hourDenial!=null && quantityDenial!=null){
+			return hourDenial.isBlocked() || quantityDenial.isBlocked();
+		}
+		if(hourDenial!=null){
+			return hourDenial.isBlocked();
+		}
+			return quantityDenial.isBlocked();
+		}
+	
+
+	public void addSuccessfulAccess() {
+		stats.addSuccessfulAccess();
+		quantityDenial.addAccess();
 	}
 	
 }
