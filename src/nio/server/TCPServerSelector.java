@@ -11,13 +11,13 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class TCPServerSelector {
-	private static final int BUFSIZE = 256; // Buffer size (bytes)
+	private static final int BUFSIZE = 1024*1024; // Buffer size (bytes)
 	private static final int TIMEOUT = 3000; // Wait timeout (milliseconds)
-	private static final String defaultHost = "pop3.live.com";
-	private static final int defaultPort = 995;
+	private static final String defaultHost = "mail.adelphia.net";
+	private static final int defaultPort = 25;
 
 	public static void main(String[] args) throws IOException {
-		int ports[]={110,8080};
+		int ports[]={25};
 		/*if (args.length < 1) { // Test for correct # of args
             throw new IllegalArgumentException("Parameter(s): <Port> ...");
         }*/
