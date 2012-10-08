@@ -2,6 +2,7 @@ package proxy;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.channels.SocketChannel;
 import java.util.Map;
 
 public class aux {
@@ -17,6 +18,7 @@ public class aux {
 	private Writeable out;
 	private Command lastCommand;
 	private User user;
+	private SocketChannel client;
 
 	private Map<String, User> users;
 	private String userName;
@@ -36,7 +38,7 @@ public class aux {
 			}else if(line.startsWith(ERR)){
 				user.getStats().addAccessFailure();
 			}
-			out.writeToClient(line);	
+			out.writeToClient(client, line);	
 		case PASS:
 			if(line.startsWith(OK)){
 
@@ -47,11 +49,11 @@ public class aux {
 				users.get(user).getStats().addAccessFailure();
 				user=null;
 			}
-			out.writeToClient(line);	
+			out.writeToClient(client, line);	
 			break;
 		case LIST:
 			log.write(" of message "+ messageNum+"\n");
-			out.writeToClient(line);	
+			out.writeToClient(client, line);	
 			break;
 			//		case LIST_MULTI:
 			//			log.write("\n");
@@ -68,7 +70,7 @@ public class aux {
 		case STAT:
 		case NOOP:
 		case RSET:
-			out.writeToClient(line);
+			out.writeToClient(client, line);
 			break;
 		case TOP:
 
@@ -81,7 +83,7 @@ public class aux {
 				log.write(" updating data...");
 				state=State.UPDATE;
 			}
-			out.writeToClient(line);
+			out.writeToClient(client, line);
 			log.write(" closing connections...\n");
 			closeConnections();
 			break;
