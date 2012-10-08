@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import proxy.aux.Command;
+import proxy.aux.State;
+
 public class POPeye {
 
 	private enum State{
@@ -245,6 +248,74 @@ public class POPeye {
 			break;
 		}
 	}
+	
+	public void proxyServer(String line) throws IOException{
+
+		switch(lastCommand){
+		case USER:	
+			if(line.startsWith(OK)){
+				//users.get(user).addSuccessfulAccess();
+				log.write("OK!\n");
+			}else if(line.startsWith(ERR)){
+				user.getStats().addAccessFailure();
+			}
+			out.writeToClient(client, line);	
+		case PASS:
+			if(line.startsWith(OK)){
+
+				log.write(userName+ "logged in\n");
+				state=State.TRANSACTION;
+				user.addSuccessfulAccess();
+			}else if(line.startsWith(ERR)){
+				users.get(user).getStats().addAccessFailure();
+				user=null;
+			}
+			out.writeToClient(client, line);	
+			break;
+		case LIST:
+			log.write(" of message "+ messageNum+"\n");
+			out.writeToClient(client, line);	
+			break;
+			//		case LIST_MULTI:
+			//			log.write("\n");
+			//			//multilined
+			//			while(!resp.equals(END)){
+			//				outCli.write(resp);
+			//				resp = inServ.read();
+			//			}
+			//			break;
+		case RETR:
+
+		case DELE:
+
+		case STAT:
+		case NOOP:
+		case RSET:
+			out.writeToClient(client, line);
+			break;
+		case TOP:
+
+		case UIDL:
+
+		//case UIDL_MULTI:
+
+		case QUIT:
+			if(state==State.TRANSACTION){
+				log.write(" updating data...");
+				state=State.UPDATE;
+			}
+			out.writeToClient(client, line);
+			log.write(" closing connections...\n");
+			closeConnections();
+			break;
+		}
+	}
+	
+	private void closeConnections(){
+		user=null;
+		saveStatistics();
+
+	}
 
 	private boolean loginRestricted(String user) {
 		return users.get(user).accessIsBlocked();
@@ -254,7 +325,6 @@ public class POPeye {
 
 	private void end() throws IOException{
 		log.close();
-		saveStatistics();
 	}
 
 	private String loadServer(String user) throws IOException{
