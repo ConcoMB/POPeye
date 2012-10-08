@@ -7,10 +7,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
+import java.nio.channels.SocketChannel;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -31,13 +29,15 @@ public class POPeye {
 	private User user;
 	private String userName;
 	private BufferedWriter log;
+	private SocketChannel client;
 
 	private int messageNum, topLines;
 	
 	private final static String defaultServer = "192.168.0.11";
 
-	public POPeye(Writeable out) throws IOException{
+	public POPeye(Writeable out, SocketChannel client) throws IOException{
 		loadUsers();
+		this.client=client;
 		this.out=out;
 		log = new BufferedWriter(new FileWriter("./log.txt"));
 		state = State.AUTHORIZATION_USER;
