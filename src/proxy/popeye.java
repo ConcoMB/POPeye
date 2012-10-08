@@ -63,7 +63,7 @@ public class POPeye {
 //			users.put(userName, user);
 //		}
 		
-		if(loginRestricted(userName)){
+		if(user.accessIsBlocked()){
 			log.write("Access blocked by POPeye\n");
 			user.getStats().addAccessFailure();
 			user=null;
@@ -261,7 +261,7 @@ public class POPeye {
 				state=State.TRANSACTION;
 				user.addSuccessfulAccess();
 			}else if(line.startsWith(ERR)){
-				users.get(user).getStats().addAccessFailure();
+				user.getStats().addAccessFailure();
 				user=null;
 			}
 			out.writeToClient(client, line);	
@@ -306,14 +306,11 @@ public class POPeye {
 	}
 	
 	private void closeConnections() throws IOException{
-		user=null;
 		saveStatistics();
-
+		user=null;
+//TODO
 	}
 
-	private boolean loginRestricted(String user) {
-		return users.get(user).accessIsBlocked();
-	}
 
 
 
@@ -352,23 +349,6 @@ public class POPeye {
 			stt.close();
 //		}
 	}
-
-//	private void loadUsers() throws IOException{
-//		users=new HashMap<String, User>();
-//		BufferedReader u = new BufferedReader(new FileReader("./users.txt"));
-//		String name = u.readLine();
-//		while(name!=null){
-//			Statistics stats = loadStatistics(name);
-//			String server = loadServer(name);
-//			QuantityDenial quantityDenial= loadQuantityDenial(name);
-//			HourDenial hourDenial = loadHourDenial(name);
-//			EraseConditions eraseConds=null; //= loadEraseConditions(name);
-//			User user = new User(name, stats, server, quantityDenial, hourDenial, eraseConds);
-//			users.put(name,user);
-//			name = u.readLine();
-//		}
-//		u.close();
-//	}
 	
 	private User loadUser() throws IOException{
 		Statistics stats = loadStatistics(userName);
