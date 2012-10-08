@@ -305,7 +305,7 @@ public class POPeye {
 		}
 	}
 	
-	private void closeConnections(){
+	private void closeConnections() throws IOException{
 		user=null;
 		saveStatistics();
 
