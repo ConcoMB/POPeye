@@ -8,12 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.SocketChannel;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
-
-import proxy.aux.Command;
-import proxy.aux.State;
 
 public class POPeye {
 
@@ -28,7 +23,7 @@ public class POPeye {
 	private Writeable out;
 	private Command lastCommand;
 
-	private Map<String, User> users;
+	//private Map<String, User> users;
 	private User user;
 	private String userName;
 	private BufferedWriter log;
@@ -39,7 +34,6 @@ public class POPeye {
 	private final static String defaultServer = "192.168.0.11";
 
 	public POPeye(Writeable out, SocketChannel client) throws IOException{
-		loadUsers();
 		this.client=client;
 		this.out=out;
 		log = new BufferedWriter(new FileWriter("./log.txt"));
@@ -62,12 +56,12 @@ public class POPeye {
 		}
 		userName=command[1];
 		log.write("User "+userName+" attempting to connect\n");
-		if(users.containsKey(userName)){
-			user=users.get(userName);
-		}else{
-			user = new User(userName);
-			users.put(userName, user);
-		}
+//		if(users.containsKey(userName)){
+//			user=users.get(userName);
+//		}else{
+			user =loadUser();
+//			users.put(userName, user);
+//		}
 		
 		if(loginRestricted(userName)){
 			log.write("Access blocked by POPeye\n");
@@ -161,7 +155,7 @@ public class POPeye {
 			messageNum=Integer.valueOf(command[1]);
 
 			log.write(userName + "requested DELE of message "+ command[1]+", checking permissions...\n");
-			out.writeToServer("RETR "+command[1]+"\n");
+			out.writeToServer(client, "RETR "+command[1]+"\n");
 			//			List<String> message = new ArrayList<String>();
 			//			message.add(resp);
 			//			while(!resp.equals(END)){
@@ -359,21 +353,30 @@ public class POPeye {
 //		}
 	}
 
-	private void loadUsers() throws IOException{
-		users=new HashMap<String, User>();
-		BufferedReader u = new BufferedReader(new FileReader("./users.txt"));
-		String name = u.readLine();
-		while(name!=null){
-			Statistics stats = loadStatistics(name);
-			String server = loadServer(name);
-			QuantityDenial quantityDenial= loadQuantityDenial(name);
-			HourDenial hourDenial = loadHourDenial(name);
-			EraseConditions eraseConds=null; //= loadEraseConditions(name);
-			User user = new User(name, stats, server, quantityDenial, hourDenial, eraseConds);
-			users.put(name,user);
-			name = u.readLine();
-		}
-		u.close();
+//	private void loadUsers() throws IOException{
+//		users=new HashMap<String, User>();
+//		BufferedReader u = new BufferedReader(new FileReader("./users.txt"));
+//		String name = u.readLine();
+//		while(name!=null){
+//			Statistics stats = loadStatistics(name);
+//			String server = loadServer(name);
+//			QuantityDenial quantityDenial= loadQuantityDenial(name);
+//			HourDenial hourDenial = loadHourDenial(name);
+//			EraseConditions eraseConds=null; //= loadEraseConditions(name);
+//			User user = new User(name, stats, server, quantityDenial, hourDenial, eraseConds);
+//			users.put(name,user);
+//			name = u.readLine();
+//		}
+//		u.close();
+//	}
+	
+	private User loadUser() throws IOException{
+		Statistics stats = loadStatistics(userName);
+		String server = loadServer(userName);
+		QuantityDenial quantityDenial= loadQuantityDenial(userName);
+		HourDenial hourDenial = loadHourDenial(userName);
+		EraseConditions eraseConds=null; //= loadEraseConditions(userName);
+		return new User(userName, stats, server, quantityDenial, hourDenial, eraseConds);
 	}
 
 
