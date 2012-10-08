@@ -13,10 +13,10 @@ import java.util.Map;
 public class TCPServerSelector {
 	private static final int BUFSIZE = 1024*1024; // Buffer size (bytes)
 	private static final int TIMEOUT = 3000; // Wait timeout (milliseconds)
-	private static final int defaultPort = 30;
+	private static final int defaultPort = 110;
 
 	public static void main(String[] args) throws IOException {
-		int ports[]={25};
+		int ports[]={110};
 		/*if (args.length < 1) { // Test for correct # of args
             throw new IllegalArgumentException("Parameter(s): <Port> ...");
         }*/

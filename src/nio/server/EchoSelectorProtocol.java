@@ -7,6 +7,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.CharacterCodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,15 +34,16 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
         // Register the selector with new channel for read and attach byte
         // buffer
         System.out.println("Accepted connection ->"+clntChan.socket().getRemoteSocketAddress());
-        clntChan.register(key.selector(), SelectionKey.OP_READ, ByteBuffer.allocate(bufSize));
+        clntChan.register(key.selector(), SelectionKey.OP_READ, new DoubleBuffer(bufSize));
         proxyMap.put(clntChan, new POPeye(this,clntChan));
+        connectToServer(clntChan, "pop.aol.com");
     }
     
     private void connectToServer(SocketChannel clntChan, String serverName) throws IOException{
     	SocketChannel hostChan = SocketChannel.open(new InetSocketAddress(serverName, defaultPort));
 		hostChan.configureBlocking(false); // Must be nonblocking to register
 		System.out.println("Creating connection ->"+hostChan.socket().getRemoteSocketAddress());
-		hostChan.register(selector, SelectionKey.OP_READ, ByteBuffer.allocate(bufSize));
+		hostChan.register(selector, SelectionKey.OP_READ, new DoubleBuffer(bufSize));
 		System.out.println("client:"+clntChan);
 		System.out.println("host:"+hostChan);
 		clientMap.put(hostChan, clntChan);
@@ -51,17 +53,21 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
     public void handleRead(SelectionKey key) throws IOException {
         // Client socket channel has pending data
         SocketChannel channel = (SocketChannel) key.channel();
-        ByteBuffer buf = (ByteBuffer) key.attachment();
+        ByteBuffer buf = ((DoubleBuffer) key.attachment()).getReadBuffer();
+        buf.rewind();
         long bytesRead = channel.read(buf);
+        buf.rewind();
         if (bytesRead == -1) { // Did the other end close?
             channel.close();
         } else if (bytesRead > 0) {
         	String line=BufferUtils.bufferToString(buf);
-        	System.out.print("READ: ("+line+")");
+        	System.out.print("READ:"+bytesRead+" ("+line+")");
         	if(serverMap.containsValue(channel)){
         		//SERVER
         		System.out.println("from server");
-        		proxyMap.get(channel).proxyServer(line);
+        		for(String s: line.split("\r\n")){
+        			proxyMap.get(clientMap.get(channel)).proxyServer(s.concat("\n"));
+    			}
         	}else{
         		//CLIENT
         		System.out.println("from client");
@@ -74,10 +80,13 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
         				return;
         			}else{
         				connectToServer(channel, serverName);
+        				writeToServer(channel, line);
         			}
         		}else{
         			//NORMAL FLOW
-        			proxyMap.get(channel).proxyClient(line);
+        			for(String s: line.split("\r\n")){
+        				proxyMap.get(channel).proxyClient(s.concat("\n"));
+        			}
         		}
         	}
         	//ByteBuffer echo=ByteBuffer.wrap(buf.array());
@@ -95,28 +104,39 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
          * channel not closed).
          */
         // Retrieve data read earlier
-        ByteBuffer buf = (ByteBuffer) key.attachment();
-        buf.flip(); // Prepare buffer for writing
+        ByteBuffer buf = ((DoubleBuffer) key.attachment()).getWriteBuffer();
+        //buf.flip(); // Prepare buffer for writing
         SocketChannel channel = (SocketChannel) key.channel();
-        //System.out.println("write ("+BufferUtils.bufferToString(buf)+")");
-        channel.write(buf);
+        System.out.println("write ("+BufferUtils.bufferToString(buf)+")");
+        buf.flip();
+        int bytesWritten=channel.write(buf);
         if (!buf.hasRemaining()) { // Buffer completely written?
+        	//System.out.println("wrote all");
+        	//System.out.println(BufferUtils.bufferToString(buf));
             // Nothing left, so no longer interested in writes
             key.interestOps(SelectionKey.OP_READ);
         }
         buf.compact(); // Make room for more data to be read in
+        buf.clear();
     }
 
 	@Override
 	public void writeToClient(SocketChannel client, String line) throws IOException {
-		client.write(ByteBuffer.wrap(line.getBytes()));
-		handleWrite(client.keyFor(selector));
+		System.out.println("toClient:("+line+")");
+		writeToChannel(client,line);
 	}
 
 	@Override
 	public void writeToServer(SocketChannel client, String line) throws IOException {
+		System.out.println("toServer:("+line+")");
 		SocketChannel server=serverMap.get(client);
-		server.write(ByteBuffer.wrap(line.getBytes()));
-		handleWrite(server.keyFor(selector));
+		writeToChannel(server, line);
+	}
+	
+	private void writeToChannel(SocketChannel channel, String line){
+		SelectionKey key=channel.keyFor(selector);
+		ByteBuffer buf=((DoubleBuffer) key.attachment()).getWriteBuffer();
+		buf.put(line.getBytes());
+		key.interestOps(SelectionKey.OP_READ|SelectionKey.OP_WRITE);
 	}
 }

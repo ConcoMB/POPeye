@@ -16,7 +16,7 @@ public class POPeye {
 		AUTHORIZATION_USER, AUTHORIZATION_PASS, TRANSACTION, UPDATE;
 	}
 	private enum Command{
-		USER, PASS, LIST, RETR, QUIT, UIDL, DELE, STAT, NOOP, RSET, APOP, TOP;
+		USER, PASS, LIST, RETR, QUIT, UIDL, DELE, STAT, NOOP, RSET, APOP, TOP, UNKNOWN;
 	}
 	private State state; 
 	private static final String OK="+OK", ERR = "-ERR", END=".", welcomeLine = "+OK POPeye at your service\n";
@@ -31,13 +31,14 @@ public class POPeye {
 
 	private int messageNum, topLines;
 	
-	private final static String defaultServer = "192.168.0.11";
+	private final static String defaultServer = "localhost";
 
 	public POPeye(Writeable out, SocketChannel client) throws IOException{
 		this.client=client;
 		this.out=out;
 		log = new BufferedWriter(new FileWriter("./log.txt"));
 		state = State.AUTHORIZATION_USER;
+		lastCommand = Command.UNKNOWN;
 	}
 
 	public String login(String line) throws IOException{
@@ -87,7 +88,7 @@ public class POPeye {
 		try{
 			com = Command.valueOf(command[0]);
 		}catch(IllegalArgumentException e){
-			return;
+			com = Command.UNKNOWN;
 		}
 		switch(com){
 
@@ -240,11 +241,12 @@ public class POPeye {
 			
 			lastCommand=com;
 			break;
+		default:
+			out.writeToServer(client, line);
 		}
 	}
 	
 	public void proxyServer(String line) throws IOException{
-
 		switch(lastCommand){
 		case USER:	
 			if(line.startsWith(OK)){
@@ -253,7 +255,8 @@ public class POPeye {
 			}else if(line.startsWith(ERR)){
 				user.getStats().addAccessFailure();
 			}
-			out.writeToClient(client, line);	
+			out.writeToClient(client, line);
+			break;
 		case PASS:
 			if(line.startsWith(OK)){
 
@@ -302,6 +305,9 @@ public class POPeye {
 			log.write(" closing connections...\n");
 			closeConnections();
 			break;
+		default:
+		case UNKNOWN:
+			out.writeToClient(client, line);
 		}
 	}
 	

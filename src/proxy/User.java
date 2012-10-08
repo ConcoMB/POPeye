@@ -18,6 +18,9 @@ public class User {
 	public User(String name,Statistics stats, String server, QuantityDenial quantityDenial,
 			HourDenial hourDenial, EraseConditions eraseConditions) {
 		this.stats = stats;
+		if(stats==null){
+			this.stats=new Statistics();
+		}
 		this.name=name;
 		this.server = server;
 		this.quantityDenial = quantityDenial;
@@ -68,13 +71,17 @@ public class User {
 		if(hourDenial!=null){
 			return hourDenial.isBlocked();
 		}
+		if(quantityDenial!=null){
 			return quantityDenial.isBlocked();
 		}
-	
+		return false;
+	}
 
 	public void addSuccessfulAccess() {
 		stats.addSuccessfulAccess();
-		quantityDenial.addAccess();
+		if(quantityDenial!=null){
+			quantityDenial.addAccess();
+		}
 	}
 	
 }
