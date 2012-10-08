@@ -13,7 +13,6 @@ import java.util.Map;
 public class TCPServerSelector {
 	private static final int BUFSIZE = 1024*1024; // Buffer size (bytes)
 	private static final int TIMEOUT = 3000; // Wait timeout (milliseconds)
-	private static final String defaultHost = "mail.adelphia.net";
 	private static final int defaultPort = 25;
 
 	public static void main(String[] args) throws IOException {
@@ -33,7 +32,7 @@ public class TCPServerSelector {
 			listnChannel.register(selector, SelectionKey.OP_ACCEPT);
 		}
 		// Create a handler that will implement the protocol
-		TCPProtocol protocol = new EchoSelectorProtocol(BUFSIZE,defaultHost,defaultPort);
+		TCPProtocol protocol = new EchoSelectorProtocol(BUFSIZE,defaultPort,selector);
 		while (true) { // Run forever, processing available I/O operations
 			// Wait for some channel to be ready (or timeout)
 			if (selector.select(TIMEOUT) == 0) { // returns # of ready chans

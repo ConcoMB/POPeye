@@ -12,9 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import proxy.aux.Command;
-import proxy.aux.State;
-
 public class POPeye {
 
 	private enum State{
@@ -161,7 +158,7 @@ public class POPeye {
 			messageNum=Integer.valueOf(command[1]);
 
 			log.write(userName + "requested DELE of message "+ command[1]+", checking permissions...\n");
-			out.writeToServer("RETR "+command[1]+"\n");
+			out.writeToServer(client, "RETR "+command[1]+"\n");
 			//			List<String> message = new ArrayList<String>();
 			//			message.add(resp);
 			//			while(!resp.equals(END)){
@@ -311,7 +308,7 @@ public class POPeye {
 		}
 	}
 	
-	private void closeConnections(){
+	private void closeConnections() throws IOException{
 		user=null;
 		saveStatistics();
 
