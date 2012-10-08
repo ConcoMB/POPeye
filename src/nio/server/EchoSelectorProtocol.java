@@ -57,8 +57,12 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
             channel.close();
         } else if (bytesRead > 0) {
         	String line=BufferUtils.bufferToString(buf);
-        	System.out.print("READ: "+line+")");
-        	if(clientMap.containsValue(channel)){
+        	System.out.print("READ: ("+line+")");
+        	if(serverMap.containsValue(channel)){
+        		//SERVER
+        		System.out.println("from server");
+        		proxyMap.get(channel).proxyServer(line);
+        	}else{
         		//CLIENT
         		System.out.println("from client");
         		if(serverMap.get(channel)==null){
@@ -75,10 +79,6 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
         			//NORMAL FLOW
         			proxyMap.get(channel).proxyClient(line);
         		}
-        	}else{
-        		//SERVER
-        		System.out.println("from server");
-        		proxyMap.get(channel).proxyServer(line);
         	}
         	//ByteBuffer echo=ByteBuffer.wrap(buf.array());
         	//other.write(echo);
