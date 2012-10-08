@@ -25,11 +25,15 @@ public class POPeye {
 	private State state; 
 	private static final String OK="+OK", ERR = "-ERR", END=".", welcomeLine = "+OK POPeye at your service\n";
 	private Writeable out;
+	private Command lastCommand;
 
 	private Map<String, User> users;
+	private User user;
 	private String userName;
 	private BufferedWriter log;
 
+	private int messageNum, topLines;
+	
 	private final static String defaultServer = "192.168.0.11";
 
 	public POPeye(Writeable out) throws IOException{
@@ -55,14 +59,24 @@ public class POPeye {
 		}
 		userName=command[1];
 		log.write("User "+userName+" attempting to connect\n");
-		if(!users.containsKey(userName)){
-			users.put(userName, new User(userName));
+		if(users.containsKey(userName)){
+			user=users.get(userName);
+		}else{
+			user = new User(userName);
+			users.put(userName, user);
 		}
-		String serverName = users.get(userName).getServer();
+		
+		if(loginRestricted(userName)){
+			log.write("Access blocked by POPeye\n");
+			user.getStats().addAccessFailure();
+			user=null;
+			return null;
+		}
+		String serverName = user.getServer();
 		if(serverName==null){
 			serverName=defaultServer;
 		}
-
+		lastCommand=Command.USER;
 		return serverName;
 
 	}
@@ -80,69 +94,37 @@ public class POPeye {
 		}
 		switch(com){
 
-		//			
-		//			resp = inServ.read();
-		//
-		//			if(resp.startsWith(OK)){
-		//				//users.get(user).addSuccessfulAccess();
-		//				userAccepted=true;
-		//				log.write("OK!\n");
-		//			}else if(resp.startsWith(ERR)){
-		//				users.get(user).getStats().addAccessFailure();
-		//			}
-		//			outCli.write(resp);
+		
 		case PASS:
-			if(state!=State.AUTHORIZATION_PASS
+			if(state!=State.AUTHORIZATION_PASS || lastCommand!=Command.USER
 			|| command.length!=2){
 				//ERROR
 			}
 			log.write("Password: "+command[1]+"\n");
 			out.writeToServer(line);
 
-			//			resp = inServ.read();
-			//			userAccepted=false;
-			//			if(resp.startsWith(OK)){
-			//				if(loginRestricted(user)){
-			//					outServ.write("QUIT\n");
-			//					resp=ERR+ "POPeye doesn't let you log in, screw you\n";
-			//					log.write("Access blocked by POPeye\n");
-			//					users.get(user).getStats().addAccessFailure();
-			//				}else{
-			//					log.write(user+ "logged in\n");
-			//					state=State.TRANSACTION;
-			//					users.get(user).addSuccessfulAccess();
-			//				}
-			//			}else if(resp.startsWith(ERR)){
-			//				users.get(user).getStats().addAccessFailure();
-			//			}
-			//			outCli.write(resp);	
+			lastCommand=com;
 			break;
 
 		case LIST:
 			if(state!=State.TRANSACTION || command.length>2){
 				//ERROR
 			}
-			log.write(user+" requested LIST");
+			log.write(userName+" requested LIST");
 			out.writeToServer(line);
-
-			//			resp = inServ.read();
-			//			if(command.length==1){
-			//				log.write("\n");
-			//				//multilined
-			//				while(!resp.equals(END)){
-			//					outCli.write(resp);
-			//					resp = inServ.read();
-			//				}
-			//			}else{
-			//				log.write(" of message "+ command[1]+"\n");
-			//			}
-			//			outCli.write(resp);
+			if(command.length==2){
+				messageNum=Integer.valueOf(command[1]);
+				//lastCommand=LIST_MULTI;
+			}else{
+				lastCommand=com;
+			}
 			break;
 		case RETR:
 			if(state!=State.TRANSACTION || command.length!=2){
 				//ERROR
 			}
-			log.write(user+ " requested RETR of message "+ command[1]+"\n");
+			messageNum=Integer.valueOf(command[1]);
+			log.write(userName+ " requested RETR of message "+ command[1]+"\n");
 			out.writeToServer(line);
 
 			//			resp = inServ.read();
@@ -162,6 +144,7 @@ public class POPeye {
 			//			}
 			//			users.get(user).getStats().addBytes(bytes);
 			//			users.get(user).getStats().readEmail();
+			lastCommand=com;
 			break;
 		case DELE :
 			if(state!=State.TRANSACTION || command.length!=2){
@@ -172,7 +155,9 @@ public class POPeye {
 			}catch(Exception e){
 				//ERROR
 			}
-			log.write(user + "requested DELE of message "+ command[1]+", checking permissions...\n");
+			messageNum=Integer.valueOf(command[1]);
+
+			log.write(userName + "requested DELE of message "+ command[1]+", checking permissions...\n");
 			out.writeToServer("RETR "+command[1]+"\n");
 			//			List<String> message = new ArrayList<String>();
 			//			message.add(resp);
@@ -190,6 +175,7 @@ public class POPeye {
 			//				resp = inServ.read();
 			//				outCli.write(resp);
 			//			}
+			lastCommand=com;
 			break;
 		case STAT:
 		case NOOP:
@@ -198,10 +184,9 @@ public class POPeye {
 			if(state!=State.TRANSACTION || command.length!=1){
 				//ERROR
 			}
-			log.write(user +" requested "+ c.toString()+ "\n");
+			log.write(userName +" requested "+ com.toString()+ "\n");
 			out.writeToServer(line);
-			//			resp = inServ.read();
-			//			outCli.write(resp);
+			lastCommand=com;
 			break;
 		case APOP:
 			//TODO
@@ -210,7 +195,7 @@ public class POPeye {
 			if(state!=State.TRANSACTION || command.length!=3){
 				//ERROR
 			}
-			log.write(user + " requested TOP of message "+ command[1]+ ", number of lines: "+ command[2]+ "\n");
+			log.write(userName + " requested TOP of message "+ command[1]+ ", number of lines: "+ command[2]+ "\n");
 			out.writeToServer(line);
 			//			resp = inServ.read();
 			//			while(!resp.equals(END)){
@@ -218,12 +203,15 @@ public class POPeye {
 			//				resp = inServ.read();
 			//			}
 			//			outCli.write(resp);
+			messageNum=Integer.valueOf(command[1]);
+			topLines=Integer.valueOf(command[2]);
+			lastCommand=com;
 			break;
 		case UIDL:
 			if(state!=State.TRANSACTION || command.length>2){
 				//ERROR
 			}
-			log.write(user + " requested UIDL");
+			log.write(userName + " requested UIDL\n");
 			out.writeToServer(line);
 
 			//			resp = inServ.read();
@@ -238,6 +226,12 @@ public class POPeye {
 			//				log.write(" of message "+ command[1]+"\n");
 			//			}
 			//			outCli.write(resp);
+			if(command.length==2){
+				messageNum=Integer.valueOf(command[1]);
+				lastCommand=com;
+			}else{
+				//lastCommand=UIDL_MULTI;
+			}
 			break;
 		case QUIT:
 			if(command.length!=1){
@@ -246,19 +240,10 @@ public class POPeye {
 			log.write("Quitting...");
 			out.writeToServer(line);
 
-			//			if(state==State.TRANSACTION){
-			//				log.write(" updating data...");
-			//				state=State.UPDATE;
-			//			}
-			//			resp = inServ.read();
-			//			outCli.write(resp);
-			//			log.write(" closing connections...\n");
-			//			closeConnections();
-			//			break;
+			
+			lastCommand=com;
+			break;
 		}
-		//TODO podria esta en un finally
-		//end();
-
 	}
 
 	private boolean loginRestricted(String user) {
@@ -297,11 +282,11 @@ public class POPeye {
 	}
 
 	private void saveStatistics() throws IOException{
-		for(User u: users.values()){
-			BufferedWriter stt = new BufferedWriter(new FileWriter("./statistics_"+u.getName()+".txt"));
-			stt.write(u.getStats().getFullStatistics());
+//		for(User u: users.values()){
+			BufferedWriter stt = new BufferedWriter(new FileWriter("./statistics_"+userName+".txt"));
+			stt.write(user.getStats().getFullStatistics());
 			stt.close();
-		}
+//		}
 	}
 
 	private void loadUsers() throws IOException{
@@ -313,7 +298,7 @@ public class POPeye {
 			String server = loadServer(name);
 			QuantityDenial quantityDenial= loadQuantityDenial(name);
 			HourDenial hourDenial = loadHourDenial(name);
-			EraseConditions eraseConds = loadEraseConditions(name);
+			EraseConditions eraseConds=null; //= loadEraseConditions(name);
 			User user = new User(name, stats, server, quantityDenial, hourDenial, eraseConds);
 			users.put(name,user);
 			name = u.readLine();
