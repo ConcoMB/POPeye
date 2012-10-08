@@ -101,7 +101,7 @@ public class POPeye {
 				//ERROR
 			}
 			log.write("Password: "+command[1]+"\n");
-			out.writeToServer(line);
+			out.writeToServer(client, line);
 
 			lastCommand=com;
 			break;
@@ -111,7 +111,7 @@ public class POPeye {
 				//ERROR
 			}
 			log.write(userName+" requested LIST");
-			out.writeToServer(line);
+			out.writeToServer(client, line);
 			if(command.length==2){
 				messageNum=Integer.valueOf(command[1]);
 				//lastCommand=LIST_MULTI;
@@ -125,7 +125,7 @@ public class POPeye {
 			}
 			messageNum=Integer.valueOf(command[1]);
 			log.write(userName+ " requested RETR of message "+ command[1]+"\n");
-			out.writeToServer(line);
+			out.writeToServer(client, line);
 
 			//			resp = inServ.read();
 			//			List<String> message = new ArrayList<String>();
@@ -185,7 +185,7 @@ public class POPeye {
 				//ERROR
 			}
 			log.write(userName +" requested "+ com.toString()+ "\n");
-			out.writeToServer(line);
+			out.writeToServer(client, line);
 			lastCommand=com;
 			break;
 		case APOP:
@@ -196,7 +196,7 @@ public class POPeye {
 				//ERROR
 			}
 			log.write(userName + " requested TOP of message "+ command[1]+ ", number of lines: "+ command[2]+ "\n");
-			out.writeToServer(line);
+			out.writeToServer(client, line);
 			//			resp = inServ.read();
 			//			while(!resp.equals(END)){
 			//				outCli.write(resp);
@@ -212,7 +212,7 @@ public class POPeye {
 				//ERROR
 			}
 			log.write(userName + " requested UIDL\n");
-			out.writeToServer(line);
+			out.writeToServer(client, line);
 
 			//			resp = inServ.read();
 			//			if(command.length==1){
@@ -238,7 +238,7 @@ public class POPeye {
 				//ERROR
 			}
 			log.write("Quitting...");
-			out.writeToServer(line);
+			out.writeToServer(client, line);
 
 			
 			lastCommand=com;
