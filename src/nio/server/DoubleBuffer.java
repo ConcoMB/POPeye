@@ -3,18 +3,18 @@ package nio.server;
 import java.nio.ByteBuffer;
 
 public class DoubleBuffer {
-	private ByteBuffer readBuffer, writeBuffer;
+	private StringBuffer readBuffer, writeBuffer;
 	
 	public DoubleBuffer(int n){
-		readBuffer=ByteBuffer.allocate(n);
-		writeBuffer=ByteBuffer.allocate(n);
+		readBuffer=new StringBuffer(n);
+		writeBuffer=new StringBuffer(n);
 	}
 
-	public ByteBuffer getReadBuffer() {
+	public StringBuffer getReadBuffer() {
 		return readBuffer;
 	}
 
-	public ByteBuffer getWriteBuffer() {
+	public StringBuffer getWriteBuffer() {
 		return writeBuffer;
 	}
 	
