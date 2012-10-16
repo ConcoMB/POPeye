@@ -1,4 +1,4 @@
-package proxy;
+package user;
 
 public interface Denial {
 

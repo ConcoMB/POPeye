@@ -6,6 +6,7 @@ public class VowelMailTransformer implements MailTransformer {
 	@Override
 	public String transform(String message) {
 		char[] string = message.toCharArray();
+		//TODO el header cuando termina
 		for(int i=0; i<string.length; i++){
 			switch(string[i]){
 			case 'a':
