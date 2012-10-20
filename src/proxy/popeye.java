@@ -10,6 +10,12 @@ import java.io.InputStream;
 import java.nio.channels.SocketChannel;
 import java.util.Properties;
 
+import user.EraseConditions;
+import user.HourDenial;
+import user.QuantityDenial;
+import user.Statistics;
+import user.User;
+
 public class POPeye {
 
 	private enum State{
@@ -80,7 +86,6 @@ public class POPeye {
 	}
 
 	public void proxyClient(String line) throws IOException {
-		Command c;
 		//out.write(welcomeLine.getBytes());
 		String user;
 		String command[] = line.split(" ");
@@ -392,5 +397,13 @@ public class POPeye {
 		QuantityDenial d=  new QuantityDenial(Integer.valueOf(b.readLine()));
 		b.close();
 		return d;
+	}
+
+	public User getCurrentUser() {
+		return user;
+	}
+	
+	public String getCurrentUserName(){
+		return userName;
 	}
 }
