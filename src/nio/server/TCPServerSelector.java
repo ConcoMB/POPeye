@@ -44,12 +44,12 @@ public class TCPServerSelector {
 			while (keyIter.hasNext()) {
 				SelectionKey key = keyIter.next(); // Key is bit mask
 				// Server socket channel has pending connection requests?
-				if (key.isAcceptable()) {
+				if (key.isValid() && key.isAcceptable()) {
 					//TODO
 					protocol.handleAccept(key);
 				}
 				// Client socket channel has pending data?
-				if (key.isReadable()) {
+				if (key.isValid() && key.isReadable()) {
 					protocol.handleRead(key);
 				}
 				// Client socket channel is available for writing and

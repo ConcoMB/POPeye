@@ -31,7 +31,7 @@ public class POPeye {
 
 	private int messageNum, topLines;
 	
-	private final static String defaultServer = "localhost";
+	private final static String defaultServer = "pop3.alu.itba.edu.ar";
 
 	public POPeye(Writeable out, SocketChannel client) throws IOException{
 		this.client=client;
@@ -121,6 +121,7 @@ public class POPeye {
 			if(state!=State.TRANSACTION || command.length!=2){
 				//ERROR
 			}
+			command[1]=command[1].trim();
 			messageNum=Integer.valueOf(command[1]);
 			log.write(userName+ " requested RETR of message "+ command[1]+"\n");
 			out.writeToServer(client, line);
