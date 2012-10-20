@@ -50,7 +50,7 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
 		System.out.println("host:"+hostChan);
 		clientMap.put(hostChan, clntChan);
 		serverMap.put(clntChan, hostChan);
-		appMap.put(clntChan, new ExternalAppExecuter("echo"));
+		appMap.put(clntChan, new ExternalAppExecuter("/home/fede/git/POPeye/apps/echo.o"));
     }
 
     private boolean isServer(SocketChannel channel){
