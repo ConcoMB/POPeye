@@ -15,7 +15,7 @@ public class TCPServerSelector {
 	private static final int TIMEOUT = 3000; // Wait timeout (milliseconds)
 	private static final int defaultPort = 110;
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, InterruptedException {
 		int ports[]={110};
 		/*if (args.length < 1) { // Test for correct # of args
             throw new IllegalArgumentException("Parameter(s): <Port> ...");

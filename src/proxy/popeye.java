@@ -85,7 +85,7 @@ public class POPeye {
 
 	}
 
-	public void proxyClient(String line) throws IOException {
+	public void proxyClient(String line) throws IOException, InterruptedException {
 		//out.write(welcomeLine.getBytes());
 		String user;
 		String command[] = line.split(" ");
@@ -252,7 +252,7 @@ public class POPeye {
 		}
 	}
 	
-	public void proxyServer(String line) throws IOException{
+	public void proxyServer(String line) throws IOException, InterruptedException{
 		switch(lastCommand){
 		case USER:	
 			if(line.startsWith(OK)){

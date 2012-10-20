@@ -20,6 +20,7 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
 	private Map<SocketChannel,SocketChannel> clientMap=new HashMap<SocketChannel,SocketChannel>();
 	private Map<SocketChannel,SocketChannel> serverMap=new HashMap<SocketChannel,SocketChannel>();
 	private Map<SocketChannel,POPeye> proxyMap=new HashMap<SocketChannel,POPeye>();
+	private Map<SocketChannel,ExternalAppExecuter> appMap=new HashMap<SocketChannel,ExternalAppExecuter>();
 	private Selector selector;
 
     public EchoSelectorProtocol(int bufSize, int dp, Selector selector) {
@@ -49,13 +50,14 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
 		System.out.println("host:"+hostChan);
 		clientMap.put(hostChan, clntChan);
 		serverMap.put(clntChan, hostChan);
+		appMap.put(clntChan, new ExternalAppExecuter("echo"));
     }
 
     private boolean isServer(SocketChannel channel){
     	return serverMap.containsValue(channel);
     }
     
-    public void handleRead(SelectionKey key) throws IOException {
+    public void handleRead(SelectionKey key) throws IOException, InterruptedException {
         // Client socket channel has pending data
         SocketChannel channel = (SocketChannel) key.channel();
         StringBuffer sBuf = ((DoubleBuffer) key.attachment()).getReadBuffer();
@@ -140,21 +142,25 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
     }
 
 	@Override
-	public void writeToClient(SocketChannel client, String line) throws IOException {
+	public void writeToClient(SocketChannel client, String line) throws IOException, InterruptedException {
 		String message=line.length()>30?line.substring(0, 30)+"...\n":line;
 		System.out.print("S--> "+message);
 		writeToChannel(client,line);
 	}
 
 	@Override
-	public void writeToServer(SocketChannel client, String line) throws IOException {
+	public void writeToServer(SocketChannel client, String line) throws IOException, InterruptedException {
 		String message=line.length()>30?line.substring(0, 30)+"...\n":line;
 		System.out.print("C--> "+message);
 		SocketChannel server=serverMap.get(client);
 		writeToChannel(server, line);
 	}
 	
-	private void writeToChannel(SocketChannel channel, String line) throws CharacterCodingException{
+	private void writeToChannel(SocketChannel channel, String line) throws InterruptedException, IOException{
+		ExternalAppExecuter appExec=appMap.get(channel);
+		if(appExec!=null){
+			line=appExec.execute(line);
+		}
 		SelectionKey key=channel.keyFor(selector);
 		StringBuffer sBuf=((DoubleBuffer) key.attachment()).getWriteBuffer();
 		String before=sBuf.toString();
