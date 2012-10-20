@@ -8,6 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.SocketChannel;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import user.EraseConditions;
@@ -18,11 +20,13 @@ import user.User;
 
 public class POPeye {
 
+	private static Map<String, User> users = new HashMap<String, User>();
+
 	private enum State{
 		AUTHORIZATION_USER, AUTHORIZATION_PASS, TRANSACTION, UPDATE;
 	}
 	private enum Command{
-		USER, PASS, LIST, RETR, QUIT, UIDL, DELE, STAT, NOOP, RSET, APOP, TOP, UNKNOWN;
+		USER, PASS, LIST, RETR, QUIT, UIDL, DELE, STAT, NOOP, RSET, APOP, TOP, UNKNOWN, LIST_MULTI, UIDL_MULTI;
 	}
 	private State state; 
 	private static final String OK="+OK", ERR = "-ERR", END=".", welcomeLine = "+OK POPeye at your service\n";
@@ -35,8 +39,9 @@ public class POPeye {
 	private BufferedWriter log;
 	private SocketChannel client;
 
-	private int messageNum, topLines;
-	
+	private int mailNum, topLines;
+
+	private Mail mail = new Mail();
 	private final static String defaultServer = "localhost";
 
 	public POPeye(Writeable out, SocketChannel client) throws IOException{
@@ -63,13 +68,13 @@ public class POPeye {
 		}
 		userName=command[1];
 		log.write("User "+userName+" attempting to connect\n");
-//		if(users.containsKey(userName)){
-//			user=users.get(userName);
-//		}else{
-			user =loadUser();
-//			users.put(userName, user);
-//		}
-		
+		//		if(users.containsKey(userName)){
+		//			user=users.get(userName);
+		//		}else{
+		user =loadUser();
+		//			users.put(userName, user);
+		//		}
+
 		if(user.accessIsBlocked()){
 			log.write("Access blocked by POPeye\n");
 			user.getStats().addAccessFailure();
@@ -97,7 +102,7 @@ public class POPeye {
 		}
 		switch(com){
 
-		
+
 		case PASS:
 			if(state!=State.AUTHORIZATION_PASS || lastCommand!=Command.USER
 			|| command.length!=2){
@@ -116,7 +121,7 @@ public class POPeye {
 			log.write(userName+" requested LIST");
 			out.writeToServer(client, line);
 			if(command.length==2){
-				messageNum=Integer.valueOf(command[1]);
+				mailNum=Integer.valueOf(command[1]);
 				//lastCommand=LIST_MULTI;
 			}else{
 				lastCommand=com;
@@ -126,27 +131,9 @@ public class POPeye {
 			if(state!=State.TRANSACTION || command.length!=2){
 				//ERROR
 			}
-			messageNum=Integer.valueOf(command[1]);
-			log.write(userName+ " requested RETR of message "+ command[1]+"\n");
+			mailNum=Integer.valueOf(command[1]);
+			log.write(userName+ " requested RETR of mail "+ command[1]+"\n");
 			out.writeToServer(client, line);
-
-			//			resp = inServ.read();
-			//			List<String> message = new ArrayList<String>();
-			//			message.add(resp);
-			//			while(!resp.equals(END)){
-			//				message.add(inServ.read());
-			//			}
-			//			message.add(resp);
-			//			log.write("Transforming message\n");
-			//			List<String> transMessage = transform(message);
-			//			int bytes = 0;
-			//			for(String s: transMessage){
-			//				outCli.write(s);
-			//				//TODO not sure
-			//				bytes+=s.length();
-			//			}
-			//			users.get(user).getStats().addBytes(bytes);
-			//			users.get(user).getStats().readEmail();
 			lastCommand=com;
 			break;
 		case DELE :
@@ -158,26 +145,8 @@ public class POPeye {
 			}catch(Exception e){
 				//ERROR
 			}
-			messageNum=Integer.valueOf(command[1]);
-
-			log.write(userName + "requested DELE of message "+ command[1]+", checking permissions...\n");
-			out.writeToServer(client, "RETR "+command[1]+"\n");
-			//			List<String> message = new ArrayList<String>();
-			//			message.add(resp);
-			//			while(!resp.equals(END)){
-			//				message.add(inServ.read());
-			//			}
-			//			if(cantErase(message)){
-			//				log.write("Permission to erase dennied\n");
-			//				outCli.write(ERR+" POPeye says you can't erase that!\n");
-			//				users.get(user).getStats().addErsaseFailure();
-			//			}else{
-			//				log.write("Marking message as deleted\n");
-			//				users.get(user).getStats().eraseEmail();
-			//				outServ.write(read);
-			//				resp = inServ.read();
-			//				outCli.write(resp);
-			//			}
+			out.writeToServer(client, "RETR "+command[1]+"\r\n");			
+			log.write(userName + "requested DELE of mail "+ command[1]+", checking permissions...\n");
 			lastCommand=com;
 			break;
 		case STAT:
@@ -198,15 +167,9 @@ public class POPeye {
 			if(state!=State.TRANSACTION || command.length!=3){
 				//ERROR
 			}
-			log.write(userName + " requested TOP of message "+ command[1]+ ", number of lines: "+ command[2]+ "\n");
+			log.write(userName + " requested TOP of mail "+ command[1]+ ", number of lines: "+ command[2]+ "\n");
 			out.writeToServer(client, line);
-			//			resp = inServ.read();
-			//			while(!resp.equals(END)){
-			//				outCli.write(resp);
-			//				resp = inServ.read();
-			//			}
-			//			outCli.write(resp);
-			messageNum=Integer.valueOf(command[1]);
+			mailNum=Integer.valueOf(command[1]);
 			topLines=Integer.valueOf(command[2]);
 			lastCommand=com;
 			break;
@@ -216,24 +179,11 @@ public class POPeye {
 			}
 			log.write(userName + " requested UIDL\n");
 			out.writeToServer(client, line);
-
-			//			resp = inServ.read();
-			//			if(command.length==1){
-			//				log.write("\n");
-			//				//multilined
-			//				while(!resp.equals(END)){
-			//					outCli.write(resp);
-			//					resp = inServ.read();
-			//				}
-			//			}else{
-			//				log.write(" of message "+ command[1]+"\n");
-			//			}
-			//			outCli.write(resp);
 			if(command.length==2){
-				messageNum=Integer.valueOf(command[1]);
+				mailNum=Integer.valueOf(command[1]);
 				lastCommand=com;
 			}else{
-				//lastCommand=UIDL_MULTI;
+				lastCommand=Command.UIDL_MULTI;
 			}
 			break;
 		case QUIT:
@@ -243,14 +193,15 @@ public class POPeye {
 			log.write("Quitting...");
 			out.writeToServer(client, line);
 
-			
+
 			lastCommand=com;
 			break;
 		default:
 			out.writeToServer(client, line);
 		}
 	}
-	
+
+
 	public void proxyServer(String line) throws IOException{
 		switch(lastCommand){
 		case USER:	
@@ -275,32 +226,74 @@ public class POPeye {
 			out.writeToClient(client, line);	
 			break;
 		case LIST:
-			log.write(" of message "+ messageNum+"\n");
+			log.write("list of mail "+ mailNum+"\n");
 			out.writeToClient(client, line);	
 			break;
-			//		case LIST_MULTI:
-			//			log.write("\n");
-			//			//multilined
-			//			while(!resp.equals(END)){
-			//				outCli.write(resp);
-			//				resp = inServ.read();
-			//			}
-			//			break;
+		case LIST_MULTI:
+
+			if(line.equals(END)){
+				log.write("list\n");
+				lastCommand=null;
+			}
+			out.writeToClient(client,line);
+			break;
 		case RETR:
-
+			mail.add(line);
+			if(line.equals(END)){
+				log.write("Transforming mail\n");
+				//List<String> transmail = transform(mail);
+				int bytes = 0;
+//				for(String s: transformMail){
+//					out.writeToClient(client, line);
+//					//TODO not sure
+//					bytes+=s.length();
+//				}
+				users.get(user).getStats().addBytes(bytes);
+				users.get(user).getStats().readEmail();
+				mail=new Mail();
+			}
+			break;
 		case DELE:
+			mail.add(line);
+			if(line.equals(END)){
 
+				if(cantErase(mail)){
+					log.write("Permission to erase dennied\n");
+					out.writeToClient(client, ERR+" POPeye says you can't erase that!\n");
+					users.get(user).getStats().addErsaseFailure();
+				}else{
+					log.write("Marking mail as deleted\n");
+					users.get(user).getStats().eraseEmail();
+					out.writeToServer(client, line);
+					lastCommand=Command.DELE;
+				}
+				mail=new Mail();
+			}
+			break;
 		case STAT:
 		case NOOP:
 		case RSET:
 			out.writeToClient(client, line);
 			break;
 		case TOP:
-
+			if(line.equals(END)){
+				log.write("top\n");
+				lastCommand=null;
+			}
+			out.writeToClient(client, line);
+			break;
 		case UIDL:
+			log.write("uidl\n");
+			out.writeToClient(client, line);
+			break;
+		case UIDL_MULTI:
+			if(line.equals(END)){
+				log.write("uidl\n");
+				lastCommand=null;
+			}
+			out.writeToClient(client, line);
 
-		//case UIDL_MULTI:
-
+			break;
 		case QUIT:
 			if(state==State.TRANSACTION){
 				log.write(" updating data...");
@@ -315,11 +308,34 @@ public class POPeye {
 			out.writeToClient(client, line);
 		}
 	}
-	
+
+	private boolean cantErase(Mail aMail) {
+//		EraseConditions er = user.getEraseConditions();
+//		if(aMail.getDate().compareTo(er.getDateLimit())<0){
+//			return true;
+//		}
+//		if(er.getFrom().contains(aMail.getFrom())){
+//			return true;
+//		}
+//		for(String c: aMail.getContentTypes()){
+//			if(er.getContentTypes.contains(c)){
+//				return true;
+//			}
+//		}
+//		if(aMail.getSize()<er.getMinSize() || aMail.getSize()>er.getMaxSize()){
+//			return true;
+//		}
+//		if((aMail.hasAttachment() && er.getAttachment()==-1) || (!aMail.hasAttachment && er.getAttachment()==1){
+//			return true;
+//		}
+//		//TODO picture;
+		return false;
+	}
+
 	private void closeConnections() throws IOException{
 		saveStatistics();
 		user=null;
-//TODO
+		//TODO
 	}
 
 
@@ -354,13 +370,11 @@ public class POPeye {
 	}
 
 	private void saveStatistics() throws IOException{
-//		for(User u: users.values()){
-			BufferedWriter stt = new BufferedWriter(new FileWriter("./statistics_"+userName+".txt"));
-			stt.write(user.getStats().getFullStatistics());
-			stt.close();
-//		}
+		BufferedWriter stt = new BufferedWriter(new FileWriter("./statistics_"+userName+".txt"));
+		stt.write(user.getStats().getFullStatistics());
+		stt.close();
 	}
-	
+
 	private User loadUser() throws IOException{
 		Statistics stats = loadStatistics(userName);
 		String server = loadServer(userName);
@@ -401,8 +415,12 @@ public class POPeye {
 	public User getCurrentUser() {
 		return user;
 	}
-	
+
 	public String getCurrentUserName(){
 		return userName;
+	}
+
+	public User getUserByName(String string) {
+		return users.get(string);
 	}
 }

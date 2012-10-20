@@ -19,6 +19,30 @@ public class Statistics {
 		accessFailures=Integer.valueOf(split[4]);
 		eraseFailures=Integer.valueOf(split[5]);
 	}
+	public int getSuccessfulAccesses() {
+		return successfulAccesses;
+	}
+
+	public int getBytesTransferred() {
+		return bytesTransferred;
+	}
+
+	public int getEmailsRead() {
+		return emailsRead;
+	}
+
+	public int getEmailsErased() {
+		return emailsErased;
+	}
+
+	public int getAccessFailures() {
+		return accessFailures;
+	}
+
+	public int getEraseFailures() {
+		return eraseFailures;
+	}
+
 	public String getFullStatistics() {
 		return successfulAccesses +","+ bytesTransferred +","+ emailsRead+","+ emailsErased +","
 				+ accessFailures +","+ eraseFailures;
