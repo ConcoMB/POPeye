@@ -14,7 +14,7 @@ import java.util.Map;
 import proxy.POPeye;
 import proxy.Writeable;
 
-public class EchoSelectorProtocol implements TCPProtocol, Writeable {
+public class PopSelectorProtocol implements POPProtocol, Writeable {
     private int bufSize; // Size of I/O buffer
 	private int defaultPort;
 	private Map<SocketChannel,SocketChannel> clientMap=new HashMap<SocketChannel,SocketChannel>();
@@ -23,7 +23,7 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
 	private Map<SocketChannel,ExternalAppExecuter> appMap=new HashMap<SocketChannel,ExternalAppExecuter>();
 	private Selector selector;
 
-    public EchoSelectorProtocol(int bufSize, int dp, Selector selector) {
+    public PopSelectorProtocol(int bufSize, int dp, Selector selector) {
         this.bufSize = bufSize;
         this.defaultPort=dp;
         this.selector=selector;
@@ -50,7 +50,7 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
 		System.out.println("host:"+hostChan);
 		clientMap.put(hostChan, clntChan);
 		serverMap.put(clntChan, hostChan);
-		appMap.put(clntChan, new ExternalAppExecuter("/home/fede/git/POPeye/apps/echo.o"));
+		appMap.put(clntChan, new ExternalAppExecuter("/home/fede/git/POPeye/apps/toUpper.o"));
     }
 
     private boolean isServer(SocketChannel channel){

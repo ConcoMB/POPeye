@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class TCPServerSelector {
+public class POPEyeServer {
 	private static final int BUFSIZE = 1024*1024; // Buffer size (bytes)
 	private static final int TIMEOUT = 3000; // Wait timeout (milliseconds)
 	private static final int defaultPort = 110;
@@ -32,7 +32,7 @@ public class TCPServerSelector {
 			listnChannel.register(selector, SelectionKey.OP_ACCEPT);
 		}
 		// Create a handler that will implement the protocol
-		TCPProtocol protocol = new EchoSelectorProtocol(BUFSIZE,defaultPort,selector);
+		POPProtocol protocol = new PopSelectorProtocol(BUFSIZE,defaultPort,selector);
 		while (true) { // Run forever, processing available I/O operations
 			// Wait for some channel to be ready (or timeout)
 			if (selector.select(TIMEOUT) == 0) { // returns # of ready chans
