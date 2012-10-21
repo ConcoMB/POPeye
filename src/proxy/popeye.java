@@ -29,7 +29,7 @@ public class POPeye {
 		USER, PASS, LIST, RETR, QUIT, UIDL, DELE, STAT, NOOP, RSET, APOP, TOP, UNKNOWN, LIST_MULTI, UIDL_MULTI;
 	}
 	private State state; 
-	private static final String OK="+OK", ERR = "-ERR", END=".", welcomeLine = "+OK POPeye at your service\n";
+	private static final String OK="+OK", ERR = "-ERR", END=".";
 	private Writeable out;
 	private Command lastCommand;
 
@@ -39,10 +39,11 @@ public class POPeye {
 	private BufferedWriter log;
 	private SocketChannel client;
 
-	private int mailNum, topLines;
 
 	private Mail mail = new Mail();
-	private final static String defaultServer = "localhost";
+	private int mailNum, topLines;
+	
+	private final static String defaultServer = "pop3.alu.itba.edu.ar";
 
 	public POPeye(Writeable out, SocketChannel client) throws IOException{
 		this.client=client;
@@ -90,7 +91,7 @@ public class POPeye {
 
 	}
 
-	public void proxyClient(String line) throws IOException {
+	public void proxyClient(String line) throws IOException, InterruptedException {
 		//out.write(welcomeLine.getBytes());
 		String user;
 		String command[] = line.split(" ");
@@ -131,8 +132,9 @@ public class POPeye {
 			if(state!=State.TRANSACTION || command.length!=2){
 				//ERROR
 			}
+			command[1]=command[1].trim();
 			mailNum=Integer.valueOf(command[1]);
-			log.write(userName+ " requested RETR of mail "+ command[1]+"\n");
+			log.write(userName+ " requested RETR of message "+ command[1]+"\n");
 			out.writeToServer(client, line);
 			lastCommand=com;
 			break;
@@ -202,7 +204,8 @@ public class POPeye {
 	}
 
 
-	public void proxyServer(String line) throws IOException{
+	
+	public void proxyServer(String line) throws IOException, InterruptedException{
 		switch(lastCommand){
 		case USER:	
 			if(line.startsWith(OK)){
