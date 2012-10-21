@@ -3,76 +3,36 @@ package user;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 public class EraseConditions {
 
-	private Date dateLimit;
+	private Date dateLimitFrom;
+	
+	private Date dateExactCondition;
 
 	private Set<String> from, contentTypes;
 
 	private int minSize, maxSize;
 
-	private int withAttachment, withPicture;
+	private boolean withAttachment, withPicture;
 
 	//	   o  Algun patron sobre cabeceras (Ejemplo: List-Id eq//	      <foo.example.org>)
 
 
 	public EraseConditions(){
-
+		//DEFAULT VALUES?
 	}
 
-	public EraseConditions(String s) throws ParseException{
-		String[] split = s.split("\n");
-		if(split.length!=5){
-			throw new IllegalStateException();
-		}
-		if(!split[0].equals("")){
-			DateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-			dateLimit=format.parse(split[0]);
-		}
-		String[] froms = split[1].split(",");
-		from=new HashSet<String>();
-		for(String user: froms){
-			from.add(user);
-		}
-		contentTypes=new HashSet<String>();
-		String[] cts = split[2].split(",");
-		for(String ct: cts){
-			contentTypes.add(ct);
-		}
-		if(!split[3].equals("")){
-			String[] sizes = split[3].split(",");
-			minSize= Integer.valueOf(sizes[0]);
-			maxSize= Integer.valueOf(sizes[1]);
-		}
-		String[] contents = split[4].split(",");
-		if(contents[0].equals("with")){
-			withAttachment=1;
-		}else if(contents[0].equals("witout")){
-			withAttachment=-1;
-		}else if(contents[0].equals("no")){
-			withAttachment=0;
-		}
-		if(contents[1].equals("with")){
-			withPicture=1;
-		}else if(contents[1].equals("witout")){
-			withPicture=-1;
-		}else if(contents[1].equals("no")){
-			withPicture=0;
-		}
-	}
 
 	public boolean canErase(String message) throws ParseException{
-		if(dateLimit!=null){
+		if(dateLimitFrom!=null){
 			String s = getHeader(message, "Date");
-			DateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-			String[] d = s.split(" ");
-			String dateStr = d[0]+"/"+getMonth(d[1])+"/"+d[2];
-			Date date = format.parse(dateStr);
-			if(dateLimit.compareTo(date)>0){
+			Date date = parseDate(s);
+			if(dateLimitFrom.compareTo(date)>0){
 				return false;
 			}
 		}
@@ -155,6 +115,46 @@ public class EraseConditions {
 			}
 		}
 		return null;
+	}
+
+	private Date parseDate(String val) throws ParseException {
+		DateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+		String[] d = val.split(" ");
+		String dateStr = d[0]+"/"+getMonth(d[1])+"/"+d[2];
+		Date date = format.parse(dateStr);
+		return date;
+	}
+
+	public void eraseOnDate(String val) throws ParseException {
+		dateExactCondition = parseDate(val);
+	}
+	public void eraseFromDate(String val) throws ParseException {
+		dateLimitFrom = parseDate(val);
+	}
+
+	public void eraseMinSize(String val) {
+		minSize = Integer.valueOf(val);
+	}
+	public void eraseMaxSize(String val) {
+		maxSize = Integer.valueOf(val);
+	}
+	
+	public void eraseContentType(String val) {
+		
+	}
+
+	public void eraseAttachment(String val) {
+		if(val.charAt(0)==1){ // VALUE 1 = true
+			withAttachment = true;
+		}
+		else withAttachment = false; // VALUE 0 = false
+	}
+
+	public void erasePicture(String val) {
+		if(val.charAt(0)==1){ 
+			withPicture = true;
+		}
+		else withPicture = false;
 	}
 
 

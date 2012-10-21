@@ -6,12 +6,12 @@ import java.util.Date;
 public class QuantityDenial implements Denial{
 	
 	private final int top;
-	private int cant;
+	private int quantity;
 	private Date lastLogin;
 	
 	public QuantityDenial(int top){
 		this.top=top;
-		cant=0;
+		quantity=0;
 	}
 	
 	public void addAccess(){
@@ -21,10 +21,10 @@ public class QuantityDenial implements Denial{
 			Date today = new Date();
 			if(!sameDay(today, lastLogin)){
 				lastLogin=today;
-				cant=0;
+				quantity=0;
 			}
 		}
-		cant++;
+		quantity++;
 	}
 	
 	private boolean sameDay(Date date1, Date date2){
@@ -37,7 +37,11 @@ public class QuantityDenial implements Denial{
 	}
 	
 	public boolean isBlocked(){
-		return cant>=top;
+		return quantity>=top;
+	}
+
+	public void setQuantity(int val) {
+		quantity=val;		
 	}
 	
 	

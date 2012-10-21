@@ -78,10 +78,14 @@ public class User {
 	}
 
 	public void addSuccessfulAccess() {
-		stats.addSuccessfulAccess();
+		stats.addSuccessfulAccess();	
 		if(quantityDenial!=null){
 			quantityDenial.addAccess();
 		}
+	}
+
+	public void setServer(String val) {
+		server = val;
 	}
 	
 }

@@ -17,20 +17,25 @@ public class ExternalAppExecuter {
 
 		ProcessBuilder builder = new ProcessBuilder(command);
 		// Map<String, String> environ = builder.environment();
-		builder.directory(new File(System.getenv("temp")));
+		//builder.directory(new File(System.getenv("temp")));
 
 		System.out.println("Directory : " + System.getenv("temp"));
 		final Process process = builder.start();
 		InputStream is = process.getInputStream();
 		OutputStream os = process.getOutputStream();
-		os.write(mail.getBytes());
+		System.out.println("wrote "+mail);
 		InputStreamReader isr = new InputStreamReader(is);
+		OutputStreamWriter osw = new OutputStreamWriter(os);
 		BufferedReader br = new BufferedReader(isr);
-		String line;
+		BufferedWriter bw = new BufferedWriter(osw);
+		bw.write(mail);
+		bw.write(-1);
+		bw.flush();
+		char c;
 		StringBuffer result = new StringBuffer();
-		while ((line = br.readLine()) != null) {
-			System.out.println(line);
-			result.append(line);
+		while ((c =(char) br.read()) != -1) {
+			System.out.println("char:"+c);
+			result.append(c);
 		}
 		System.out.println("Program terminated!");
 		return result.toString();

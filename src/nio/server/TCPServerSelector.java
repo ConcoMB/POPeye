@@ -16,7 +16,7 @@ public class TCPServerSelector {
 	private static final int defaultPort = 2233;
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-		int ports[]={110};
+		int ports[]={4040};
 		/*if (args.length < 1) { // Test for correct # of args
             throw new IllegalArgumentException("Parameter(s): <Port> ...");
         }*/

@@ -380,7 +380,8 @@ public class POPeye {
 
 	private User loadUser() throws IOException{
 		Statistics stats = loadStatistics(userName);
-		String server = loadServer(userName);
+		//String server = loadServer(userName);
+		String server=null;
 		QuantityDenial quantityDenial= loadQuantityDenial(userName);
 		HourDenial hourDenial = loadHourDenial(userName);
 		EraseConditions eraseConds=null; //= loadEraseConditions(userName);
