@@ -45,7 +45,7 @@ public class ImageRotationTransformer implements MailTransformer{
 			e.printStackTrace();
 		}
 		
-		BufferedImage outputImg =rotateImage(img,90);
+		BufferedImage outputImg =rotateImage(img,180);
 		
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		try {
@@ -84,7 +84,7 @@ public class ImageRotationTransformer implements MailTransformer{
 	public static BufferedImage rotateImage(BufferedImage image, double angle) {
 		AffineTransform tx = new AffineTransform();
 		tx.translate(image.getHeight()/2, image.getWidth()/2);
-		tx.rotate(Math.PI/2); 
+		tx.rotate(Math.PI); // 1 radians (180 degrees)
 		
 		// first - center image at the origin so rotate works OK
 		tx.translate(-image.getWidth()/2,-image.getHeight()/2);

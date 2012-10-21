@@ -84,6 +84,7 @@ public class User {
 		}
 	}
 
+	// If change default to another server
 	public void setServer(String val) {
 		server = val;
 	}
