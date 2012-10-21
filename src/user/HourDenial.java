@@ -44,4 +44,22 @@ public class HourDenial implements Denial{
 		return true;
 	}
 
+
+
+	public void setMinHour(int val) {
+		minHour = val;
+	}
+
+	public void setMaxHour(int val) {
+		maxHour = val;
+	}
+
+	public void setMaxMinute(int val) {
+		maxMinute = val;
+	}
+
+	public void setMinMinute(int val) {
+		minMinute = val;
+	}
+
 }
