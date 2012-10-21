@@ -20,7 +20,6 @@ public class Configuration {
 		ERASE_CONTENTTYPE, ERASE_MINSIZE, ERASE_MAXSIZE, ERASE_ATTACHMENT,
 		ERASE_PICTURE;
 	}
-
 	public Configuration(POPeye proxy){
 		this.proxy=proxy;
 	}

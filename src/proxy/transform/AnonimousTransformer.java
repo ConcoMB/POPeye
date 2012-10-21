@@ -1,24 +1,10 @@
 package proxy.transform;
 
 public class AnonimousTransformer implements MailTransformer {
-
+	
 	@Override
 	public String transform(String message) {
-		String[] split = message.split("\n");
-		String ans="";
-		boolean flag=false;
-		for(int i=0; i<split.length; i++){
-			if(split[i].startsWith("From:")){
-				if(flag){
-					ans+=split[i];
-				}else{
-					flag=true;
-				}
-			}else{
-				ans+=split[i];
-			}
-		}
-		return ans;
+		return message.replaceAll("^From:[ ]*[a-zA-z ]*[ ]*<[\\w.%-]+@[-.\\w]+\\.[A-Za-z]{2,4}>$", "From: Anonymous <anon@anon.org>");
 	}
 
 }
