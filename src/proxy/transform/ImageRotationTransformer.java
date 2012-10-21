@@ -2,10 +2,13 @@ package proxy.transform;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import javax.imageio.ImageIO;
 
@@ -13,22 +16,28 @@ import org.apache.commons.codec.binary.Base64;
 
 public class ImageRotationTransformer implements MailTransformer{
 
-	
+	/** TEST METHOD
 	public static void main(String args[]){
 		ImageRotationTransformer imt = new ImageRotationTransformer();
 		System.out.println(imt.transform(args[0].toString()));
-	}
+	}*/
+	
+	/** Takes a base64 string, decodes it and creates a java2d image. 
+	 *  Rotates the image, saves it to byte buffer and encodes it to base64 for return.
+	 * @param the image to convert in String base64 format
+	 * @return the image rotated, in String base64 format 
+	 */
 	@Override
 	public String transform(String message) {
 		return imageRotation(message);
 	}
 	
-	public String imageRotation(String image){
+	public String imageRotation(String image) {
 		
 		byte[] b  = decodeBase64(image);
 		
 		ByteArrayInputStream in = new ByteArrayInputStream(b);
-		
+	
 		BufferedImage img = null;
 		try {
 			img = ImageIO.read(in);
@@ -36,19 +45,32 @@ public class ImageRotationTransformer implements MailTransformer{
 			e.printStackTrace();
 		}
 		
-		BufferedImage outputImg =rotateImage(img, 90);
-
+		BufferedImage outputImg =rotateImage(img,90);
+		
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		
 		try {
-			ImageIO.write(outputImg, "", bos);
+			ImageIO.write( outputImg, "jpg", bos);
 		} catch (IOException e) {
-			System.err.println("Failed to write image to buffer");
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		try {
+			bos.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		byte[] imageInByte = bos.toByteArray();
+		try {
+			bos.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		byte[] o = bos.toByteArray();
 		
-		b = bos.toByteArray();
-		
-		return encodeBase64(b);
+		return encodeBase64(o);
 	
 	}
 
@@ -59,16 +81,17 @@ public class ImageRotationTransformer implements MailTransformer{
 	    return Base64.encodeBase64String(b);
 	}
 
-
 	public static BufferedImage rotateImage(BufferedImage image, double angle) {
-		int width = image.getWidth();
-		int height = image.getHeight();
-		BufferedImage outputImage =new BufferedImage(width, height, image.getType());
-		Graphics2D g = outputImage.createGraphics();
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g.rotate(Math.toRadians(angle), width/2, height/2);
-		g.drawImage(image, null, 0, 0);
-		return outputImage;
+		AffineTransform tx = new AffineTransform();
+		tx.translate(image.getHeight()/2, image.getWidth()/2);
+		tx.rotate(Math.PI/2); 
+		
+		// first - center image at the origin so rotate works OK
+		tx.translate(-image.getWidth()/2,-image.getHeight()/2);
+		
+		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR);
+		BufferedImage outputImage =new BufferedImage(image.getHeight(), image.getWidth(), image.getType());
+		return op.filter(image, outputImage);
 	}
 
 }
