@@ -20,6 +20,7 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
 	private Map<SocketChannel,SocketChannel> clientMap=new HashMap<SocketChannel,SocketChannel>();
 	private Map<SocketChannel,SocketChannel> serverMap=new HashMap<SocketChannel,SocketChannel>();
 	private Map<SocketChannel,POPeye> proxyMap=new HashMap<SocketChannel,POPeye>();
+	private Map<SocketChannel,ExternalAppExecuter> appMap=new HashMap<SocketChannel,ExternalAppExecuter>();
 	private Selector selector;
 
     public EchoSelectorProtocol(int bufSize, int dp, Selector selector) {
@@ -36,7 +37,7 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
         System.out.println("Accepted connection ->"+clntChan.socket().getRemoteSocketAddress());
         clntChan.register(key.selector(), SelectionKey.OP_READ, new DoubleBuffer(bufSize));
         proxyMap.put(clntChan, new POPeye(this,clntChan));
-        connectToServer(clntChan, "pop.aol.com");
+        connectToServer(clntChan, "pop3.alu.itba.edu.ar");
     }
     
     private void connectToServer(SocketChannel clntChan, String serverName) throws IOException{
@@ -49,13 +50,14 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
 		System.out.println("host:"+hostChan);
 		clientMap.put(hostChan, clntChan);
 		serverMap.put(clntChan, hostChan);
+		appMap.put(clntChan, new ExternalAppExecuter("/home/fede/git/POPeye/apps/echo.o"));
     }
 
     private boolean isServer(SocketChannel channel){
     	return serverMap.containsValue(channel);
     }
     
-    public void handleRead(SelectionKey key) throws IOException {
+    public void handleRead(SelectionKey key) throws IOException, InterruptedException {
         // Client socket channel has pending data
         SocketChannel channel = (SocketChannel) key.channel();
         StringBuffer sBuf = ((DoubleBuffer) key.attachment()).getReadBuffer();
@@ -63,7 +65,16 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
         long bytesRead = channel.read(buf);
         buf.flip();
         if (bytesRead == -1) { // Did the other end close?
-            channel.close();
+        	if(isServer(channel)){
+        		//SERVER DISCONNECTED
+        		System.out.println("Server disconnected (client:"+clientMap.get(channel).socket().getRemoteSocketAddress()+")");
+        		clientMap.get(channel).close();
+        	}else{
+        		//CLIENT DISCONNECTED
+        		System.out.println("Client disconnected:"+channel.socket().getRemoteSocketAddress());
+        		serverMap.get(channel).close();
+        	}
+        	channel.close();
         } else if (bytesRead > 0) {
         	String line=BufferUtils.bufferToString(buf);
         	sBuf.append(line);
@@ -71,7 +82,8 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
         		return;
         	}
         	line=sBuf.toString();
-        	System.out.print("READ:"+bytesRead+" "+line);
+        	sBuf.delete(0, sBuf.length());
+        	//System.out.print("READ:"+bytesRead+" "+line);
         	if(isServer(channel)){
         		//SERVER
         		/*for(String s: line.split("\r\n")){
@@ -80,12 +92,15 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
         		proxyMap.get(clientMap.get(channel)).proxyServer(line);
         	}else{
         		//CLIENT
-        		if(serverMap.get(channel)==null){
+        		//TODO turbio
+        		//if(serverMap.get(channel)==null){
+        		if(line.startsWith("USER")){
         			//AUTHENTICATION
+        			System.out.println("AUTHENTICATION");
         			String serverName=proxyMap.get(channel).login(line);
         			if(serverName==null){
         				//FAIL
-        				writeToClient(channel, "err");
+        				writeToClient(channel, "-ERR");
         				return;
         			}else{
         				connectToServer(channel, serverName);
@@ -121,24 +136,31 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
             // Nothing left, so no longer interested in writes
             key.interestOps(SelectionKey.OP_READ);
         }
+        sBuf.delete(0, bytesWritten);
         buf.compact(); // Make room for more data to be read in
         buf.clear();
     }
 
 	@Override
-	public void writeToClient(SocketChannel client, String line) throws IOException {
-		System.out.print("S--> "+line);
+	public void writeToClient(SocketChannel client, String line) throws IOException, InterruptedException {
+		String message=line.length()>30?line.substring(0, 30)+"...\n":line;
+		System.out.print("S--> "+message);
 		writeToChannel(client,line);
 	}
 
 	@Override
-	public void writeToServer(SocketChannel client, String line) throws IOException {
-		System.out.print("C--> "+line);
+	public void writeToServer(SocketChannel client, String line) throws IOException, InterruptedException {
+		String message=line.length()>30?line.substring(0, 30)+"...\n":line;
+		System.out.print("C--> "+message);
 		SocketChannel server=serverMap.get(client);
 		writeToChannel(server, line);
 	}
 	
-	private void writeToChannel(SocketChannel channel, String line) throws CharacterCodingException{
+	private void writeToChannel(SocketChannel channel, String line) throws InterruptedException, IOException{
+		ExternalAppExecuter appExec=appMap.get(channel);
+		if(appExec!=null){
+			line=appExec.execute(line);
+		}
 		SelectionKey key=channel.keyFor(selector);
 		StringBuffer sBuf=((DoubleBuffer) key.attachment()).getWriteBuffer();
 		String before=sBuf.toString();

@@ -37,7 +37,7 @@ public class POPeye {
 
 	private int messageNum, topLines;
 	
-	private final static String defaultServer = "localhost";
+	private final static String defaultServer = "pop3.alu.itba.edu.ar";
 
 	public POPeye(Writeable out, SocketChannel client) throws IOException{
 		this.client=client;
@@ -85,7 +85,7 @@ public class POPeye {
 
 	}
 
-	public void proxyClient(String line) throws IOException {
+	public void proxyClient(String line) throws IOException, InterruptedException {
 		//out.write(welcomeLine.getBytes());
 		String user;
 		String command[] = line.split(" ");
@@ -126,6 +126,7 @@ public class POPeye {
 			if(state!=State.TRANSACTION || command.length!=2){
 				//ERROR
 			}
+			command[1]=command[1].trim();
 			messageNum=Integer.valueOf(command[1]);
 			log.write(userName+ " requested RETR of message "+ command[1]+"\n");
 			out.writeToServer(client, line);
@@ -251,7 +252,7 @@ public class POPeye {
 		}
 	}
 	
-	public void proxyServer(String line) throws IOException{
+	public void proxyServer(String line) throws IOException, InterruptedException{
 		switch(lastCommand){
 		case USER:	
 			if(line.startsWith(OK)){
@@ -363,7 +364,8 @@ public class POPeye {
 	
 	private User loadUser() throws IOException{
 		Statistics stats = loadStatistics(userName);
-		String server = loadServer(userName);
+		//String server = loadServer(userName);
+		String server=null;
 		QuantityDenial quantityDenial= loadQuantityDenial(userName);
 		HourDenial hourDenial = loadHourDenial(userName);
 		EraseConditions eraseConds=null; //= loadEraseConditions(userName);

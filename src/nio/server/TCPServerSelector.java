@@ -15,8 +15,8 @@ public class TCPServerSelector {
 	private static final int TIMEOUT = 3000; // Wait timeout (milliseconds)
 	private static final int defaultPort = 110;
 
-	public static void main(String[] args) throws IOException {
-		int ports[]={110};
+	public static void main(String[] args) throws IOException, InterruptedException {
+		int ports[]={4040};
 		/*if (args.length < 1) { // Test for correct # of args
             throw new IllegalArgumentException("Parameter(s): <Port> ...");
         }*/
@@ -44,12 +44,12 @@ public class TCPServerSelector {
 			while (keyIter.hasNext()) {
 				SelectionKey key = keyIter.next(); // Key is bit mask
 				// Server socket channel has pending connection requests?
-				if (key.isAcceptable()) {
+				if (key.isValid() && key.isAcceptable()) {
 					//TODO
 					protocol.handleAccept(key);
 				}
 				// Client socket channel has pending data?
-				if (key.isReadable()) {
+				if (key.isValid() && key.isReadable()) {
 					protocol.handleRead(key);
 				}
 				// Client socket channel is available for writing and
