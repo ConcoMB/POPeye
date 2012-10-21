@@ -5,10 +5,7 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 public class POPEyeServer {
 	private static final int BUFSIZE = 1024*1024; // Buffer size (bytes)
@@ -22,6 +19,8 @@ public class POPEyeServer {
         }*/
 		// Create a selector to multiplex listening sockets and connections
 		Selector selector = Selector.open();
+		Selector oliveSelector = Selector.open();
+		Selector blutoSelector = Selector.open();
 		// Create listening socket channel for each port and register selector
 		for (Integer port : ports) {
 			ServerSocketChannel listnChannel = ServerSocketChannel.open();
@@ -31,34 +30,59 @@ public class POPEyeServer {
 			// Register selector with channel. The returned key is ignored
 			listnChannel.register(selector, SelectionKey.OP_ACCEPT);
 		}
+		ServerSocketChannel listnChannel = ServerSocketChannel.open();
+		listnChannel.socket().bind(new InetSocketAddress(4444));
+		listnChannel.configureBlocking(false); // must be nonblocking to
+		// register
+		// Register selector with channel. The returned key is ignored
+		listnChannel.register(oliveSelector, SelectionKey.OP_ACCEPT);
+		listnChannel = ServerSocketChannel.open();
+		listnChannel.socket().bind(new InetSocketAddress(8888));
+		listnChannel.configureBlocking(false); // must be nonblocking to
+		// register
+		// Register selector with channel. The returned key is ignored
+		listnChannel.register(blutoSelector, SelectionKey.OP_ACCEPT);
+		
 		// Create a handler that will implement the protocol
-		POPProtocol protocol = new PopSelectorProtocol(BUFSIZE,defaultPort,selector);
+		SelectorProtocol protocol = new PopSelectorProtocol(BUFSIZE,defaultPort,selector);
+		SelectorProtocol oliveProtocol = new OliveSelectorProtocol(BUFSIZE,oliveSelector);
+		SelectorProtocol blutoProtocol = new BlutoSelectorProtocol(BUFSIZE,blutoSelector);
 		while (true) { // Run forever, processing available I/O operations
+			if(oliveSelector.selectNow()>0){
+				handleKeys(oliveSelector,oliveProtocol);
+			}
+			if(blutoSelector.selectNow()>0){
+				handleKeys(blutoSelector,blutoProtocol);
+			}
 			// Wait for some channel to be ready (or timeout)
 			if (selector.select(TIMEOUT) == 0) { // returns # of ready chans
 				//System.out.println(".");
 				continue;
 			}
-			// Get iterator on set of keys with I/O to process
-			Iterator<SelectionKey> keyIter = selector.selectedKeys().iterator();
-			while (keyIter.hasNext()) {
-				SelectionKey key = keyIter.next(); // Key is bit mask
-				// Server socket channel has pending connection requests?
-				if (key.isValid() && key.isAcceptable()) {
-					//TODO
-					protocol.handleAccept(key);
-				}
-				// Client socket channel has pending data?
-				if (key.isValid() && key.isReadable()) {
-					protocol.handleRead(key);
-				}
-				// Client socket channel is available for writing and
-				// key is valid (i.e., channel not closed)?
-				if (key.isValid() && key.isWritable()) {
-					protocol.handleWrite(key);
-				}
-				keyIter.remove(); // remove from set of selected keys
+			handleKeys(selector,protocol);
+		}
+	}
+	
+	private static void handleKeys(Selector selector, SelectorProtocol protocol) throws IOException, InterruptedException{
+		// Get iterator on set of keys with I/O to process
+		Iterator<SelectionKey> keyIter = selector.selectedKeys().iterator();
+		while (keyIter.hasNext()) {
+			SelectionKey key = keyIter.next(); // Key is bit mask
+			// Server socket channel has pending connection requests?
+			if (key.isValid() && key.isAcceptable()) {
+				//TODO
+				protocol.handleAccept(key);
 			}
+			// Client socket channel has pending data?
+			if (key.isValid() && key.isReadable()) {
+				protocol.handleRead(key);
+			}
+			// Client socket channel is available for writing and
+			// key is valid (i.e., channel not closed)?
+			if (key.isValid() && key.isWritable()) {
+				protocol.handleWrite(key);
+			}
+			keyIter.remove(); // remove from set of selected keys
 		}
 	}
 }

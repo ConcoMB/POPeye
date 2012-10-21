@@ -9,14 +9,14 @@ import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 
 import proxy.Writeable;
-import statistics.StatisticsProvider;
+import configuration.Configuration;
 
-public class OliveSelectorProtocol implements SelectorProtocol, Writeable {
+public class BlutoSelectorProtocol implements SelectorProtocol, Writeable {
     private int bufSize; // Size of I/O buffer
 	private Selector selector;
-	private HashMap<SocketChannel,StatisticsProvider> providerMap=new HashMap<SocketChannel,StatisticsProvider>();
+	private HashMap<SocketChannel,Configuration> configMap=new HashMap<SocketChannel,Configuration>();
 
-    public OliveSelectorProtocol(int bufSize, Selector selector) {
+    public BlutoSelectorProtocol(int bufSize, Selector selector) {
         this.bufSize = bufSize;
         this.selector=selector;
     }
@@ -26,8 +26,8 @@ public class OliveSelectorProtocol implements SelectorProtocol, Writeable {
         clntChan.configureBlocking(false); // Must be nonblocking to register
         // Register the selector with new channel for read and attach byte
         // buffer
-        System.out.println("OLIVE: Accepted connection ->"+clntChan.socket().getRemoteSocketAddress());
-        providerMap.put(clntChan, new StatisticsProvider(this,clntChan));
+        System.out.println("BLUTO: Accepted connection ->"+clntChan.socket().getRemoteSocketAddress());
+        configMap.put(clntChan, new Configuration(this,clntChan));
         clntChan.register(key.selector(), SelectionKey.OP_READ, new DoubleBuffer(bufSize));
     }
     
@@ -39,7 +39,7 @@ public class OliveSelectorProtocol implements SelectorProtocol, Writeable {
         long bytesRead = channel.read(buf);
         buf.flip();
         if (bytesRead == -1) { // Did the other end close?
-    		System.out.println("OLIVE: Client disconnected:"+channel.socket().getRemoteSocketAddress());
+    		System.out.println("BLUTO: Client disconnected:"+channel.socket().getRemoteSocketAddress());
         	disconnectClient(channel);
         } else if (bytesRead > 0) {
         	String line=BufferUtils.bufferToString(buf);
@@ -48,15 +48,15 @@ public class OliveSelectorProtocol implements SelectorProtocol, Writeable {
         		return;
         	}
         	line=sBuf.toString();
-        	System.out.println("OLIVE: C--> "+line);
+        	System.out.println("BLUTO: C--> "+line);
         	sBuf.delete(0, sBuf.length());
         	//System.out.print("READ:"+bytesRead+" "+line);
-        	providerMap.get(channel).consult(line.trim());
+        	configMap.get(channel).apply(line.trim());
         }
     }
 
     private void disconnectClient(SocketChannel client) throws IOException {
-    	providerMap.remove(client);
+    	configMap.remove(client);
     	client.close();
 	}
     
@@ -87,7 +87,7 @@ public class OliveSelectorProtocol implements SelectorProtocol, Writeable {
 	@Override
 	public void writeToClient(SocketChannel client, String line) throws IOException, InterruptedException {
 		String message=line.length()>30?line.substring(0, 30)+"...\n":line;
-		System.out.print("OLIVE: S--> "+message);
+		System.out.print("BLUTO: S--> "+message);
 		writeToChannel(client,line);
 	}
 
