@@ -40,7 +40,7 @@ public class POPeye {
 	private SocketChannel client;
 
 
-	private Mail mail = new Mail();
+	private Mail mail;
 	private int mailNum, topLines;
 	
 	private final static String defaultServer = "pop3.alu.itba.edu.ar";
