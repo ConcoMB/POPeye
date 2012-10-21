@@ -13,7 +13,7 @@ import java.util.Map;
 public class POPEyeServer {
 	private static final int BUFSIZE = 1024*1024; // Buffer size (bytes)
 	private static final int TIMEOUT = 3000; // Wait timeout (milliseconds)
-	private static final int defaultPort = 110;
+	private static final int defaultPort = 2233;
 
 	public static void main(String[] args) throws IOException, InterruptedException {
 		int ports[]={4040};
