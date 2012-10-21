@@ -237,6 +237,7 @@ public class POPeye {
 		case RETR:
 			//mail.add(line);
 			if(line.equals(END)){
+				mail.parse();
 				log.write("Transforming mail\n");
 				//List<String> transmail = transform(mail);
 				int bytes = 0;
@@ -245,6 +246,7 @@ public class POPeye {
 //					//TODO not sure
 //					bytes+=s.length();
 //				}
+				out.writeToClient(client, mail.toString());
 				users.get(user).getStats().addBytes(bytes);
 				users.get(user).getStats().readEmail();
 				//mail=new Mail();
@@ -253,7 +255,7 @@ public class POPeye {
 		case DELE:
 			/*mail.add(line);
 			if(line.equals(END)){
-
+				mail.parse();
 				if(cantErase(mail)){
 					log.write("Permission to erase dennied\n");
 					out.writeToClient(client, ERR+" POPeye says you can't erase that!\n");

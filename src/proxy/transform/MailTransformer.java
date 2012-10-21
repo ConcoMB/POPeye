@@ -1,7 +1,9 @@
 package proxy.transform;
 
+import proxy.Mail;
+
 public interface MailTransformer {
 
-	public String transform(String message);
+	public void transform(Mail mail);
 	
 }
