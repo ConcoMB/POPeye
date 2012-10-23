@@ -237,7 +237,7 @@ public class POPeye {
 		case RETR:
 			//mail.add(line);
 			if(line.equals(END)){
-				mail.parse();
+				//mail.parse();
 				log.write("Transforming mail\n");
 				//List<String> transmail = transform(mail);
 				int bytes = 0;
@@ -246,7 +246,7 @@ public class POPeye {
 //					//TODO not sure
 //					bytes+=s.length();
 //				}
-				out.writeToClient(client, mail.toString());
+				//out.writeToClient(client, mail.toString());
 				users.get(user).getStats().addBytes(bytes);
 				users.get(user).getStats().readEmail();
 				//mail=new Mail();

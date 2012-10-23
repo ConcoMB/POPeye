@@ -31,7 +31,7 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 
     public void handleAccept(SelectionKey key) throws IOException {
     	SocketChannel clntChan = ((ServerSocketChannel) key.channel()).accept();
-    	String address=clntChan.getRemoteAddress().toString();
+    	String address=clntChan.socket().getRemoteSocketAddress().toString();
     	address=address.substring(1, address.indexOf(':'));
     	System.out.println(address);
     	if(!POPeye.isBlocked(address)){

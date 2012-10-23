@@ -8,7 +8,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.util.Iterator;
 
 public class POPEyeServer {
-	private static final int BUFSIZE = 1024*1024; // Buffer size (bytes)
+	private static final int BUFSIZE = 1024 * 1024; // Buffer size (bytes)
 	private static final int TIMEOUT = 3000; // Wait timeout (milliseconds)
 	private static final int defaultPort = 2233;
 
@@ -47,13 +47,11 @@ public class POPEyeServer {
 		SelectorProtocol protocol = new PopSelectorProtocol(BUFSIZE,defaultPort,selector);
 		SelectorProtocol oliveProtocol = new OliveSelectorProtocol(BUFSIZE,oliveSelector);
 		SelectorProtocol blutoProtocol = new BlutoSelectorProtocol(BUFSIZE,blutoSelector);
+		Thread oliveThread = new SelectorThread(oliveSelector, oliveProtocol);
+		Thread blutoThread = new SelectorThread(blutoSelector, blutoProtocol);
+		oliveThread.start();
+		blutoThread.start();
 		while (true) { // Run forever, processing available I/O operations
-			if(oliveSelector.selectNow()>0){
-				handleKeys(oliveSelector,oliveProtocol);
-			}
-			if(blutoSelector.selectNow()>0){
-				handleKeys(blutoSelector,blutoProtocol);
-			}
 			// Wait for some channel to be ready (or timeout)
 			if (selector.select(TIMEOUT) == 0) { // returns # of ready chans
 				//System.out.println(".");
@@ -62,15 +60,16 @@ public class POPEyeServer {
 			handleKeys(selector,protocol);
 		}
 	}
-	
-	private static void handleKeys(Selector selector, SelectorProtocol protocol) throws IOException, InterruptedException{
+
+	private static void handleKeys(Selector selector, SelectorProtocol protocol)
+			throws IOException, InterruptedException {
 		// Get iterator on set of keys with I/O to process
 		Iterator<SelectionKey> keyIter = selector.selectedKeys().iterator();
 		while (keyIter.hasNext()) {
 			SelectionKey key = keyIter.next(); // Key is bit mask
 			// Server socket channel has pending connection requests?
 			if (key.isValid() && key.isAcceptable()) {
-				//TODO
+				// TODO
 				protocol.handleAccept(key);
 			}
 			// Client socket channel has pending data?
@@ -83,6 +82,32 @@ public class POPEyeServer {
 				protocol.handleWrite(key);
 			}
 			keyIter.remove(); // remove from set of selected keys
+		}
+	}
+
+	private static class SelectorThread extends Thread {
+		private Selector selector;
+		private SelectorProtocol protocol;
+
+		public SelectorThread(Selector selector, SelectorProtocol protocol) {
+			this.selector = selector;
+			this.protocol = protocol;
+		}
+
+		@Override
+		public void run() {
+			try{
+			while (true) { // Run forever, processing available I/O operations
+				// Wait for some channel to be ready (or timeout)
+				if (selector.select(TIMEOUT) == 0) { // returns # of ready chans
+					//System.out.println(".");
+					continue;
+				}
+				handleKeys(selector,protocol);
+			}
+			}catch(Exception e){
+				e.printStackTrace();
+			}
 		}
 	}
 }
