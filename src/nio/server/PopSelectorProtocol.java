@@ -14,7 +14,7 @@ import java.util.Map;
 import proxy.POPeye;
 import proxy.Writeable;
 
-public class EchoSelectorProtocol implements TCPProtocol, Writeable {
+public class PopSelectorProtocol implements SelectorProtocol, Writeable {
     private int bufSize; // Size of I/O buffer
 	private int defaultPort;
 	private Map<SocketChannel,SocketChannel> clientMap=new HashMap<SocketChannel,SocketChannel>();
@@ -23,21 +23,29 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
 	private Map<SocketChannel,ExternalAppExecuter> appMap=new HashMap<SocketChannel,ExternalAppExecuter>();
 	private Selector selector;
 
-    public EchoSelectorProtocol(int bufSize, int dp, Selector selector) {
+    public PopSelectorProtocol(int bufSize, int dp, Selector selector) {
         this.bufSize = bufSize;
         this.defaultPort=dp;
         this.selector=selector;
     }
 
     public void handleAccept(SelectionKey key) throws IOException {
-        SocketChannel clntChan = ((ServerSocketChannel) key.channel()).accept();
-        clntChan.configureBlocking(false); // Must be nonblocking to register
-        // Register the selector with new channel for read and attach byte
-        // buffer
-        System.out.println("Accepted connection ->"+clntChan.socket().getRemoteSocketAddress());
-        clntChan.register(key.selector(), SelectionKey.OP_READ, new DoubleBuffer(bufSize));
-        proxyMap.put(clntChan, new POPeye(this,clntChan));
-        connectToServer(clntChan, "pop3.alu.itba.edu.ar");
+    	SocketChannel clntChan = ((ServerSocketChannel) key.channel()).accept();
+    	String address=clntChan.socket().getRemoteSocketAddress().toString();
+    	address=address.substring(1, address.indexOf(':'));
+    	System.out.println(address);
+    	if(!POPeye.isBlocked(address)){
+    		clntChan.configureBlocking(false); // Must be nonblocking to register
+    		// Register the selector with new channel for read and attach byte
+    		// buffer
+    		System.out.println("Accepted connection ->"+clntChan.socket().getRemoteSocketAddress());
+    		clntChan.register(key.selector(), SelectionKey.OP_READ, new DoubleBuffer(bufSize));
+    		proxyMap.put(clntChan, new POPeye(this,clntChan));
+    		connectToServer(clntChan, "pop3.alu.itba.edu.ar");
+    	}else{
+    		System.out.println("Blocked: "+address);
+    		disconnectClient(clntChan);
+    	}
     }
     
     private void connectToServer(SocketChannel clntChan, String serverName) throws IOException{
@@ -50,7 +58,7 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
 		System.out.println("host:"+hostChan);
 		clientMap.put(hostChan, clntChan);
 		serverMap.put(clntChan, hostChan);
-		appMap.put(clntChan, new ExternalAppExecuter("/home/fede/git/POPeye/apps/echo.o"));
+		appMap.put(clntChan, new ExternalAppExecuter("/home/fede/git/POPeye/apps/toUpper.o"));
     }
 
     private boolean isServer(SocketChannel channel){
@@ -68,13 +76,12 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
         	if(isServer(channel)){
         		//SERVER DISCONNECTED
         		System.out.println("Server disconnected (client:"+clientMap.get(channel).socket().getRemoteSocketAddress()+")");
-        		clientMap.get(channel).close();
+        		disconnectClient(clientMap.get(channel));
         	}else{
         		//CLIENT DISCONNECTED
         		System.out.println("Client disconnected:"+channel.socket().getRemoteSocketAddress());
-        		serverMap.get(channel).close();
+        		disconnectClient(channel);
         	}
-        	channel.close();
         } else if (bytesRead > 0) {
         	String line=BufferUtils.bufferToString(buf);
         	sBuf.append(line);
@@ -117,7 +124,17 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
         }
     }
 
-    public void handleWrite(SelectionKey key) throws IOException {
+    private void disconnectClient(SocketChannel client) throws IOException {
+    	SocketChannel server=serverMap.get(client);
+    	if(server!=null){
+    		serverMap.remove(client);
+    		clientMap.remove(server);
+    		server.close();
+    	}
+    	client.close();
+	}
+
+	public void handleWrite(SelectionKey key) throws IOException {
         /*
          * Channel is available for writing, and key is valid (i.e., client
          * channel not closed).

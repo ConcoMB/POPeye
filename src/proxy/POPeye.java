@@ -1,25 +1,19 @@
 package proxy;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Properties;
+import java.util.Set;
 
-import user.EraseConditions;
-import user.HourDenial;
-import user.QuantityDenial;
-import user.Statistics;
 import user.User;
 
 public class POPeye {
-
+	
+	private static Set<String> blockedIPs = new HashSet<String>();
 	private static Map<String, User> users = new HashMap<String, User>();
 
 	private enum State{
@@ -40,7 +34,7 @@ public class POPeye {
 	private SocketChannel client;
 
 
-	private Mail mail = new Mail();
+	//private Mail mail = new Mail();
 	private int mailNum, topLines;
 	
 	private final static String defaultServer = "pop3.alu.itba.edu.ar";
@@ -72,7 +66,7 @@ public class POPeye {
 		//		if(users.containsKey(userName)){
 		//			user=users.get(userName);
 		//		}else{
-		user =loadUser();
+		user =getUserByName(userName);
 		//			users.put(userName, user);
 		//		}
 
@@ -241,9 +235,9 @@ public class POPeye {
 			out.writeToClient(client,line);
 			break;
 		case RETR:
-			mail.add(line);
+			//mail.add(line);
 			if(line.equals(END)){
-				mail.parse();
+				//mail.parse();
 				log.write("Transforming mail\n");
 				//List<String> transmail = transform(mail);
 				int bytes = 0;
@@ -252,14 +246,14 @@ public class POPeye {
 //					//TODO not sure
 //					bytes+=s.length();
 //				}
-				out.writeToClient(client, mail.toString());
+				//out.writeToClient(client, mail.toString());
 				users.get(user).getStats().addBytes(bytes);
 				users.get(user).getStats().readEmail();
-				mail=new Mail();
+				//mail=new Mail();
 			}
 			break;
 		case DELE:
-			mail.add(line);
+			/*mail.add(line);
 			if(line.equals(END)){
 				mail.parse();
 				if(cantErase(mail)){
@@ -273,7 +267,7 @@ public class POPeye {
 					lastCommand=Command.DELE;
 				}
 				mail=new Mail();
-			}
+			}*/
 			break;
 		case STAT:
 		case NOOP:
@@ -338,84 +332,12 @@ public class POPeye {
 	}
 
 	private void closeConnections() throws IOException{
-		saveStatistics();
 		user=null;
 		//TODO
 	}
 
-
-
-
 	private void end() throws IOException{
 		log.close();
-	}
-
-	private String loadServer(String user) throws IOException{
-		Properties properties=new Properties();
-		try {
-			InputStream is= getClass().getClassLoader().getResourceAsStream("./servers.properties");
-			properties.load(is);
-		} catch (IOException ex) {
-			ex.printStackTrace();
-			throw new IOException();
-		}
-		return properties.getProperty(user);
-	}
-
-	private Statistics loadStatistics(String name) throws IOException {
-		BufferedReader stt;
-		try{
-			stt = new BufferedReader(new FileReader("./statistics_"+name+".txt"));
-		}catch(FileNotFoundException e){
-			return null;
-		}
-		Statistics s=  new Statistics(stt.readLine());
-		stt.close();
-		return s;
-	}
-
-	private void saveStatistics() throws IOException{
-		BufferedWriter stt = new BufferedWriter(new FileWriter("./statistics_"+userName+".txt"));
-		stt.write(user.getStats().getFullStatistics());
-		stt.close();
-	}
-
-	private User loadUser() throws IOException{
-		Statistics stats = loadStatistics(userName);
-		//String server = loadServer(userName);
-		String server=null;
-		QuantityDenial quantityDenial= loadQuantityDenial(userName);
-		HourDenial hourDenial = loadHourDenial(userName);
-		EraseConditions eraseConds=null; //= loadEraseConditions(userName);
-		return new User(userName, stats, server, quantityDenial, hourDenial, eraseConds);
-	}
-
-
-
-	private HourDenial loadHourDenial(String name) throws IOException {
-		BufferedReader b;
-		try{
-			b = new BufferedReader(new FileReader("./hourDenial_"+name+".txt"));
-		}catch(FileNotFoundException e){
-			return null;
-		}
-		HourDenial d=  new HourDenial(b.readLine());
-		b.close();
-		return d;
-	}
-
-
-
-	private QuantityDenial loadQuantityDenial(String name) throws NumberFormatException, IOException {
-		BufferedReader b;
-		try{
-			b = new BufferedReader(new FileReader("./quantityDenial_"+name+".txt"));
-		}catch(FileNotFoundException e){
-			return null;
-		}
-		QuantityDenial d=  new QuantityDenial(Integer.valueOf(b.readLine()));
-		b.close();
-		return d;
 	}
 
 	public User getCurrentUser() {
@@ -426,7 +348,23 @@ public class POPeye {
 		return userName;
 	}
 
-	public User getUserByName(String string) {
+	public static User getUserByName(String string) {
+		if(!users.containsKey(string)){
+			users.put(string,new User(string));
+		}
 		return users.get(string);
+	}
+	
+	public static void addUser(String username){
+		users.put(username, new User(username));
+	}
+	
+	public static void blockIP(String ip){
+		blockedIPs.add(ip);
+		System.out.println("blocked IP:"+ip);
+	}
+	
+	public static boolean isBlocked(String ip){
+		return blockedIPs.contains(ip);
 	}
 }
