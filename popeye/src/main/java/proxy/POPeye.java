@@ -248,7 +248,7 @@ public class POPeye {
 			out.writeToClient(client,line);
 			break;
 		case RETR:
-			System.out.print("Line: "+line);
+			//System.out.print("Line: "+line);
 			mail.add(line);
 			if(line.equals(END+"\r\n")){
 				mail.parse();
