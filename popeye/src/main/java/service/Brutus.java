@@ -90,7 +90,6 @@ public class Brutus extends Service{
 				h = Integer.valueOf(s2[0]);
 				m = Integer.valueOf(s2[1]);
 				if(!validateHour(h) || ! validateMin(m)){
-					//ERROR
 					invalidConfig();
 					return;
 				}else{
@@ -109,14 +108,16 @@ public class Brutus extends Service{
 				try {
 					e.eraseOnDate(val);
 				} catch (ParseException e1) {
-					System.err.println("Date format input incorrect");
+					invalidConfig();
+					return;
 				}
 				break;
 			case ERASE_FROM:
 				try {
 					e.eraseFromDate(val);
 				} catch (ParseException e2) {
-					System.err.println("Date format input incorrect");
+					invalidConfig();
+					return;
 				}
 				break;
 			case ERASE_CONTENTTYPE:
@@ -190,6 +191,5 @@ public class Brutus extends Service{
 			return false;
 		return true;
 	}
-
 
 }
