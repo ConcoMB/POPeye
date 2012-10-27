@@ -5,7 +5,7 @@ import java.util.Set;
 
 import proxy.transform.AnonymousTransformer;
 import proxy.transform.MailTransformer;
-import proxy.transform.VowelMailTransformer;
+import proxy.transform.VowelTransformer;
 
 public class User {
 
@@ -25,7 +25,7 @@ public class User {
 		quantityDenial=new QuantityDenial();
 		eraseConditions=new EraseConditions();
 		
-		transformers.add(VowelMailTransformer.getInstance());
+		transformers.add(VowelTransformer.getInstance());
 	}
 	
 //	public User(String name,Statistics stats, String server, QuantityDenial quantityDenial,

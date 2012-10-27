@@ -8,6 +8,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import proxy.transform.MailTransformer;
+import proxy.transform.VowelTransformer;
+
 public class Mail {
 
 	private static final String FROM = "From:", DATE="Date: ", MULTIPART= "Content-Type: multipart", CONTENTTYPE="Content-Type: ",
@@ -186,8 +189,8 @@ public class Mail {
 			m += line + '\n';
 		}
 		Mail mail = new Mail(m);
-//		MailTransformer t = new AnonimousTransformer();
-//		t.transform(mail);
+		MailTransformer t = VowelTransformer.getInstance();
+		t.transform(mail);
 		mail.print();
 		//System.out.println(mail.message);
 	}

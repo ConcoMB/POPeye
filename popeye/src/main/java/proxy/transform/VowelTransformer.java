@@ -3,11 +3,11 @@ package proxy.transform;
 import proxy.Mail;
 
 
-public class VowelMailTransformer implements MailTransformer {
+public class VowelTransformer implements MailTransformer {
 
-	private static VowelMailTransformer t;
+	private static VowelTransformer t;
 	
-	private VowelMailTransformer(){}
+	private VowelTransformer(){}
 	
 	public void transform(Mail mail) {
 		char[] string = mail.getMessage().toCharArray();
@@ -81,9 +81,9 @@ public class VowelMailTransformer implements MailTransformer {
 		mail.setMessage(new String(string));
 	}
 
-	public static VowelMailTransformer getInstance() {
+	public static VowelTransformer getInstance() {
 		if(t==null){
-			t=new VowelMailTransformer();
+			t=new VowelTransformer();
 		}
 		return t;
 	}
