@@ -5,7 +5,7 @@ import java.util.Date;
 
 public class QuantityDenial implements Denial{
 	
-	private final int top;
+	private int top;
 	private int quantity;
 	private Date lastLogin;
 	
@@ -43,7 +43,7 @@ public class QuantityDenial implements Denial{
 	}
 
 	public void setTop(int val) {
-		quantity=val;		
+		top=val;		
 	}
 	
 	public int getTop(){

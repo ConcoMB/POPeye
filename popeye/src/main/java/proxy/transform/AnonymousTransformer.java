@@ -24,8 +24,13 @@ public class AnonymousTransformer implements MailTransformer {
 //		mail.eraseFrom();
 		
 		int index = mail.getFromLine();
-		int i = mail.getIndexAtLine(index);
-		
+		String[] s = mail.getMessage().split("\n");
+		s[index]="From: popeye <guess@who.com>\r";
+		String m = "";
+		for(String l:s){
+			m+=l+"\n";
+		}
+		mail.setMessage(m);
 	}
 
 	public static MailTransformer getInstance() {

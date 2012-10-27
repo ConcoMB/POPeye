@@ -27,10 +27,13 @@ public class User {
 		hourDenial=new HourDenial();
 		quantityDenial=new QuantityDenial();
 		eraseConditions=new EraseConditions();
-//		transformers.add(ImageRotationTransformer.getInstance());
+		//transformers.add(ImageRotationTransformer.getInstance());
 		transformers.add(AnonymousTransformer.getInstance());
 
 		transformers.add(VowelTransformer.getInstance());
+		//quantityDenial.setTop(1);
+		//hourDenial.setMaxMinute(5);
+		eraseConditions.erasePicture("1");
 	}
 	
 //	public User(String name,Statistics stats, String server, QuantityDenial quantityDenial,
@@ -83,16 +86,7 @@ public class User {
 	}
 
 	public boolean accessIsBlocked() {
-		if(hourDenial!=null && quantityDenial!=null){
-			return hourDenial.isBlocked() || quantityDenial.isBlocked();
-		}
-		if(hourDenial!=null){
-			return hourDenial.isBlocked();
-		}
-		if(quantityDenial!=null){
-			return quantityDenial.isBlocked();
-		}
-		return false;
+		return hourDenial.isBlocked() || quantityDenial.isBlocked();
 	}
 
 	public void addSuccessfulAccess() {

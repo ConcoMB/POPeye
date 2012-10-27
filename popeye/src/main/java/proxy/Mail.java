@@ -125,8 +125,15 @@ public class Mail {
 					}
 					htmlEnd=i;
 				}else{
-					i++;
-					if(m[i].startsWith(CONTENTDISP)){
+					boolean cd=false;
+					if(m[i+1].startsWith(CONTENTDISP)){
+						i++;
+						cd=true;
+					}else if(m[i+2].startsWith(CONTENTDISP)){
+						i+=2;
+						cd=true;
+					}
+					if(cd){
 						String disp = m[i].split(CONTENTDISP)[1];
 						disp=disp.split(";")[0];
 						contentDispositions.add(disp);
