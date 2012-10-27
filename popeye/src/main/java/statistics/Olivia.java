@@ -1,6 +1,10 @@
 package statistics;
 
+import java.io.IOException;
+import java.nio.channels.SocketChannel;
+
 import proxy.POPeye;
+import proxy.Writeable;
 import user.Statistics;
 import user.User;
 
@@ -8,17 +12,20 @@ public class Olivia {
 	
 	private int bytesTransferred;
 	private int successfulConnections, connections;
-	private POPeye proxy;
+	private SocketChannel channel;
+	private Writeable out;
 	
 	private enum Command{
 		BYTES, CONNECTIONS, FULL,SUCCESSFUL_CONNECTIONS, FAILED_CONNECTIONS, EMAILS_READ, EMAILS_ERASED, ERASE_FAILURES;
 	}
 	
-	public Olivia(POPeye proxy){
-		this.proxy=proxy;
+	public Olivia(Writeable out, SocketChannel channel){
+		this.channel=channel;
+		this.out=out;
 	}
 	
-	public void consult(String line){
+	
+	public void consult(String line) throws IOException, InterruptedException{
 		String[] command = line.split(" ");
 		Command c;
 		if(!command[0].equals("IN") || !command[2].equals("ASK")){
@@ -54,7 +61,7 @@ public class Olivia {
 				return;
 			}
 		}else{
-			User user = proxy.getUserByName(command[1]);
+			User user = POPeye.getUserByName(command[1]);
 			if(user==null){
 				//ERROR
 				return;
@@ -98,15 +105,15 @@ public class Olivia {
 		//TODO
 	}
 	
-	public void writeSimple(String info){
-		//TODO
+	public void writeSimple(String info) throws IOException, InterruptedException{
+		out.writeToClient(channel, info);
 	}
 	
 	public void writeEndMultiline(){
 		//TODO
 	}
 	
-	public void writeFullStats(Statistics stats){
+	public void writeFullStats(Statistics stats) throws IOException, InterruptedException{
 		writeSimple("Connections: " + stats.getAccesses() +"\n");
 		writeSimple("Connections failed : " + stats.getAccessFailures() +"\n");
 		writeSimple("Bytes transferred: " + stats.getBytesTransferred() +"\n");
@@ -116,7 +123,7 @@ public class Olivia {
 		writeEndMultiline();
 	}
 	
-	public void writeFullStats(){
+	public void writeFullStats() throws IOException, InterruptedException{
 		writeSimple("Connections: " + connections +"\n");
 		writeSimple("Connections failed : " + successfulConnections +"\n");
 		writeSimple("Bytes transferred: " + bytesTransferred +"\n");

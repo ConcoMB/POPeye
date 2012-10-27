@@ -13,6 +13,9 @@ public class User {
 	public User(String name) {
 		this.name=name;
 		stats=new Statistics();
+		hourDenial=new HourDenial();
+		quantityDenial=new QuantityDenial();
+		eraseConditions=new EraseConditions();
 	}
 	
 //	public User(String name,Statistics stats, String server, QuantityDenial quantityDenial,

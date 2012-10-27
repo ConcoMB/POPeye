@@ -24,6 +24,7 @@ import user.User;
 
 public class POPeye {
 
+	private static Set<String> blockedIPs = new HashSet<String>();
 	private static Map<String, User> users = new HashMap<String, User>();
 
 	private enum State{
@@ -341,5 +342,12 @@ public class POPeye {
 		users.put(user.getName(), user);
 	}
 	
-	
+	public static void blockIP(String ip){
+		blockedIPs.add(ip);
+		System.out.println("blocked IP:"+ip);
+	}
+
+	public static boolean isBlocked(String ip){
+		return blockedIPs.contains(ip);
+	}
 }

@@ -15,17 +15,6 @@ public class HourDenial implements Denial{
 		this.maxMinute = maxMinute;
 	}
 
-
-
-	public HourDenial(String readLine) {
-		String[] split = readLine.split(",");
-		String[] min = split[0].split(":"), max = split[1].split(":");
-		init(Integer.valueOf(min[0]),Integer.valueOf(min[1]), 
-				Integer.valueOf(max[0]), Integer.valueOf(max[1]));
-	}
-
-
-
 	public boolean isBlocked() {
 		Date now = new Date();
 		DateFormat hhmmssFormat = new SimpleDateFormat("yyyyMMddhh:mm:ss");

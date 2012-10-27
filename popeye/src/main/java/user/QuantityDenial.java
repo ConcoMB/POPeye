@@ -9,11 +9,10 @@ public class QuantityDenial implements Denial{
 	private int quantity;
 	private Date lastLogin;
 	
-	public QuantityDenial(int top){
-		this.top=top;
-		quantity=0;
+	public QuantityDenial() {
+		top=-1;
 	}
-	
+
 	public void addAccess(){
 		if(lastLogin==null){
 			lastLogin=new Date();
@@ -37,6 +36,9 @@ public class QuantityDenial implements Denial{
 	}
 	
 	public boolean isBlocked(){
+		if(top==-1){
+			return false;
+		}
 		return quantity>=top;
 	}
 
