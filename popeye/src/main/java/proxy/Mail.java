@@ -182,17 +182,26 @@ public class Mail {
 
 	
 	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new FileReader("./mailexample.txt"));
-		String line;
-		String m="";
-		while((line=br.readLine())!=null){
-			m += line + '\n';
-		}
-		Mail mail = new Mail(m);
-		MailTransformer t = VowelTransformer.getInstance();
-		t.transform(mail);
-		mail.print();
+//		BufferedReader br = new BufferedReader(new FileReader("./mailexample.txt"));
+//		String line;
+//		String m="";
+//		while((line=br.readLine())!=null){
+//			m += line + '\n';
+//		}
+//		Mail mail = new Mail(m);
+//		MailTransformer t = VowelTransformer.getInstance();
+//		t.transform(mail);
+//		mail.print();
 		//System.out.println(mail.message);
+		char[] c= "HOla que tal como va todo bien???????????".toCharArray();
+		char[] c2 = new Mail().shift(c, 15, 3);
+		for(char ca: c){
+			System.out.print(ca);
+		}
+		System.out.println();
+		for(char ca: c2){
+			System.out.print(ca);
+		}
 	}
 	
 	private void print(){
@@ -216,6 +225,8 @@ public class Mail {
 		for(String r: contentDispositions){
 			System.out.println(r);
 		}
+		
+		
 	}
 
 	
@@ -266,11 +277,31 @@ public class Mail {
 		int index, listIndex=0;
 		for(MailImage m : photos){
 			index=getIndexAtLine(m.startLine);
-			char[] image = newImages.get(listIndex++).toCharArray();
-			for(int j=0; j<image.length; j++, index++){
-				newMessage[index]=image[j];
+			int end = getIndexAtLine(m.endLine);
+			while(newMessage[end]!='\n'){
+				end++;
 			}
+			end++;
+			char[] image = newImages.get(listIndex++).toCharArray();
+			int dif = image.length - (end-index);
+			char[] mess = shift(newMessage, dif, end);
+			for(int j=0; j<image.length; j++, index++){
+				mess[index]=image[j];
+			}
+			newMessage=mess;
 		}
+		message=new String(newMessage);
+	}
+	
+	private char[] shift(char[] m , int cant, int index){
+		char[] ans = new char[m.length+cant];
+		for(int i=0; i<index; i++){
+			ans[i]=m[i];
+		}
+		for(int i=index; i<m.length; i++){
+			ans[i+cant]=m[i];
+		}
+		return ans;
 	}
 	
 	public int getIndexAtLine(int line){
@@ -280,7 +311,7 @@ public class Mail {
 			if(c[i]=='\n'){
 				count++;
 				if(count==line){
-					return i;
+					return i+1;
 				}
 			}
 		}
