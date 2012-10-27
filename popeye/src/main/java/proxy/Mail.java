@@ -8,20 +8,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import proxy.transform.AnonymousTransformer;
-import proxy.transform.MailTransformer;
-
 public class Mail {
 
 	private static final String FROM = "From:", DATE="Date: ", MULTIPART= "Content-Type: multipart", CONTENTTYPE="Content-Type: ",
-			TEXT="Content-Type: text/plain", CTE= "Content-Transfer-Encoding: ", PIC="Content-Type: image", CONTENTDISP="Content-Disposition: ";
+			TEXT="Content-Type: text/plain", CTE= "Content-Transfer-Encoding: ", PIC="Content-Type: image", 
+			CONTENTDISP="Content-Disposition: ", HTML="Content-Type: text/html";
 
 	private String date ; 
 //	private String subject; // "Subject: ";
 	private String from;
 	private int fromLine;
 	private Set<String> contentTypes = new HashSet<String>(), contentDispositions = new HashSet<String>();
-	private int bodyIndex, bodyEnd;
+	private int bodyIndex, bodyEnd, htmlBeg, htmlEnd;
 	private List<MailImage> photos = new ArrayList<MailImage>();
 	private String message="";
 	
@@ -104,6 +102,25 @@ public class Mail {
 					image.endLine=i-1;
 					//photo+=m[i];
 					photos.add(image);
+				}else if(m[i].startsWith(HTML)){
+					while(!m[i].equals("")){
+						i++;
+					}
+					htmlBeg=i++;
+					flag=false;
+					while(!flag && i<m.length && !m[i].equals("--=20")){
+						for(String b: bounds){
+							if(m[i].startsWith("--"+b) || m[i].equals(b)){
+								flag=true;
+								break;
+							}
+						}
+						if(!flag){
+							//body+=m[i]+"\n";
+							i++;
+						}
+					}
+					htmlEnd=i;
 				}else{
 					i++;
 					if(m[i].startsWith(CONTENTDISP)){
@@ -162,7 +179,7 @@ public class Mail {
 
 	
 	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new FileReader("./mimeExample.txt"));
+		BufferedReader br = new BufferedReader(new FileReader("./mailexample.txt"));
 		String line;
 		String m="";
 		while((line=br.readLine())!=null){
@@ -312,6 +329,14 @@ public class Mail {
 	
 	public String getDate(){
 		return date;
+	}
+
+	public int getHTMLEnd() {
+		return htmlEnd;
+	}
+	
+	public int getHTMLIndex(){
+		return htmlBeg;
 	}
 
 }
