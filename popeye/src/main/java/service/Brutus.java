@@ -16,6 +16,8 @@ import user.User;
 
 public class Brutus {
 
+	private final static String OK=":)", ERROR=":(";
+	
 	private SocketChannel channel;
 	private Writeable out;
 	private User user;
@@ -54,7 +56,7 @@ public class Brutus {
 			val=spl[5].toString();
 			v=Variable.valueOf(spl[3]);
 		}catch(Exception e){
-			invalidConfig();
+			error("invalid variable");
 			return;
 		}
 
@@ -65,6 +67,7 @@ public class Brutus {
 				break;
 			default:
 				//ERROR
+				error("invalid variable");
 				break;
 			}
 		}else{
@@ -80,6 +83,8 @@ public class Brutus {
 				m = Integer.valueOf(s[1]);
 				if(!validateHour(h) || ! validateMin(m)){
 					//ERROR
+					error("invalid time format");
+					return;
 				}else{
 					hd.setMinHour(h);
 					hd.setMinMinute(m);
@@ -90,6 +95,8 @@ public class Brutus {
 				h = Integer.valueOf(s2[0]);
 				m = Integer.valueOf(s2[1]);
 				if(!validateHour(h) || ! validateMin(m)){
+					error("invalid time format");
+					return;
 					//ERROR
 				}else{
 					hd.setMaxHour(h);
@@ -107,14 +114,16 @@ public class Brutus {
 				try {
 					e.eraseOnDate(val);
 				} catch (ParseException e1) {
-					System.err.println("Date format input incorrect");
+					error("invalid date format");
+					return;
 				}
 				break;
 			case ERASE_FROM:
 				try {
 					e.eraseFromDate(val);
 				} catch (ParseException e2) {
-					System.err.println("Date format input incorrect");
+					error("invalid date format");
+					return;
 				}
 				break;
 			case ERASE_CONTENTTYPE:
@@ -129,6 +138,8 @@ public class Brutus {
 			case ERASE_ATTACHMENT:
 				if(!val.equals("1") || !val.equals("0") || !val.equals("-1")){
 					//EROR
+					error("invalid value");
+					return;
 				}else{
 					e.eraseAttachment(val);
 				}
@@ -136,6 +147,8 @@ public class Brutus {
 			case ERASE_PICTURE:
 				if(!val.equals("1") || !val.equals("0") || !val.equals("-1")){
 					//EROR
+					error("invalid value");
+					return;
 				}else{
 					e.erasePicture(val);
 				}
@@ -164,9 +177,8 @@ public class Brutus {
 				}
 				break;
 			default:
-				//ERROR
+				error("invalid variable");
 				break;
-
 			}
 		}
 
@@ -187,7 +199,10 @@ public class Brutus {
 
 	private void invalidConfig() throws IOException, InterruptedException {
 		// TODO Auto-generated method stub
-		out.writeToClient(channel, "INVALID CONFIG\n");
-		System.out.println("not valid config");
+		error("invalid config");
+	}
+	
+	public void error(String message) throws IOException, InterruptedException{
+		out.writeToClient(channel, ERROR+" "+message+"\r\n");
 	}
 }

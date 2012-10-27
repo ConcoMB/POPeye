@@ -295,6 +295,7 @@ public class Mail {
 	
 	private char[] shift(char[] m , int cant, int index){
 		char[] ans = new char[m.length+cant];
+		System.out.println("Cant:"+cant);
 		for(int i=0; i<index; i++){
 			ans[i]=m[i];
 		}
