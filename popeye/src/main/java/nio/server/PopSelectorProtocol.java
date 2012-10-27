@@ -50,6 +50,7 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
     }
     
     private void connectToServer(SocketChannel clntChan, String serverName) throws IOException{
+    	System.out.println("Server:"+serverName+" port:"+defaultPort);
     	SocketChannel hostChan = SocketChannel.open(new InetSocketAddress(serverName, defaultPort));
 		hostChan.configureBlocking(false); // Must be nonblocking to register
 		System.out.println("Creating connection ->"+hostChan.socket().getRemoteSocketAddress());
@@ -91,7 +92,7 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
         	}
         	line=sBuf.toString();
         	sBuf.delete(0, sBuf.length());
-        	//System.out.print("READ:"+bytesRead+" "+line);
+        	System.out.print("READ:"+bytesRead+" "+line);
         	if(isServer(channel)){
         		//SERVER
         		/*for(String s: line.split("\r\n")){
@@ -173,10 +174,10 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 	}
 	
 	private void writeToChannel(SocketChannel channel, String line) throws InterruptedException, IOException{
-		ExternalAppExecuter appExec=appMap.get(channel);
+		/*ExternalAppExecuter appExec=appMap.get(channel);
 		if(appExec!=null){
 			line=appExec.execute(line);
-		}
+		}*/
 		SelectionKey key=channel.keyFor(selector);
 		StringBuffer sBuf=((DoubleBuffer) key.attachment()).getWriteBuffer();
 		String before=sBuf.toString();
