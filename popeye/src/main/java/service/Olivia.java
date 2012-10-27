@@ -14,10 +14,14 @@ import user.User;
 
 public class Olivia {
 
+	
+	//TODO esto aca?
+	
 	private int bytesTransferred;
 	private int successfulConnections, connections;
 	private SocketChannel channel;
 	private Writeable out;
+	private final static String OK=":)", ERROR=":(";
 
 	private enum Command{
 		BYTES, CONNECTIONS, FULL,SUCCESSFUL_CONNECTIONS, FAILED_CONNECTIONS, EMAILS_READ, EMAILS_ERASED, ERASE_FAILURES,
@@ -36,7 +40,7 @@ public class Olivia {
 		Command c;
 		Variable v = null;
 		if(!command[0].equals("IN") || !command[2].equals("ASK")){
-			//ERROR
+			error("invalid command format");
 			return;
 		}
 		try{
@@ -46,7 +50,7 @@ public class Olivia {
 				v=Variable.valueOf(command[3]);
 				c=Command.CHECK_VAR;
 			}catch(Exception e2){
-				//ERROR
+				error("invalid variable");
 				return;
 			}
 		}
@@ -70,12 +74,14 @@ public class Olivia {
 
 			default:
 				//EROR
+				error("invalid variable");
 				return;
 			}
 		}else{
 			User user = POPeye.getUserByName(command[1]);
 			if(user==null){
 				//ERROR
+				error("no info about user");
 				return;
 			}
 			Statistics stats = user.getStats();
@@ -185,12 +191,14 @@ public class Olivia {
 					break;
 				default:
 					//ERROR;
+					error("invalid variable");
 					break;
 				}
 				break;
 
 			default:
 				//EROR
+				error("invalid variable");
 				return;	
 			}
 
@@ -198,8 +206,8 @@ public class Olivia {
 	}
 
 
-	public void writeSimple(int info){
-		//TODO
+	public void writeSimple(int info) throws IOException, InterruptedException{
+		writeSimple(""+info);
 	}
 
 	public void writeSimple(String info) throws IOException, InterruptedException{
@@ -225,5 +233,9 @@ public class Olivia {
 		writeSimple("Connections failed : " + successfulConnections +"\n");
 		writeSimple("Bytes transferred: " + bytesTransferred +"\n");
 		writeEndMultiline();
+	}
+	
+	public void error(String message) throws IOException, InterruptedException{
+		out.writeToClient(channel, ERROR+" "+message+"\r\n");
 	}
 }

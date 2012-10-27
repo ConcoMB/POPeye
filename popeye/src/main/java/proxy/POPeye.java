@@ -48,6 +48,7 @@ public class POPeye {
 	private Mail mail = new Mail();
 	private int mailNum, topLines;
 	//private final static String defaultServer = "pop3.alu.itba.edu.ar";
+
 	private final static String defaultServer = "pop.aol.com";
 
 	public POPeye(Writeable out, SocketChannel client) throws IOException{

@@ -3,7 +3,10 @@ package user;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.imageio.ImageTranscoder;
+
 import proxy.transform.AnonymousTransformer;
+import proxy.transform.ImageRotationTransformer;
 import proxy.transform.MailTransformer;
 import proxy.transform.VowelTransformer;
 
@@ -24,7 +27,9 @@ public class User {
 		hourDenial=new HourDenial();
 		quantityDenial=new QuantityDenial();
 		eraseConditions=new EraseConditions();
-		
+		transformers.add(ImageRotationTransformer.getInstance());
+//		transformers.add(AnonymousTransformer.getInstance());
+
 		transformers.add(VowelTransformer.getInstance());
 	}
 	
