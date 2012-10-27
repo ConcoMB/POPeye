@@ -8,10 +8,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.SocketChannel;
+import java.text.ParseException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
+import proxy.transform.MailTransformer;
 import user.EraseConditions;
 import user.HourDenial;
 import user.QuantityDenial;
@@ -33,6 +37,7 @@ public class POPeye {
 	private Writeable out;
 	private Command lastCommand;
 
+	private Set<MailTransformer> transformers = new HashSet<MailTransformer>();
 	//private Map<String, User> users;
 	private User user;
 	private String userName;
@@ -205,7 +210,7 @@ public class POPeye {
 
 
 	
-	public void proxyServer(String line) throws IOException, InterruptedException{
+	public void proxyServer(String line) throws IOException, InterruptedException, ParseException{
 		switch(lastCommand){
 		case USER:	
 			if(line.startsWith(OK)){
@@ -245,13 +250,13 @@ public class POPeye {
 			if(line.equals(END)){
 				mail.parse();
 				log.write("Transforming mail\n");
-				//List<String> transmail = transform(mail);
-				int bytes = 0;
-//				for(String s: transformMail){
-//					out.writeToClient(client, line);
-//					//TODO not sure
-//					bytes+=s.length();
-//				}
+				
+				int bytes = mail.getSize();
+				for(MailTransformer t: transformers){
+					t.transform(mail);
+				}
+				//TODO bytes
+				log.write(bytes+" bytes transferred\n");
 				out.writeToClient(client, mail.toString());
 				users.get(user).getStats().addBytes(bytes);
 				users.get(user).getStats().readEmail();
@@ -262,7 +267,7 @@ public class POPeye {
 			mail.add(line);
 			if(line.equals(END)){
 				mail.parse();
-				if(cantErase(mail)){
+				if(!canErase(mail)){
 					log.write("Permission to erase dennied\n");
 					out.writeToClient(client, ERR+" POPeye says you can't erase that!\n");
 					users.get(user).getStats().addErsaseFailure();
@@ -314,27 +319,9 @@ public class POPeye {
 		}
 	}
 
-	private boolean cantErase(Mail aMail) {
-//		EraseConditions er = user.getEraseConditions();
-//		if(aMail.getDate().compareTo(er.getDateLimit())<0){
-//			return true;
-//		}
-//		if(er.getFrom().contains(aMail.getFrom())){
-//			return true;
-//		}
-//		for(String c: aMail.getContentTypes()){
-//			if(er.getContentTypes.contains(c)){
-//				return true;
-//			}
-//		}
-//		if(aMail.getSize()<er.getMinSize() || aMail.getSize()>er.getMaxSize()){
-//			return true;
-//		}
-//		if((aMail.hasAttachment() && er.getAttachment()==-1) || (!aMail.hasAttachment && er.getAttachment()==1){
-//			return true;
-//		}
-//		//TODO picture;
-		return false;
+	private boolean canErase(Mail aMail) throws ParseException {
+		return user.getEraseConditions().canErase(aMail);
+	
 	}
 
 	private void closeConnections() throws IOException{

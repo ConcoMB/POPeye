@@ -7,6 +7,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,7 +57,7 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
     	return serverMap.containsValue(channel);
     }
     
-    public void handleRead(SelectionKey key) throws IOException, InterruptedException {
+    public void handleRead(SelectionKey key) throws IOException, InterruptedException, ParseException {
         // Client socket channel has pending data
         SocketChannel channel = (SocketChannel) key.channel();
         StringBuffer sBuf = ((DoubleBuffer) key.attachment()).getReadBuffer();
@@ -83,13 +84,20 @@ public class EchoSelectorProtocol implements TCPProtocol, Writeable {
         	line=sBuf.toString();
         	sBuf.delete(0, sBuf.length());
         	//System.out.print("READ:"+bytesRead+" "+line);
-        	if(isServer(channel)){
-        		//SERVER
-        		/*for(String s: line.split("\r\n")){
-        			proxyMap.get(clientMap.get(channel)).proxyServer(s.concat("\r\n"));
-    			}*/
-        		proxyMap.get(clientMap.get(channel)).proxyServer(line);
-        	}else{
+        	if(isServer(channel))
+				try {
+					{
+						//SERVER
+						/*for(String s: line.split("\r\n")){
+							proxyMap.get(clientMap.get(channel)).proxyServer(s.concat("\r\n"));
+						}*/
+						proxyMap.get(clientMap.get(channel)).proxyServer(line);
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			else{
         		//CLIENT
         		//TODO turbio
         		//if(serverMap.get(channel)==null){

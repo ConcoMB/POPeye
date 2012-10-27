@@ -14,13 +14,13 @@ import proxy.transform.MailTransformer;
 public class Mail {
 
 	private static final String FROM = "From:", DATE="Date: ", MULTIPART= "Content-Type: multipart", CONTENTTYPE="Content-Type: ",
-			TEXT="Content-Type: text/plain", CTE= "Content-Transfer-Encoding: ", PIC="Content-Type: image";
+			TEXT="Content-Type: text/plain", CTE= "Content-Transfer-Encoding: ", PIC="Content-Type: image", CONTENTDISP="Content-Disposition: ";
 
 	private String date ; 
 //	private String subject; // "Subject: ";
 	private String from;
 	private int fromLine;
-	private Set<String> contentTypes = new HashSet<String>();
+	private Set<String> contentTypes = new HashSet<String>(), contentDispositions = new HashSet<String>();
 	private int bodyIndex, bodyEnd;
 	private List<MailImage> photos = new ArrayList<MailImage>();
 	private String message="";
@@ -104,12 +104,22 @@ public class Mail {
 					image.endLine=i-1;
 					//photo+=m[i];
 					photos.add(image);
+				}else{
+					i++;
+					if(m[i].startsWith(CONTENTDISP)){
+						String disp = m[i].split(CONTENTDISP)[1];
+						disp=disp.split(";")[0];
+						contentDispositions.add(disp);
+					}
 				}
 			}
 		}
 	}
 	
 	
+	public Set<String> getContentDispositions(){
+		return contentDispositions;
+	}
 	private String parseMonth(String string) {
 		if(string.equals("Jan")){
 			return "01";
@@ -159,10 +169,10 @@ public class Mail {
 			m += line + '\n';
 		}
 		Mail mail = new Mail(m);
-		MailTransformer t = new AnonimousTransformer();
-		t.transform(mail);
+//		MailTransformer t = new AnonimousTransformer();
+//		t.transform(mail);
 		mail.print();
-		System.out.println(mail.message);
+		//System.out.println(mail.message);
 	}
 	
 	private void print(){
@@ -182,6 +192,9 @@ public class Mail {
 			for(int i=p.startLine; i<p.endLine; i++){
 				System.out.println(s[i]);
 			}
+		}
+		for(String r: contentDispositions){
+			System.out.println(r);
 		}
 	}
 
@@ -280,5 +293,24 @@ public class Mail {
 			mi.endLine--;
 			mi.startLine--;
 		}
+	}
+
+
+	public int getSize() {
+		return message.length();
+	}
+
+
+	public Set<String> getContentTypes() {
+		return contentTypes;
+	}
+
+
+	public String getFrom() {
+		return from;
+	}
+	
+	public String getDate(){
+		return date;
 	}
 }

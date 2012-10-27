@@ -101,10 +101,18 @@ public class Configuration {
 			e.eraseMaxSize(val);
 			break;
 		case ERASE_ATTACHMENT:
+			if(!val.equals("1") || !val.equals("0") || !val.equals("-1")){
+				//EROR
+			}else{
 			e.eraseAttachment(val);
+			}
 			break;
 		case ERASE_PICTURE:
+			if(!val.equals("1") || !val.equals("0") || !val.equals("-1")){
+				//EROR
+			}else{
 			e.erasePicture(val);
+			}
 			break;
 		}
 
