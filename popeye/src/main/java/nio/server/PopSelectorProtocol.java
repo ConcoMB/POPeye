@@ -50,6 +50,7 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
     }
     
     private void connectToServer(SocketChannel clntChan, String serverName) throws IOException{
+    	System.out.println("Server:"+serverName+" port:"+defaultPort);
     	SocketChannel hostChan = SocketChannel.open(new InetSocketAddress(serverName, defaultPort));
 		hostChan.configureBlocking(false); // Must be nonblocking to register
 		System.out.println("Creating connection ->"+hostChan.socket().getRemoteSocketAddress());
@@ -94,10 +95,10 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
         	//System.out.print("READ:"+bytesRead+" "+line);
         	if(isServer(channel)){
         		//SERVER
-        		/*for(String s: line.split("\r\n")){
+        		for(String s: line.split("\r\n")){
         			proxyMap.get(clientMap.get(channel)).proxyServer(s.concat("\r\n"));
-    			}*/
-        		proxyMap.get(clientMap.get(channel)).proxyServer(line);
+    			}
+        		//proxyMap.get(clientMap.get(channel)).proxyServer(line);
         	}else{
         		//CLIENT
         		//TODO turbio
@@ -116,10 +117,10 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
         			}
         		}else{
         			//NORMAL FLOW
-        			/*for(String s: line.split("\r\n")){
+        			for(String s: line.split("\r\n")){
         				proxyMap.get(channel).proxyClient(s.concat("\r\n"));
-        			}*/
-        			proxyMap.get(channel).proxyClient(line);
+        			}
+        			//proxyMap.get(channel).proxyClient(line);
         		}
         	}
         }
@@ -173,10 +174,10 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 	}
 	
 	private void writeToChannel(SocketChannel channel, String line) throws InterruptedException, IOException{
-		ExternalAppExecuter appExec=appMap.get(channel);
+		/*ExternalAppExecuter appExec=appMap.get(channel);
 		if(appExec!=null){
 			line=appExec.execute(line);
-		}
+		}*/
 		SelectionKey key=channel.keyFor(selector);
 		StringBuffer sBuf=((DoubleBuffer) key.attachment()).getWriteBuffer();
 		String before=sBuf.toString();

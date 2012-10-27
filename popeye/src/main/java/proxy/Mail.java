@@ -37,17 +37,18 @@ public class Mail {
 	}
 	
 	public void add(String s){
-		message+=(s+"\n");
+		message+=(s);
 	}
 	
 
 	
 	public void parse(){
 		boolean flag=false;
-		String[] m = message.split("\n");
+		String[] m = message.split("\r\n");
 		Set<String> bounds = new HashSet<String>();
 		for(int i=0; i<m.length; i++){
 			if(m[i].startsWith(FROM)){
+				while(!m[i].contains("<")){i++;}
 				from = m[i].split("<")[1].split(">")[0];
 				fromLine=i;
 			}else if(m[i].startsWith(DATE)){
@@ -60,7 +61,7 @@ public class Mail {
 				contentTypes.add(m[i].split(CONTENTTYPE)[1]);
 				if(m[i].startsWith(MULTIPART)){
 					String b;
-					if(!m[i].contains("boundary")){
+					while(!m[i].contains("boundary")){
 						i++;
 					}
 					b = m[i].split("boundary=")[1];
@@ -313,4 +314,5 @@ public class Mail {
 	public String getDate(){
 		return date;
 	}
+
 }
