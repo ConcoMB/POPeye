@@ -43,6 +43,7 @@ public class POPeye {
 	private String userName;
 	private BufferedWriter log;
 	private SocketChannel client;
+	private String mailToDelete;
 
 
 	private Mail mail = new Mail();
@@ -157,7 +158,8 @@ public class POPeye {
 			}catch(Exception e){
 				//ERROR
 			}
-			out.writeToServer(client, "RETR "+command[1]+"\r\n");			
+			out.writeToServer(client, "RETR "+command[1]);
+			mailToDelete=command[1].trim();
 			log.write(userName + "requested DELE of mail "+ command[1]+", checking permissions...\n");
 			lastCommand=com;
 			break;
@@ -273,17 +275,17 @@ public class POPeye {
 			break;
 		case DELE:
 			mail.add(line);
-			if(line.equals(END)){
+			if(line.equals(END+"\r\n")){
 				mail.parse();
 				if(!canErase(mail)){
 					log.write("Permission to erase dennied\n");
 					out.writeToClient(client, ERR+" POPeye says you can't erase that!\n");
-					users.get(user).getStats().addErsaseFailure();
+					user.getStats().addErsaseFailure();
 				}else{
 					log.write("Marking mail as deleted\n");
-					users.get(user).getStats().eraseEmail();
-					out.writeToServer(client, line);
-					lastCommand=Command.DELE;
+					user.getStats().eraseEmail();
+					out.writeToServer(client, "DELE "+mailToDelete+"\r\n");
+					lastCommand=Command.UNKNOWN;
 				}
 				mail=new Mail();
 			}

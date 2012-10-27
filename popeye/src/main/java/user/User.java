@@ -31,6 +31,7 @@ public class User {
 		transformers.add(AnonymousTransformer.getInstance());
 
 		transformers.add(VowelTransformer.getInstance());
+		eraseConditions.eraseAttachment("1");
 	}
 	
 //	public User(String name,Statistics stats, String server, QuantityDenial quantityDenial,

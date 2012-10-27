@@ -87,11 +87,15 @@ public class EraseConditions {
 				|| (maxSize != 0 && size > maxSize)) {
 			return false;
 		}
+		System.out.println(withAttachment);
+		for(String s:mail.getContentDispositions()){
+			System.out.println(s);
+		}
 		if (withAttachment == 1
-				&& !mail.getContentDispositions().contains("attachment")) {
+				&& mail.getContentDispositions().contains("attachment")) {
 			return false;
 		} else if (withAttachment == -1
-				&& mail.getContentDispositions().contains("attachment")) {
+				&& !mail.getContentDispositions().contains("attachment")) {
 			return false;
 		}
 		if (withPicture == 1 && mail.getImages().size() == 0) {
