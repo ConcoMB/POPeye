@@ -250,11 +250,13 @@ public class POPeye {
 			mail.add(line);
 			if(line.equals(END+"\r\n")){
 				mail.parse();
+				System.out.println("parsing---");
 				log.write("Transforming mail\n");
 				
 				int bytes = mail.getSize();
 				for(MailTransformer t: user.getTransformers()){
 					t.transform(mail);
+					System.out.println("cubeta de agua!!");
 				}
 				//TODO bytes
 				log.write(bytes+" bytes transferred\n");

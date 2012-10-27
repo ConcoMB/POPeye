@@ -6,7 +6,7 @@ import java.text.ParseException;
 
 import proxy.POPeye;
 import proxy.Writeable;
-import proxy.transform.AnonimousTransformer;
+import proxy.transform.AnonymousTransformer;
 import proxy.transform.ImageRotationTransformer;
 import proxy.transform.VowelMailTransformer;
 import user.EraseConditions;
@@ -23,7 +23,7 @@ public class Brutus {
 	enum Variable{
 		MINHOUR, MAXHOUR, QUANT, SERVER, ERASE_DATE, ERASE_FROM,
 		ERASE_CONTENTTYPE, ERASE_MINSIZE, ERASE_MAXSIZE, ERASE_ATTACHMENT,
-		ERASE_PICTURE, BLOCK_IP, SET_ANONIMOUS_T, SET_VOWELS_T, SET_IMAGE_T;
+		ERASE_PICTURE, BLOCK_IP, ANONYMOUS_T, VOWELS_T, IMAGE_T;
 	}
 
 	public Brutus(Writeable out, SocketChannel channel) {
@@ -140,21 +140,21 @@ public class Brutus {
 					e.erasePicture(val);
 				}
 				break;
-			case SET_ANONIMOUS_T:
+			case ANONYMOUS_T:
 				if(val.equals("1")){
-					user.addTransformer(AnonimousTransformer.getInstance());
+					user.addTransformer(AnonymousTransformer.getInstance());
 				}else if(val.equals("0")){
-					user.removeTransformer(AnonimousTransformer.getInstance());
+					user.removeTransformer(AnonymousTransformer.getInstance());
 				}
 				break;
-			case SET_IMAGE_T:
+			case IMAGE_T:
 				if(val.equals("1")){
 					user.addTransformer(ImageRotationTransformer.getInstance());
 				}else if(val.equals("0")){
 					user.removeTransformer(ImageRotationTransformer.getInstance());
 				}
 				break;
-			case SET_VOWELS_T:
+			case VOWELS_T:
 				if(val.equals("1")){
 					user.addTransformer(VowelMailTransformer.getInstance());
 				}else if(val.equals("0")){

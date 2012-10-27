@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import proxy.transform.AnonimousTransformer;
+import proxy.transform.AnonymousTransformer;
 import proxy.transform.MailTransformer;
 
 public class Mail {
@@ -70,11 +70,10 @@ public class Mail {
 					}
 					bounds.add(b);
 				}else if (m[i].startsWith(TEXT)){
-					i++;
-					if(m[i+1].startsWith(CTE)){
+					while(!m[i].equals("")){
 						i++;
 					}
-					bodyIndex=i;
+					bodyIndex=++i;
 					flag=false;
 					while(!flag && i<m.length && !m[i].equals("--=20")){
 						for(String b: bounds){

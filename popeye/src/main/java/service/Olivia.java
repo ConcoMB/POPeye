@@ -5,7 +5,7 @@ import java.nio.channels.SocketChannel;
 
 import proxy.POPeye;
 import proxy.Writeable;
-import proxy.transform.AnonimousTransformer;
+import proxy.transform.AnonymousTransformer;
 import proxy.transform.ImageRotationTransformer;
 import proxy.transform.VowelMailTransformer;
 import service.Brutus.Variable;
@@ -173,14 +173,14 @@ public class Olivia {
 						writeSimple("mustn't have pictures");
 					}
 					break;
-				case SET_ANONIMOUS_T:
-					writeSimple(user.getTransformers().contains(AnonimousTransformer.getInstance())?"yes":"no");
+				case ANONYMOUS_T:
+					writeSimple(user.getTransformers().contains(AnonymousTransformer.getInstance())?"yes":"no");
 					break;
-				case SET_IMAGE_T:
+				case IMAGE_T:
 					writeSimple(user.getTransformers().contains(ImageRotationTransformer.getInstance())?"yes":"no");
 
 					break;
-				case SET_VOWELS_T:
+				case VOWELS_T:
 					writeSimple(user.getTransformers().contains(VowelMailTransformer.getInstance())?"yes":"no");
 					break;
 				default:

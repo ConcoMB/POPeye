@@ -3,8 +3,9 @@ package user;
 import java.util.HashSet;
 import java.util.Set;
 
-import proxy.transform.AnonimousTransformer;
+import proxy.transform.AnonymousTransformer;
 import proxy.transform.MailTransformer;
+import proxy.transform.VowelMailTransformer;
 
 public class User {
 
@@ -23,6 +24,8 @@ public class User {
 		hourDenial=new HourDenial();
 		quantityDenial=new QuantityDenial();
 		eraseConditions=new EraseConditions();
+		
+		transformers.add(VowelMailTransformer.getInstance());
 	}
 	
 //	public User(String name,Statistics stats, String server, QuantityDenial quantityDenial,
