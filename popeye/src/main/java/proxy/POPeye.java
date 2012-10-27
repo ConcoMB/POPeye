@@ -47,7 +47,6 @@ public class POPeye {
 
 	private Mail mail = new Mail();
 	private int mailNum, topLines;
-	
 	private final static String defaultServer = "pop3.alu.itba.edu.ar";
 
 	public POPeye(Writeable out, SocketChannel client) throws IOException{
@@ -72,12 +71,15 @@ public class POPeye {
 			//decir q todo mal al cli:
 			return null;
 		}
-		userName=command[1];
 		log.write("User "+userName+" attempting to connect\n");
 		//		if(users.containsKey(userName)){
 		//			user=users.get(userName);
 		//		}else{
-		user =loadUser();
+		user =users.get(command[1]);
+		if(user==null){
+			user=new User(command[1]);
+			users.put(command[1], user);
+		}
 		//			users.put(userName, user);
 		//		}
 
@@ -214,7 +216,6 @@ public class POPeye {
 		switch(lastCommand){
 		case USER:	
 			if(line.startsWith(OK)){
-				//users.get(user).addSuccessfulAccess();
 				log.write("OK!\n");
 			}else if(line.startsWith(ERR)){
 				user.getStats().addAccessFailure();
@@ -287,7 +288,7 @@ public class POPeye {
 			break;
 		case TOP:
 			if(line.equals(END)){
-				log.write("top\n");
+				log.write("top con mail "+ mailNum +" cant lineas "+ topLines +"\n");
 				lastCommand=null;
 			}
 			out.writeToClient(client, line);
@@ -311,7 +312,7 @@ public class POPeye {
 			}
 			out.writeToClient(client, line);
 			log.write(" closing connections...\n");
-			closeConnections();
+			//closeConnections();
 			break;
 		default:
 		case UNKNOWN:
@@ -324,87 +325,6 @@ public class POPeye {
 	
 	}
 
-	private void closeConnections() throws IOException{
-		saveStatistics();
-		user=null;
-		//TODO
-	}
-
-
-
-
-	private void end() throws IOException{
-		log.close();
-	}
-
-	private String loadServer(String user) throws IOException{
-		Properties properties=new Properties();
-		try {
-			InputStream is= getClass().getClassLoader().getResourceAsStream("./servers.properties");
-			properties.load(is);
-		} catch (IOException ex) {
-			ex.printStackTrace();
-			throw new IOException();
-		}
-		return properties.getProperty(user);
-	}
-
-	private Statistics loadStatistics(String name) throws IOException {
-		BufferedReader stt;
-		try{
-			stt = new BufferedReader(new FileReader("./statistics_"+name+".txt"));
-		}catch(FileNotFoundException e){
-			return null;
-		}
-		Statistics s=  new Statistics(stt.readLine());
-		stt.close();
-		return s;
-	}
-
-	private void saveStatistics() throws IOException{
-		BufferedWriter stt = new BufferedWriter(new FileWriter("./statistics_"+userName+".txt"));
-		stt.write(user.getStats().getFullStatistics());
-		stt.close();
-	}
-
-	private User loadUser() throws IOException{
-		Statistics stats = loadStatistics(userName);
-		//String server = loadServer(userName);
-		String server=null;
-		QuantityDenial quantityDenial= loadQuantityDenial(userName);
-		HourDenial hourDenial = loadHourDenial(userName);
-		EraseConditions eraseConds=null; //= loadEraseConditions(userName);
-		return new User(userName, stats, server, quantityDenial, hourDenial, eraseConds);
-	}
-
-
-
-	private HourDenial loadHourDenial(String name) throws IOException {
-		BufferedReader b;
-		try{
-			b = new BufferedReader(new FileReader("./hourDenial_"+name+".txt"));
-		}catch(FileNotFoundException e){
-			return null;
-		}
-		HourDenial d=  new HourDenial(b.readLine());
-		b.close();
-		return d;
-	}
-
-
-
-	private QuantityDenial loadQuantityDenial(String name) throws NumberFormatException, IOException {
-		BufferedReader b;
-		try{
-			b = new BufferedReader(new FileReader("./quantityDenial_"+name+".txt"));
-		}catch(FileNotFoundException e){
-			return null;
-		}
-		QuantityDenial d=  new QuantityDenial(Integer.valueOf(b.readLine()));
-		b.close();
-		return d;
-	}
-
 	public User getCurrentUser() {
 		return user;
 	}
@@ -413,7 +333,13 @@ public class POPeye {
 		return userName;
 	}
 
-	public User getUserByName(String string) {
+	public static User getUserByName(String string) {
 		return users.get(string);
 	}
+	
+	public static void addUser(User user){
+		users.put(user.getName(), user);
+	}
+	
+	
 }

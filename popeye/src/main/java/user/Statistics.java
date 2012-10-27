@@ -10,15 +10,15 @@ public class Statistics {
 		
 	}
 	
-	public Statistics(String s){
-		String[] split= s.split(",");
-		successfulAccesses=Integer.valueOf(split[0]); 
-		bytesTransferred= Integer.valueOf(split[1]);
-		emailsRead=Integer.valueOf(split[2]);
-		emailsErased=Integer.valueOf(split[3]);
-		accessFailures=Integer.valueOf(split[4]);
-		eraseFailures=Integer.valueOf(split[5]);
-	}
+//	public Statistics(String s){
+//		String[] split= s.split(",");
+//		successfulAccesses=Integer.valueOf(split[0]); 
+//		bytesTransferred= Integer.valueOf(split[1]);
+//		emailsRead=Integer.valueOf(split[2]);
+//		emailsErased=Integer.valueOf(split[3]);
+//		accessFailures=Integer.valueOf(split[4]);
+//		eraseFailures=Integer.valueOf(split[5]);
+//	}
 	public int getSuccessfulAccesses() {
 		return successfulAccesses;
 	}

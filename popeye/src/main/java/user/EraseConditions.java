@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 import proxy.Mail;
@@ -14,7 +15,7 @@ public class EraseConditions {
 
 	private Date dateExactCondition;
 
-	private Set<String> from, contentTypes;
+	private Set<String> from = new HashSet<String>(), contentTypes= new HashSet<String>();
 
 	private int minSize, maxSize;
 

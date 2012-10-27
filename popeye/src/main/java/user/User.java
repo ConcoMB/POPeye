@@ -15,18 +15,18 @@ public class User {
 		stats=new Statistics();
 	}
 	
-	public User(String name,Statistics stats, String server, QuantityDenial quantityDenial,
-			HourDenial hourDenial, EraseConditions eraseConditions) {
-		this.stats = stats;
-		if(stats==null){
-			this.stats=new Statistics();
-		}
-		this.name=name;
-		this.server = server;
-		this.quantityDenial = quantityDenial;
-		this.hourDenial = hourDenial;
-		this.eraseConditions = eraseConditions;
-	}
+//	public User(String name,Statistics stats, String server, QuantityDenial quantityDenial,
+//			HourDenial hourDenial, EraseConditions eraseConditions) {
+//		this.stats = stats;
+//		if(stats==null){
+//			this.stats=new Statistics();
+//		}
+//		this.name=name;
+//		this.server = server;
+//		this.quantityDenial = quantityDenial;
+//		this.hourDenial = hourDenial;
+//		this.eraseConditions = eraseConditions;
+//	}
 	
 	
 	public Statistics getStats() {
