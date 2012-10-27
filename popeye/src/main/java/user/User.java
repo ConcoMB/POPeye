@@ -27,8 +27,8 @@ public class User {
 		hourDenial=new HourDenial();
 		quantityDenial=new QuantityDenial();
 		eraseConditions=new EraseConditions();
-		transformers.add(ImageRotationTransformer.getInstance());
-//		transformers.add(AnonymousTransformer.getInstance());
+//		transformers.add(ImageRotationTransformer.getInstance());
+		transformers.add(AnonymousTransformer.getInstance());
 
 		transformers.add(VowelTransformer.getInstance());
 	}

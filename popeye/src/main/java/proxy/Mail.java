@@ -295,11 +295,22 @@ public class Mail {
 	
 	private char[] shift(char[] m , int cant, int index){
 		char[] ans = new char[m.length+cant];
+		if(cant>0){
 		for(int i=0; i<index; i++){
 			ans[i]=m[i];
 		}
 		for(int i=index; i<m.length; i++){
 			ans[i+cant]=m[i];
+		}
+		}else if(cant<0){
+			for(int i=0; i<index+cant; i++){
+				ans[i]=m[i];
+			}
+			for(int i=index; i<ans.length; i++){
+				ans[i+cant]=m[i];
+			}
+		}else{
+			ans=m;
 		}
 		return ans;
 	}
