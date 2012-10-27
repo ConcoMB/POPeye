@@ -8,7 +8,7 @@ import proxy.POPeye;
 import proxy.Writeable;
 import proxy.transform.AnonymousTransformer;
 import proxy.transform.ImageRotationTransformer;
-import proxy.transform.VowelMailTransformer;
+import proxy.transform.VowelTransformer;
 import user.EraseConditions;
 import user.HourDenial;
 import user.QuantityDenial;
@@ -156,9 +156,9 @@ public class Brutus {
 				break;
 			case VOWELS_T:
 				if(val.equals("1")){
-					user.addTransformer(VowelMailTransformer.getInstance());
+					user.addTransformer(VowelTransformer.getInstance());
 				}else if(val.equals("0")){
-					user.removeTransformer(VowelMailTransformer.getInstance());
+					user.removeTransformer(VowelTransformer.getInstance());
 				}
 				break;
 			default:

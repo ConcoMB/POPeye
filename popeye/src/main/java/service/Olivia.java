@@ -7,7 +7,7 @@ import proxy.POPeye;
 import proxy.Writeable;
 import proxy.transform.AnonymousTransformer;
 import proxy.transform.ImageRotationTransformer;
-import proxy.transform.VowelMailTransformer;
+import proxy.transform.VowelTransformer;
 import service.Brutus.Variable;
 import user.Statistics;
 import user.User;
@@ -181,7 +181,7 @@ public class Olivia {
 
 					break;
 				case VOWELS_T:
-					writeSimple(user.getTransformers().contains(VowelMailTransformer.getInstance())?"yes":"no");
+					writeSimple(user.getTransformers().contains(VowelTransformer.getInstance())?"yes":"no");
 					break;
 				default:
 					//ERROR;
