@@ -14,6 +14,9 @@ import user.User;
 
 public class Olivia {
 
+	
+	//TODO esto aca?
+	
 	private int bytesTransferred;
 	private int successfulConnections, connections;
 	private SocketChannel channel;

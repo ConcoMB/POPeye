@@ -26,7 +26,7 @@ public class BrutusSelectorProtocol implements SelectorProtocol, Writeable {
         clntChan.configureBlocking(false); // Must be nonblocking to register
         // Register the selector with new channel for read and attach byte
         // buffer
-        System.out.println("BLUTO: Accepted connection ->"+clntChan.socket().getRemoteSocketAddress());
+        System.out.println("BRUTUS: Accepted connection ->"+clntChan.socket().getRemoteSocketAddress());
         configMap.put(clntChan, new Brutus(this,clntChan));
         clntChan.register(key.selector(), SelectionKey.OP_READ, new DoubleBuffer(bufSize));
     }
@@ -39,7 +39,7 @@ public class BrutusSelectorProtocol implements SelectorProtocol, Writeable {
         long bytesRead = channel.read(buf);
         buf.flip();
         if (bytesRead == -1) { // Did the other end close?
-    		System.out.println("BLUTO: Client disconnected:"+channel.socket().getRemoteSocketAddress());
+    		System.out.println("BRUTUS: Client disconnected:"+channel.socket().getRemoteSocketAddress());
         	disconnectClient(channel);
         } else if (bytesRead > 0) {
         	String line=BufferUtils.bufferToString(buf);
@@ -48,7 +48,7 @@ public class BrutusSelectorProtocol implements SelectorProtocol, Writeable {
         		return;
         	}
         	line=sBuf.toString();
-        	System.out.println("BLUTO: C--> "+line);
+        	System.out.println("BRUTUS: C--> "+line);
         	sBuf.delete(0, sBuf.length());
         	//System.out.print("READ:"+bytesRead+" "+line);
         	configMap.get(channel).apply(line.trim());
@@ -86,7 +86,7 @@ public class BrutusSelectorProtocol implements SelectorProtocol, Writeable {
 
 	public void writeToClient(SocketChannel client, String line) throws IOException, InterruptedException {
 		String message=line.length()>30?line.substring(0, 30)+"...\n":line;
-		System.out.print("BLUTO: S--> "+message);
+		System.out.print("BRUTUS: S--> "+message);
 		writeToChannel(client,line);
 	}
 
