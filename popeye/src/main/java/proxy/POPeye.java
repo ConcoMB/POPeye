@@ -248,8 +248,9 @@ public class POPeye {
 			out.writeToClient(client,line);
 			break;
 		case RETR:
+			System.out.print("Line: "+line);
 			mail.add(line);
-			if(line.equals(END)){
+			if(line.equals(END+"\r\n")){
 				mail.parse();
 				log.write("Transforming mail\n");
 				
@@ -259,9 +260,9 @@ public class POPeye {
 				}
 				//TODO bytes
 				log.write(bytes+" bytes transferred\n");
-				out.writeToClient(client, mail.toString());
-				users.get(user).getStats().addBytes(bytes);
-				users.get(user).getStats().readEmail();
+				out.writeToClient(client, mail.getMessage());
+				user.getStats().addBytes(bytes);
+				user.getStats().readEmail();
 				mail=new Mail();
 			}
 			break;

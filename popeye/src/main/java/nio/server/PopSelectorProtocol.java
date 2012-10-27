@@ -92,13 +92,13 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
         	}
         	line=sBuf.toString();
         	sBuf.delete(0, sBuf.length());
-        	System.out.print("READ:"+bytesRead+" "+line);
+        	//System.out.print("READ:"+bytesRead+" "+line);
         	if(isServer(channel)){
         		//SERVER
-        		/*for(String s: line.split("\r\n")){
+        		for(String s: line.split("\r\n")){
         			proxyMap.get(clientMap.get(channel)).proxyServer(s.concat("\r\n"));
-    			}*/
-        		proxyMap.get(clientMap.get(channel)).proxyServer(line);
+    			}
+        		//proxyMap.get(clientMap.get(channel)).proxyServer(line);
         	}else{
         		//CLIENT
         		//TODO turbio
@@ -117,10 +117,10 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
         			}
         		}else{
         			//NORMAL FLOW
-        			/*for(String s: line.split("\r\n")){
+        			for(String s: line.split("\r\n")){
         				proxyMap.get(channel).proxyClient(s.concat("\r\n"));
-        			}*/
-        			proxyMap.get(channel).proxyClient(line);
+        			}
+        			//proxyMap.get(channel).proxyClient(line);
         		}
         	}
         }

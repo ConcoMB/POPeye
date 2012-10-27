@@ -37,7 +37,7 @@ public class Mail {
 	}
 	
 	public void add(String s){
-		message+=(s+"\n");
+		message+=(s);
 	}
 	
 
@@ -313,4 +313,5 @@ public class Mail {
 	public String getDate(){
 		return date;
 	}
+
 }
