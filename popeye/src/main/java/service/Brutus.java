@@ -149,7 +149,9 @@ public class Brutus {
 				break;
 			case IMAGE_T:
 				if(val.equals("1")){
+					System.out.println(user.getTransformers().size());
 					user.addTransformer(ImageRotationTransformer.getInstance());
+					System.out.println(user.getTransformers().size());
 				}else if(val.equals("0")){
 					user.removeTransformer(ImageRotationTransformer.getInstance());
 				}

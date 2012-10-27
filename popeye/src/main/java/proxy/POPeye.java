@@ -75,7 +75,8 @@ public class POPeye {
 		//		if(users.containsKey(userName)){
 		//			user=users.get(userName);
 		//		}else{
-		user =users.get(command[1]);
+		user =users.get(command[1].trim());
+		System.out.println("usuario:("+command[1]+")");
 		if(user==null){
 			user=new User(command[1]);
 			users.put(command[1], user);
@@ -254,9 +255,10 @@ public class POPeye {
 				log.write("Transforming mail\n");
 				
 				int bytes = mail.getSize();
+				System.out.println("transformadores:"+user.getTransformers().size());
 				for(MailTransformer t: user.getTransformers()){
 					t.transform(mail);
-					System.out.println("cubeta de agua!!");
+					System.out.println("cubeta de agua!!"+t);
 				}
 				//TODO bytes
 				log.write(bytes+" bytes transferred\n");
