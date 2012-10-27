@@ -9,7 +9,7 @@ import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 
 import proxy.Writeable;
-import statistics.Olivia;
+import service.Olivia;
 
 public class OliviaSelectorProtocol implements SelectorProtocol, Writeable {
     private int bufSize; // Size of I/O buffer

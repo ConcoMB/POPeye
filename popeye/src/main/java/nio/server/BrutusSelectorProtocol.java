@@ -9,7 +9,7 @@ import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 
 import proxy.Writeable;
-import configuration.Brutus;
+import service.Brutus;
 
 public class BrutusSelectorProtocol implements SelectorProtocol, Writeable {
     private int bufSize; // Size of I/O buffer

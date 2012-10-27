@@ -97,7 +97,7 @@ public class Mail {
 					MailImage image = new MailImage();
 					image.startLine=i;
 					//String photo="";
-					while(i<m.length && !m[i].contains("--")){
+					while(i<m.length && !m[i].contains("--") && !m[i].equals("")){
 						//photo+=m[i];
 						i++;
 					}

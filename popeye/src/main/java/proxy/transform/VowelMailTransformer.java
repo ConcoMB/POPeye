@@ -5,6 +5,9 @@ import proxy.Mail;
 
 public class VowelMailTransformer implements MailTransformer {
 
+	private static VowelMailTransformer t;
+	
+	private VowelMailTransformer(){}
 	
 	public void transform(Mail mail) {
 		char[] string = mail.getMessage().toCharArray();
@@ -37,6 +40,13 @@ public class VowelMailTransformer implements MailTransformer {
 			}
 		}
 		mail.setMessage(new String(string));
+	}
+
+	public static VowelMailTransformer getInstance() {
+		if(t==null){
+			t=new VowelMailTransformer();
+		}
+		return t;
 	}
 
 }

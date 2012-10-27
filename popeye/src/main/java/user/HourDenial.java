@@ -7,13 +7,30 @@ import java.util.Date;
 public class HourDenial implements Denial{
 
 	private int minHour, minMinute, maxHour, maxMinute;
-	
-	private void init(int minHour, int minMinute, int maxHour, int maxMinute) {
-		this.minHour = minHour;
-		this.minMinute = minMinute;
-		this.maxHour = maxHour;
-		this.maxMinute = maxMinute;
+
+	public int getMinHour() {
+		return minHour;
 	}
+
+
+
+	public int getMinMinute() {
+		return minMinute;
+	}
+
+
+
+	public int getMaxHour() {
+		return maxHour;
+	}
+
+
+
+	public int getMaxMinute() {
+		return maxMinute;
+	}
+
+
 
 	public boolean isBlocked() {
 		Date now = new Date();

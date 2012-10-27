@@ -23,6 +23,38 @@ public class EraseConditions {
 
 	// o Algun patron sobre cabeceras (Ejemplo: List-Id eq// <foo.example.org>)
 
+	public Date getDateLimitFrom() {
+		return dateLimitFrom;
+	}
+
+	public Date getDateExactCondition() {
+		return dateExactCondition;
+	}
+
+	public Set<String> getFrom() {
+		return from;
+	}
+
+	public Set<String> getContentTypes() {
+		return contentTypes;
+	}
+
+	public int getMinSize() {
+		return minSize;
+	}
+
+	public int getMaxSize() {
+		return maxSize;
+	}
+
+	public char getWithAttachment() {
+		return withAttachment;
+	}
+
+	public char getWithPicture() {
+		return withPicture;
+	}
+
 	public EraseConditions() {
 		// DEFAULT VALUES?
 	}

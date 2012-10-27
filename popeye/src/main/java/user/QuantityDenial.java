@@ -42,8 +42,12 @@ public class QuantityDenial implements Denial{
 		return quantity>=top;
 	}
 
-	public void setQuantity(int val) {
+	public void setTop(int val) {
 		quantity=val;		
+	}
+	
+	public int getTop(){
+		return top;
 	}
 	
 	

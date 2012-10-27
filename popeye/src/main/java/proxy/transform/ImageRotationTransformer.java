@@ -18,6 +18,12 @@ import proxy.Mail.MailImage;
 
 public class ImageRotationTransformer implements MailTransformer{
 
+	private static ImageRotationTransformer t;
+	
+	private ImageRotationTransformer(){
+		
+	}
+	
 	/** TEST METHOD
 	public static void main(String args[]){
 		ImageRotationTransformer imt = new ImageRotationTransformer();
@@ -100,6 +106,13 @@ public class ImageRotationTransformer implements MailTransformer{
 		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR);
 		BufferedImage outputImage =new BufferedImage(image.getHeight(), image.getWidth(), image.getType());
 		return op.filter(image, outputImage);
+	}
+
+	public static ImageRotationTransformer getInstance() {
+		if(t==null){
+			t=new ImageRotationTransformer();
+		}
+		return t;
 	}
 
 }

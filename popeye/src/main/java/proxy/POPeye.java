@@ -38,7 +38,6 @@ public class POPeye {
 	private Writeable out;
 	private Command lastCommand;
 
-	private Set<MailTransformer> transformers = new HashSet<MailTransformer>();
 	//private Map<String, User> users;
 	private User user;
 	private String userName;
@@ -101,7 +100,6 @@ public class POPeye {
 
 	public void proxyClient(String line) throws IOException, InterruptedException {
 		//out.write(welcomeLine.getBytes());
-		String user;
 		String command[] = line.split(" ");
 		Command com;
 		try{
@@ -254,7 +252,7 @@ public class POPeye {
 				log.write("Transforming mail\n");
 				
 				int bytes = mail.getSize();
-				for(MailTransformer t: transformers){
+				for(MailTransformer t: user.getTransformers()){
 					t.transform(mail);
 				}
 				//TODO bytes

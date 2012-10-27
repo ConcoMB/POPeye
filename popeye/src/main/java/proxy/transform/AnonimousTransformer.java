@@ -4,6 +4,10 @@ import proxy.Mail;
 
 public class AnonimousTransformer implements MailTransformer {
 	
+	private static AnonimousTransformer t;
+	
+	private AnonimousTransformer(){}
+	
 	public void transform(Mail mail) {
 		String[] message = mail.getMessage().split("\n");
 		String m ="";
@@ -18,6 +22,13 @@ public class AnonimousTransformer implements MailTransformer {
 		//System.out.println(s);
 		mail.setMessage(m);
 		mail.eraseFrom();
+	}
+
+	public static MailTransformer getInstance() {
+		if(t==null){
+			t=new AnonimousTransformer();
+		}
+		return t;
 	}
 
 }

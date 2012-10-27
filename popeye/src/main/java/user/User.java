@@ -1,5 +1,11 @@
 package user;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import proxy.transform.AnonimousTransformer;
+import proxy.transform.MailTransformer;
+
 public class User {
 
 	private Statistics stats;
@@ -7,6 +13,7 @@ public class User {
 	private QuantityDenial quantityDenial;
 	private HourDenial hourDenial;
 	private EraseConditions eraseConditions;
+	private Set<MailTransformer> transformers = new HashSet<MailTransformer>();
 	
 	public User(){}
 	
@@ -90,6 +97,18 @@ public class User {
 	// If change default to another server
 	public void setServer(String val) {
 		server = val;
+	}
+
+	public void addTransformer(MailTransformer t) {
+		transformers.add(t);
+	}
+	
+	public Set<MailTransformer> getTransformers(){
+		return transformers;
+	}
+
+	public void removeTransformer(MailTransformer t) {
+		transformers.remove(t);
 	}
 	
 }
