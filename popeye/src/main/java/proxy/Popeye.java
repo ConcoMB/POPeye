@@ -22,7 +22,7 @@ import user.QuantityDenial;
 import user.Statistics;
 import user.User;
 
-public class POPeye {
+public class Popeye {
 
 	private static Set<String> blockedIPs = new HashSet<String>();
 	private static Map<String, User> users = new HashMap<String, User>();
@@ -52,7 +52,7 @@ public class POPeye {
 
 	private final static String defaultServer = "pop.aol.com";
 
-	public POPeye(Writeable out, SocketChannel client) throws IOException{
+	public Popeye(Writeable out, SocketChannel client) throws IOException{
 		this.client=client;
 		this.out=out;
 		log = new BufferedWriter(new FileWriter("./log.txt"));
@@ -83,7 +83,7 @@ public class POPeye {
 		System.out.println("usuario:("+userName+")");
 		if(user==null){
 			user=new User(userName);
-			users.put(command[1], user);
+			users.put(userName, user);
 		}
 		//			users.put(userName, user);
 		//		}
@@ -234,7 +234,8 @@ public class POPeye {
 				state=State.TRANSACTION;
 				user.addSuccessfulAccess();
 			}else if(line.startsWith(ERR)){
-				user.getStats().addAccessFailure();
+				if(user!=null)
+					user.getStats().addAccessFailure();
 				user=null;
 			}
 			out.writeToClient(client, line);	
@@ -285,8 +286,8 @@ public class POPeye {
 					log.write("Marking mail as deleted\n");
 					user.getStats().eraseEmail();
 					out.writeToServer(client, "DELE "+mailToDelete+"\r\n");
-					lastCommand=Command.UNKNOWN;
 				}
+				lastCommand=Command.UNKNOWN;
 				mail=new Mail();
 			}
 			break;

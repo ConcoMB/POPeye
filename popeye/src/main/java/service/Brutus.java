@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.text.ParseException;
 
-import proxy.POPeye;
+import proxy.Popeye;
 import proxy.Writeable;
 import proxy.transform.AnonymousTransformer;
 import proxy.transform.ImageRotationTransformer;
@@ -14,23 +14,18 @@ import user.HourDenial;
 import user.QuantityDenial;
 import user.User;
 
-public class Brutus {
+public class Brutus extends Service{
 
-	private final static String OK=":)", ERROR=":(";
-	
-	private SocketChannel channel;
-	private Writeable out;
 	private User user;
 
-	enum Variable{
+	enum BrutusVariable{
 		MINHOUR, MAXHOUR, QUANT, SERVER, ERASE_DATE, ERASE_FROM,
 		ERASE_CONTENTTYPE, ERASE_MINSIZE, ERASE_MAXSIZE, ERASE_ATTACHMENT,
 		ERASE_PICTURE, BLOCK_IP, ANONYMOUS_T, VOWELS_T, IMAGE_T;
 	}
 
 	public Brutus(Writeable out, SocketChannel channel) {
-		this.out = out;
-		this.channel = channel;
+		super(out, channel);
 	}
 
 	public void apply(String command) throws IOException, InterruptedException{
@@ -44,31 +39,31 @@ public class Brutus {
 		}
 
 		if (!spl[1].equals("GENERAL")) {
-			user = POPeye.getUserByName(spl[1]);
+			user = Popeye.getUserByName(spl[1]);
 			if(user == null){
 				user = new User(spl[1]);
 			}
-			POPeye.addUser(user);
+			Popeye.addUser(user);
 		}
-		Variable v;
+		BrutusVariable v;
 		String val;
 		try{
 			val=spl[5].toString();
-			v=Variable.valueOf(spl[3]);
+			v=BrutusVariable.valueOf(spl[3]);
 		}catch(Exception e){
-			error("invalid variable");
+			invalidConfig();
 			return;
 		}
 
 		if (user == null) {
 			switch(v){
 			case BLOCK_IP:
-				POPeye.blockIP(val);
+				Popeye.blockIP(val);
 				break;
 			default:
 				//ERROR
-				error("invalid variable");
-				break;
+				invalidConfig();
+				return;
 			}
 		}else{
 			EraseConditions e = user.getEraseConditions();
@@ -83,7 +78,7 @@ public class Brutus {
 				m = Integer.valueOf(s[1]);
 				if(!validateHour(h) || ! validateMin(m)){
 					//ERROR
-					error("invalid time format");
+					invalidConfig();
 					return;
 				}else{
 					hd.setMinHour(h);
@@ -95,9 +90,8 @@ public class Brutus {
 				h = Integer.valueOf(s2[0]);
 				m = Integer.valueOf(s2[1]);
 				if(!validateHour(h) || ! validateMin(m)){
-					error("invalid time format");
+					invalidConfig();
 					return;
-					//ERROR
 				}else{
 					hd.setMaxHour(h);
 					hd.setMaxMinute(h);
@@ -114,7 +108,7 @@ public class Brutus {
 				try {
 					e.eraseOnDate(val);
 				} catch (ParseException e1) {
-					error("invalid date format");
+					invalidConfig();
 					return;
 				}
 				break;
@@ -122,7 +116,7 @@ public class Brutus {
 				try {
 					e.eraseFromDate(val);
 				} catch (ParseException e2) {
-					error("invalid date format");
+					invalidConfig();
 					return;
 				}
 				break;
@@ -138,7 +132,7 @@ public class Brutus {
 			case ERASE_ATTACHMENT:
 				if(!val.equals("1") || !val.equals("0") || !val.equals("-1")){
 					//EROR
-					error("invalid value");
+					invalidConfig();
 					return;
 				}else{
 					e.eraseAttachment(val);
@@ -147,7 +141,7 @@ public class Brutus {
 			case ERASE_PICTURE:
 				if(!val.equals("1") || !val.equals("0") || !val.equals("-1")){
 					//EROR
-					error("invalid value");
+					invalidConfig();
 					return;
 				}else{
 					e.erasePicture(val);
@@ -177,11 +171,12 @@ public class Brutus {
 				}
 				break;
 			default:
-				error("invalid variable");
-				break;
+				//ERROR
+				invalidConfig();
+				return;
 			}
 		}
-
+		writeOK();
 	}
 
 	private boolean validateMin(int i){
@@ -197,12 +192,4 @@ public class Brutus {
 		return true;
 	}
 
-	private void invalidConfig() throws IOException, InterruptedException {
-		// TODO Auto-generated method stub
-		error("invalid config");
-	}
-	
-	public void error(String message) throws IOException, InterruptedException{
-		out.writeToClient(channel, ERROR+" "+message+"\r\n");
-	}
 }
