@@ -47,7 +47,8 @@ public class POPeye {
 
 	private Mail mail = new Mail();
 	private int mailNum, topLines;
-	private final static String defaultServer = "pop3.alu.itba.edu.ar";
+	//private final static String defaultServer = "pop3.alu.itba.edu.ar";
+	private final static String defaultServer = "pop.aol.com";
 
 	public POPeye(Writeable out, SocketChannel client) throws IOException{
 		this.client=client;
@@ -75,10 +76,11 @@ public class POPeye {
 		//		if(users.containsKey(userName)){
 		//			user=users.get(userName);
 		//		}else{
-		user =users.get(command[1].trim());
-		System.out.println("usuario:("+command[1]+")");
+		userName=command[1].trim();
+		user =users.get(userName);
+		System.out.println("usuario:("+userName+")");
 		if(user==null){
-			user=new User(command[1]);
+			user=new User(userName);
 			users.put(command[1], user);
 		}
 		//			users.put(userName, user);
