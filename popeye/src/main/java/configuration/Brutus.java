@@ -102,7 +102,7 @@ public class Brutus {
 				}
 				break;
 			case QUANT: 
-				q.setQuantity(Integer.valueOf(val));
+				q.setTop(Integer.valueOf(val));
 				break;
 			case SERVER: 
 				user.setServer(val);
