@@ -5,6 +5,8 @@ import java.util.Set;
 
 import javax.imageio.ImageTranscoder;
 
+import nio.server.ExternalAppExecuter;
+
 import proxy.transform.AnonymousTransformer;
 import proxy.transform.ImageRotationTransformer;
 import proxy.transform.MailTransformer;
@@ -18,6 +20,7 @@ public class User {
 	private HourDenial hourDenial;
 	private EraseConditions eraseConditions;
 	private Set<MailTransformer> transformers = new HashSet<MailTransformer>();
+	private ExternalAppExecuter app;
 	
 	public User(){}
 	
@@ -32,7 +35,7 @@ public class User {
 //		transformers.add(VowelTransformer.getInstance());
 		//quantityDenial.setTop(1);
 		//hourDenial.setMaxMinute(5);
-		eraseConditions.erasePicture("1");
+
 	}
 	
 //	public User(String name,Statistics stats, String server, QuantityDenial quantityDenial,
@@ -112,4 +115,15 @@ public class User {
 		transformers.remove(t);
 	}
 	
+	public void setApp(String path){
+		app=new ExternalAppExecuter(path);
+	}
+	
+	public void unsetApp(){
+		app=null;
+	}
+	
+	public ExternalAppExecuter getApp(){
+		return app;
+	}
 }

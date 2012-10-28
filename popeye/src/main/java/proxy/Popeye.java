@@ -1,25 +1,17 @@
 package proxy;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.channels.SocketChannel;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
+import nio.server.ExternalAppExecuter;
 import proxy.transform.MailTransformer;
-import user.EraseConditions;
-import user.HourDenial;
-import user.QuantityDenial;
-import user.Statistics;
 import user.User;
 
 public class Popeye {
@@ -43,6 +35,7 @@ public class Popeye {
 	private String userName;
 	private BufferedWriter log;
 	private SocketChannel client;
+	private String mailToDelete;
 
 
 	private Mail mail = new Mail();
@@ -157,7 +150,8 @@ public class Popeye {
 			}catch(Exception e){
 				//ERROR
 			}
-			out.writeToServer(client, "RETR "+command[1]+"\r\n");			
+			out.writeToServer(client, "RETR "+command[1]);
+			mailToDelete=command[1].trim();
 			log.write(userName + "requested DELE of mail "+ command[1]+", checking permissions...\n");
 			lastCommand=com;
 			break;
@@ -266,7 +260,17 @@ public class Popeye {
 				}
 				//TODO bytes
 				log.write(bytes+" bytes transferred\n");
-				out.writeToClient(client, mail.getMessage());
+				ExternalAppExecuter app=user.getApp();
+				String message=mail.getMessage();
+				if(app!=null){
+					try{
+						message=app.execute(message);
+					}catch(IOException e){
+						//TODO
+						System.out.println("app: \""+app.getPath()+"\" not found");
+					}
+				}
+				out.writeToClient(client, message);
 				user.getStats().addBytes(bytes);
 				user.getStats().readEmail();
 				mail=new Mail();
@@ -274,18 +278,18 @@ public class Popeye {
 			break;
 		case DELE:
 			mail.add(line);
-			if(line.equals(END)){
+			if(line.equals(END+"\r\n")){
 				mail.parse();
 				if(!canErase(mail)){
 					log.write("Permission to erase dennied\n");
 					out.writeToClient(client, ERR+" POPeye says you can't erase that!\n");
-					users.get(user).getStats().addErsaseFailure();
+					user.getStats().addErsaseFailure();
 				}else{
 					log.write("Marking mail as deleted\n");
-					users.get(user).getStats().eraseEmail();
-					out.writeToServer(client, line);
-					lastCommand=Command.DELE;
+					user.getStats().eraseEmail();
+					out.writeToServer(client, "DELE "+mailToDelete+"\r\n");
 				}
+				lastCommand=Command.UNKNOWN;
 				mail=new Mail();
 			}
 			break;
