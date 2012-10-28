@@ -39,6 +39,7 @@ public class ImageRotationTransformer implements MailTransformer{
 	public void transform(Mail mail) {
 		String message = mail.getMessage();
 		List<String> list = new ArrayList<String>();
+		System.out.println("images to rotate: "+mail.getImages().size());
 		for(MailImage mi: mail.getImages()){
 			String rotated = imageRotation(mail.getImage(mi));
 			list.add(rotated);
@@ -96,26 +97,21 @@ public class ImageRotationTransformer implements MailTransformer{
 	    return Base64.decodeBase64(s);
 	}
 	public String encodeBase64(byte[] b) {
-	    String s = Base64.encodeBase64String(b);
-	    System.out.println(s);
-	    return s;
+	    return Base64.encodeBase64String(b);
 	}
 
 	public static BufferedImage rotateImage(BufferedImage image, double angle) {
 		AffineTransform tx = new AffineTransform();
-		System.out.println("1");
-		tx.translate(image.getHeight()/2, image.getWidth()/2);
-		System.out.println("2");
+		tx.translate(image.getWidth()/2, image.getHeight()/2);
 
 		tx.rotate(Math.PI); // 1 radians (180 degrees)
-		System.out.println("3");
 
 		// first - center image at the origin so rotate works OK
 		tx.translate(-image.getWidth()/2,-image.getHeight()/2);
-		System.out.println("4");
 
 		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR);
-		BufferedImage outputImage =new BufferedImage(image.getHeight(), image.getWidth(), image.getType());
+		System.out.println("height: "+image.getHeight()+" width: "+image.getWidth());
+		BufferedImage outputImage =new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
 		return op.filter(image, outputImage);
 	}
 
