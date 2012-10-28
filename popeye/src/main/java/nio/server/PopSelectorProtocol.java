@@ -21,7 +21,6 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 	private Map<SocketChannel,SocketChannel> clientMap=new HashMap<SocketChannel,SocketChannel>();
 	private Map<SocketChannel,SocketChannel> serverMap=new HashMap<SocketChannel,SocketChannel>();
 	private Map<SocketChannel,Popeye> proxyMap=new HashMap<SocketChannel,Popeye>();
-	private Map<SocketChannel,ExternalAppExecuter> appMap=new HashMap<SocketChannel,ExternalAppExecuter>();
 	private Map<SocketChannel, Boolean> connection = new HashMap<SocketChannel, Boolean>();
 	private Selector selector;
 
@@ -62,7 +61,6 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 		System.out.println("host:"+hostChan);
 		clientMap.put(hostChan, clntChan);
 		serverMap.put(clntChan, hostChan);
-		appMap.put(clntChan, new ExternalAppExecuter("/home/fede/git/POPeye/apps/toUpper.o"));
 	}
 
 	private boolean isServer(SocketChannel channel){
@@ -181,10 +179,6 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 	}
 
 	private void writeToChannel(SocketChannel channel, String line) throws InterruptedException, IOException{
-		/*ExternalAppExecuter appExec=appMap.get(channel);
-		if(appExec!=null){
-			line=appExec.execute(line);
-		}*/
 		SelectionKey key=channel.keyFor(selector);
 		StringBuffer sBuf=((DoubleBuffer) key.attachment()).getWriteBuffer();
 		String before=sBuf.toString();

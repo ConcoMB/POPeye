@@ -1,25 +1,17 @@
 package proxy;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.channels.SocketChannel;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
+import nio.server.ExternalAppExecuter;
 import proxy.transform.MailTransformer;
-import user.EraseConditions;
-import user.HourDenial;
-import user.QuantityDenial;
-import user.Statistics;
 import user.User;
 
 public class Popeye {
@@ -268,7 +260,17 @@ public class Popeye {
 				}
 				//TODO bytes
 				log.write(bytes+" bytes transferred\n");
-				out.writeToClient(client, mail.getMessage());
+				ExternalAppExecuter app=user.getApp();
+				String message=mail.getMessage();
+				if(app!=null){
+					try{
+						message=app.execute(message);
+					}catch(IOException e){
+						//TODO
+						System.out.println("app: \""+app.getPath()+"\" not found");
+					}
+				}
+				out.writeToClient(client, message);
 				user.getStats().addBytes(bytes);
 				user.getStats().readEmail();
 				mail=new Mail();

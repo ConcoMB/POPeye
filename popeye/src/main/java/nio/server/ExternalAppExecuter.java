@@ -4,18 +4,19 @@ import java.io.*;
 import java.util.*;
 
 public class ExternalAppExecuter {
-	private String app;
+	private ProcessBuilder builder;
+	private String path;
 	
-	public ExternalAppExecuter(String app){
-		this.app=app;
+	public ExternalAppExecuter(String path){
+		List<String> command = new ArrayList<String>();
+		command.add(path);
+		this.path=path;
+		//command.add("/A");
+
+		builder = new ProcessBuilder(command);
 	}
 	
 	public String execute(String mail) throws InterruptedException, IOException {
-		List<String> command = new ArrayList<String>();
-		command.add(app);
-		//command.add("/A");
-
-		ProcessBuilder builder = new ProcessBuilder(command);
 		// Map<String, String> environ = builder.environment();
 		//builder.directory(new File(System.getenv("temp")));
 
@@ -36,5 +37,9 @@ public class ExternalAppExecuter {
 			result.append((char)c);
 		}
 		return result.toString();
+	}
+
+	public String getPath() {
+		return path;
 	}
 }

@@ -3,6 +3,7 @@ package service;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 
+import nio.server.ExternalAppExecuter;
 import proxy.Popeye;
 import proxy.Writeable;
 import proxy.transform.AnonymousTransformer;
@@ -181,6 +182,14 @@ public class Olivia extends Service{
 					break;
 				case VOWELS_T:
 					writeSimple(user.getTransformers().contains(VowelTransformer.getInstance())?"yes":"no");
+					break;
+				case APP:
+					ExternalAppExecuter app=user.getApp();
+					if(app==null){
+						writeSimple("no application set for this user");
+					}else{
+						writeSimple("Application path: "+app.getPath());
+					}
 					break;
 				default:
 					//ERROR;

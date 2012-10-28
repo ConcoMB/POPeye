@@ -21,7 +21,7 @@ public class Brutus extends Service{
 	enum BrutusVariable{
 		MINHOUR, MAXHOUR, QUANT, SERVER, ERASE_DATE, ERASE_FROM,
 		ERASE_CONTENTTYPE, ERASE_MINSIZE, ERASE_MAXSIZE, ERASE_ATTACHMENT,
-		ERASE_PICTURE, BLOCK_IP, ANONYMOUS_T, VOWELS_T, IMAGE_T;
+		ERASE_PICTURE, BLOCK_IP, ANONYMOUS_T, VOWELS_T, IMAGE_T, APP;
 	}
 
 	public Brutus(Writeable out, SocketChannel channel) {
@@ -168,6 +168,13 @@ public class Brutus extends Service{
 					user.addTransformer(VowelTransformer.getInstance());
 				}else if(val.equals("0")){
 					user.removeTransformer(VowelTransformer.getInstance());
+				}
+				break;
+			case APP:
+				if(val.equals("0")){
+					user.unsetApp();
+				}else{
+					user.setApp(val);
 				}
 				break;
 			default:
