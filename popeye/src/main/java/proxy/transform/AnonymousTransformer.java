@@ -28,7 +28,7 @@ public class AnonymousTransformer implements MailTransformer {
 		s[index]="From: popeye <guess@who.com>\r";
 		String m = "";
 		for(String l:s){
-			m+=l+"\n";
+			m+=l+"\r\n";
 		}
 		mail.setMessage(m);
 	}

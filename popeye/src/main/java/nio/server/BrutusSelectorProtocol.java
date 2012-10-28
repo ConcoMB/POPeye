@@ -21,7 +21,7 @@ public class BrutusSelectorProtocol implements SelectorProtocol, Writeable {
         this.selector=selector;
     }
 
-    public void handleAccept(SelectionKey key) throws IOException {
+    public void handleAccept(SelectionKey key) throws IOException, InterruptedException {
         SocketChannel clntChan = ((ServerSocketChannel) key.channel()).accept();
         clntChan.configureBlocking(false); // Must be nonblocking to register
         // Register the selector with new channel for read and attach byte
@@ -29,6 +29,7 @@ public class BrutusSelectorProtocol implements SelectorProtocol, Writeable {
         System.out.println("BRUTUS: Accepted connection ->"+clntChan.socket().getRemoteSocketAddress());
         configMap.put(clntChan, new Brutus(this,clntChan));
         clntChan.register(key.selector(), SelectionKey.OP_READ, new DoubleBuffer(bufSize));
+        writeToClient(clntChan, ":) Brutus says hi\r\n");
     }
     
     public void handleRead(SelectionKey key) throws IOException, InterruptedException {

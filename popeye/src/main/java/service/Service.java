@@ -39,7 +39,7 @@ public abstract class Service {
 	}
 	
 	protected void invalidConfig(String s) throws IOException, InterruptedException{
-		out.writeToClient(channel, ERROR+" INVALID CONFIG\n");
+		out.writeToClient(channel, ERROR+" "+ s+"\r\n");
 		System.out.println(ERROR+" "+s);
 	}
 	

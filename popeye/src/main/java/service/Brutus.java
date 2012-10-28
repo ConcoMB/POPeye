@@ -32,13 +32,13 @@ public class Brutus extends Service{
 
 		// check correctness of command
 		String[] spl = command.split(" ");
-		if(spl.length<6 || !spl[0].equals("IN") ||
+		if(spl.length!=6 || !spl[0].equals("IN") ||
 				!spl[2].equals("SET") || !spl[4].equals("VALUE")){
 			invalidConfig();
 			return;
 		}
 
-		if (!spl[1].equals("GENERAL")) {
+		if (!spl[1].equals("GENER@L")) {
 			user = Popeye.getUserByName(spl[1]);
 			if(user == null){
 				user = new User(spl[1]);

@@ -21,7 +21,7 @@ public class OliviaSelectorProtocol implements SelectorProtocol, Writeable {
         this.selector=selector;
     }
 
-    public void handleAccept(SelectionKey key) throws IOException {
+    public void handleAccept(SelectionKey key) throws IOException, InterruptedException {
         SocketChannel clntChan = ((ServerSocketChannel) key.channel()).accept();
         clntChan.configureBlocking(false); // Must be nonblocking to register
         // Register the selector with new channel for read and attach byte
@@ -29,6 +29,7 @@ public class OliviaSelectorProtocol implements SelectorProtocol, Writeable {
         System.out.println("OLIVIA: Accepted connection ->"+clntChan.socket().getRemoteSocketAddress());
         providerMap.put(clntChan, new Olivia(this,clntChan));
         clntChan.register(key.selector(), SelectionKey.OP_READ, new DoubleBuffer(bufSize));
+        writeToClient(clntChan, ":) Olivia says hi\r\n");
     }
     
     public void handleRead(SelectionKey key) throws IOException, InterruptedException {

@@ -29,6 +29,9 @@ public class Olivia extends Service{
 
 	public void consult(String line) throws IOException, InterruptedException{
 		String[] command = line.split(" ");
+		if(command.length!=4){
+			invalidConfig();
+		}
 		String ans="";
 		OliviaCommand c;
 		BrutusVariable v = null;
@@ -47,7 +50,7 @@ public class Olivia extends Service{
 				return;
 			}
 		}
-		if(command[1].equals("GENERAL")){
+		if(command[1].equals("GENER@L")){
 			switch(c){
 			case BYTES:
 				writeSimple(bytesTransferred);
@@ -198,6 +201,7 @@ public class Olivia extends Service{
 		}
 	}
 	private void writeFullStats(Statistics stats) throws IOException, InterruptedException{
+		writeOK();
 		writeSimple("Connections: " + stats.getAccesses() );
 		writeSimple("Connections failed : " + stats.getAccessFailures() );
 		writeSimple("Bytes transferred: " + stats.getBytesTransferred() );
@@ -208,6 +212,7 @@ public class Olivia extends Service{
 	}
 
 	private void writeFullStats() throws IOException, InterruptedException{
+		writeOK();
 		writeSimple("Connections: " + connections);
 		writeSimple("Connections failed : " + successfulConnections);
 		writeSimple("Bytes transferred: " + bytesTransferred);

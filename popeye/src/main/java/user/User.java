@@ -27,10 +27,9 @@ public class User {
 		hourDenial=new HourDenial();
 		quantityDenial=new QuantityDenial();
 		eraseConditions=new EraseConditions();
-		//transformers.add(ImageRotationTransformer.getInstance());
-		transformers.add(AnonymousTransformer.getInstance());
-
-		transformers.add(VowelTransformer.getInstance());
+		transformers.add(ImageRotationTransformer.getInstance());
+//		transformers.add(AnonymousTransformer.getInstance());
+//		transformers.add(VowelTransformer.getInstance());
 		//quantityDenial.setTop(1);
 		//hourDenial.setMaxMinute(5);
 		eraseConditions.erasePicture("1");
