@@ -136,7 +136,7 @@ public class Olivia extends Service{
 					break;
 				case ERASE_FROM:
 					for(String s: user.getEraseConditions().getFrom()){
-						ans+=(s+"\n");
+						ans+=(s+" ");
 					}
 					if(ans.equals("")){
 						writeSimple("no conditions");
@@ -146,7 +146,7 @@ public class Olivia extends Service{
 					break;
 				case ERASE_CONTENTTYPE:
 					for(String s: user.getEraseConditions().getContentTypes()){
-						ans+=(s+"\n");
+						ans+=(s+" ");
 					}
 					if(ans.equals("")){
 						writeSimple("no conditions");
@@ -168,6 +168,16 @@ public class Olivia extends Service{
 						writeSimple("no conditions");
 					}else{
 						writeSimple("mustn't have attachment");
+					}
+					break;
+				case ERASE_HEADER:
+					for(String s: user.getEraseConditions().getGeneralHeaders()){
+						ans+=(s+" ");
+					}
+					if(ans.equals("")){
+						writeSimple("no conditions");
+					}else{
+						writeSimple(ans);
 					}
 					break;
 				case ERASE_PICTURE:

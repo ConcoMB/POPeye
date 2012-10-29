@@ -20,7 +20,7 @@ public class Brutus extends Service{
 
 	enum BrutusVariable{
 		MINHOUR, MAXHOUR, QUANT, SERVER, ERASE_DATE, ERASE_FROM,
-		ERASE_CONTENTTYPE, ERASE_MINSIZE, ERASE_MAXSIZE, ERASE_ATTACHMENT,
+		ERASE_CONTENTTYPE, ERASE_MINSIZE, ERASE_MAXSIZE, ERASE_ATTACHMENT, ERASE_HEADER,
 		ERASE_PICTURE, BLOCK_IP, ANONYMOUS_T, VOWELS_T, IMAGE_T, APP;
 	}
 
@@ -54,7 +54,7 @@ public class Brutus extends Service{
 		BrutusVariable v;
 		String val;
 		try{
-			val=spl[5].toString();
+			val=spl[5];
 			v=BrutusVariable.valueOf(spl[3]);
 		}catch(Exception e){
 			invalidConfig();
@@ -125,6 +125,9 @@ public class Brutus extends Service{
 					invalidConfig();
 					return;
 				}
+				break;
+			case ERASE_HEADER:
+				e.addHeader(val);
 				break;
 			case ERASE_CONTENTTYPE:
 				e.eraseContentType(val);

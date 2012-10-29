@@ -15,7 +15,8 @@ public class EraseConditions {
 
 	private Date dateExactCondition;
 
-	private Set<String> from = new HashSet<String>(), contentTypes= new HashSet<String>();
+	private Set<String> from = new HashSet<String>(), contentTypes= new HashSet<String>(),
+			generalHeaders = new HashSet<String>();
 
 	private int minSize, maxSize;
 
@@ -55,8 +56,11 @@ public class EraseConditions {
 		return withPicture;
 	}
 
+	public Set<String> getGeneralHeaders(){
+		return generalHeaders;
+	}
+	
 	public EraseConditions() {
-		// DEFAULT VALUES?
 	}
 
 	public boolean canErase(Mail mail) throws ParseException {
@@ -103,6 +107,11 @@ public class EraseConditions {
 		} else if (withPicture == -1 && mail.getImages().size() != 0) {
 			return false;
 		}
+		for(String header: generalHeaders){
+			if(mail.containsHeader(header)){
+				return false;
+			}
+		}
 		return true;
 	}
 
@@ -121,6 +130,10 @@ public class EraseConditions {
 
 	public void eraseMinSize(String val) {
 		minSize = Integer.valueOf(val);
+	}
+	
+	public void addHeader(String header){
+		generalHeaders.add(header);
 	}
 
 	public void eraseMaxSize(String val) {

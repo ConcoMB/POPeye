@@ -1,15 +1,12 @@
 package proxy;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import proxy.transform.MailTransformer;
-import proxy.transform.VowelTransformer;
 
 public class Mail {
 
@@ -38,11 +35,11 @@ public class Mail {
 	}
 
 	public void add(String s){
-//		if(message==null){
-//			message="";
-//		}else{
-			message+=(s);
-//		}
+		//		if(message==null){
+		//			message="";
+		//		}else{
+		message+=(s);
+		//		}
 	}
 
 
@@ -191,47 +188,32 @@ public class Mail {
 		}
 		return null;
 	}
-
-
-	public static void main(String[] args) throws IOException {
-		//		BufferedReader br = new BufferedReader(new FileReader("./mailexample.txt"));
-		//		String line;
-		//		String m="";
-		//		while((line=br.readLine())!=null){
-		//			m += line + '\n';
-		//		}
-		//		Mail mail = new Mail(m);
-		//		MailTransformer t = VowelTransformer.getInstance();
-		//		t.transform(mail);
-		//		mail.print();
-		//System.out.println(mail.message);
-		
-	}
-
-	private void print(){
-		//System.out.println("From: "+from);
-		System.out.println("date: " + date);
-		for(String s : contentTypes){
-			System.out.println("ct: "+s);
-		}
-		System.out.println("BODY");
-		printBody();
-		for(MailImage p: photos){
-			//			System.out.println("PHOTO");
-			//			System.out.println(p.startLine+" "+p.endLine);
-			String[] s = message.split("\n");
-			//			System.out.println(s[p.startLine]);
-			//			System.out.println(s[p.endLine]);
-			for(int i=p.startLine; i<p.endLine; i++){
-				System.out.println(s[i]);
-			}
-		}
-		for(String r: contentDispositions){
-			System.out.println(r);
-		}
-
-
-	}
+	//
+	//
+	//	private void print(){
+	//		//System.out.println("From: "+from);
+	//		System.out.println("date: " + date);
+	//		for(String s : contentTypes){
+	//			System.out.println("ct: "+s);
+	//		}
+	//		System.out.println("BODY");
+	//		printBody();
+	//		for(MailImage p: photos){
+	//			//			System.out.println("PHOTO");
+	//			//			System.out.println(p.startLine+" "+p.endLine);
+	//			String[] s = message.split("\n");
+	//			//			System.out.println(s[p.startLine]);
+	//			//			System.out.println(s[p.endLine]);
+	//			for(int i=p.startLine; i<p.endLine; i++){
+	//				System.out.println(s[i]);
+	//			}
+	//		}
+	//		for(String r: contentDispositions){
+	//			System.out.println(r);
+	//		}
+	//
+	//
+	//	}
 
 
 	public void printBody(){
@@ -380,4 +362,32 @@ public class Mail {
 		return htmlBeg;
 	}
 
+
+	public boolean containsHeader(String header) {
+		String[] s = message.split("\n");
+		for(String line:s){
+			if(line.equals("") || line.equals("\r")){
+				return false;
+			}
+			if(line.startsWith(header)){
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+	public static void main(String[] args) throws Exception {
+		BufferedReader br = new BufferedReader(new FileReader("./mailexample.txt"));
+		String line;
+		String m="";
+		while((line=br.readLine())!=null){
+			m += line + '\n';
+		}
+		Mail mail = new Mail(m);
+		System.out.println(mail.containsHeader("From:"));
+		System.out.println(mail.containsHeader("Received:"));
+		System.out.println(mail.containsHeader("Hi Conrado"));
+
+	}
 }
