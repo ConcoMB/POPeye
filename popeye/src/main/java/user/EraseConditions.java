@@ -19,7 +19,7 @@ public class EraseConditions {
 
 	private int minSize, maxSize;
 
-	private char withAttachment, withPicture;
+	private int withAttachment, withPicture;
 
 	// o Algun patron sobre cabeceras (Ejemplo: List-Id eq// <foo.example.org>)
 
@@ -47,11 +47,11 @@ public class EraseConditions {
 		return maxSize;
 	}
 
-	public char getWithAttachment() {
+	public int getWithAttachment() {
 		return withAttachment;
 	}
 
-	public char getWithPicture() {
+	public int getWithPicture() {
 		return withPicture;
 	}
 
@@ -87,11 +87,15 @@ public class EraseConditions {
 				|| (maxSize != 0 && size > maxSize)) {
 			return false;
 		}
+		System.out.println(withAttachment+":"+(withAttachment==1));
+		for(String s:mail.getContentDispositions()){
+			System.out.println(s);
+		}
 		if (withAttachment == 1
-				&& !mail.getContentDispositions().contains("attachment")) {
+				&& mail.getContentDispositions().contains("attachment")) {
 			return false;
 		} else if (withAttachment == -1
-				&& mail.getContentDispositions().contains("attachment")) {
+				&& !mail.getContentDispositions().contains("attachment")) {
 			return false;
 		}
 		if (withPicture == 1 && mail.getImages().size() == 0) {
@@ -128,11 +132,11 @@ public class EraseConditions {
 	}
 
 	public void eraseAttachment(String val) {
-		withAttachment = val.charAt(0);
+		withAttachment = Integer.valueOf(val);
 	}
 
 	public void erasePicture(String val) {
-		withPicture = val.charAt(0);
+		withPicture = Integer.valueOf(val);
 	}
 
 }

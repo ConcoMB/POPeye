@@ -21,14 +21,15 @@ public class OliviaSelectorProtocol implements SelectorProtocol, Writeable {
         this.selector=selector;
     }
 
-    public void handleAccept(SelectionKey key) throws IOException {
+    public void handleAccept(SelectionKey key) throws IOException, InterruptedException {
         SocketChannel clntChan = ((ServerSocketChannel) key.channel()).accept();
         clntChan.configureBlocking(false); // Must be nonblocking to register
         // Register the selector with new channel for read and attach byte
         // buffer
-        System.out.println("OLIVE: Accepted connection ->"+clntChan.socket().getRemoteSocketAddress());
+        System.out.println("OLIVIA: Accepted connection ->"+clntChan.socket().getRemoteSocketAddress());
         providerMap.put(clntChan, new Olivia(this,clntChan));
         clntChan.register(key.selector(), SelectionKey.OP_READ, new DoubleBuffer(bufSize));
+        writeToClient(clntChan, ":) Olivia says hi\r\n");
     }
     
     public void handleRead(SelectionKey key) throws IOException, InterruptedException {
@@ -39,7 +40,7 @@ public class OliviaSelectorProtocol implements SelectorProtocol, Writeable {
         long bytesRead = channel.read(buf);
         buf.flip();
         if (bytesRead == -1) { // Did the other end close?
-    		System.out.println("OLIVE: Client disconnected:"+channel.socket().getRemoteSocketAddress());
+    		System.out.println("OLIVIA: Client disconnected:"+channel.socket().getRemoteSocketAddress());
         	disconnectClient(channel);
         } else if (bytesRead > 0) {
         	String line=BufferUtils.bufferToString(buf);
@@ -48,7 +49,7 @@ public class OliviaSelectorProtocol implements SelectorProtocol, Writeable {
         		return;
         	}
         	line=sBuf.toString();
-        	System.out.println("OLIVE: C--> "+line);
+        	System.out.println("OLIVIA: C--> "+line);
         	sBuf.delete(0, sBuf.length());
         	//System.out.print("READ:"+bytesRead+" "+line);
         	providerMap.get(channel).consult(line.trim());
@@ -86,7 +87,7 @@ public class OliviaSelectorProtocol implements SelectorProtocol, Writeable {
 
 	public void writeToClient(SocketChannel client, String line) throws IOException, InterruptedException {
 		String message=line.length()>30?line.substring(0, 30)+"...\n":line;
-		System.out.print("OLIVE: S--> "+message);
+		System.out.print("OLIVIA: S--> "+message);
 		writeToChannel(client,line);
 	}
 

@@ -8,7 +8,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.text.ParseException;
 import java.util.Iterator;
 
-public class POPEyeServer {
+public class PopeyeServer {
 	private static final int BUFSIZE = 1024 * 1024; // Buffer size (bytes)
 	private static final int TIMEOUT = 3000; // Wait timeout (milliseconds)
 	private static final int defaultPort = 110;

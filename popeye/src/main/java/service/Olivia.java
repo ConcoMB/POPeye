@@ -3,58 +3,55 @@ package service;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 
-import proxy.POPeye;
+import nio.server.ExternalAppExecuter;
+import proxy.Popeye;
 import proxy.Writeable;
 import proxy.transform.AnonymousTransformer;
 import proxy.transform.ImageRotationTransformer;
 import proxy.transform.VowelTransformer;
-import service.Brutus.Variable;
+import service.Brutus.BrutusVariable;
 import user.Statistics;
 import user.User;
 
-public class Olivia {
-
-	
-	//TODO esto aca?
+public class Olivia extends Service{
 	
 	private int bytesTransferred;
 	private int successfulConnections, connections;
-	private SocketChannel channel;
-	private Writeable out;
-	private final static String OK=":)", ERROR=":(";
 
-	private enum Command{
+	private enum OliviaCommand{
 		BYTES, CONNECTIONS, FULL,SUCCESSFUL_CONNECTIONS, FAILED_CONNECTIONS, EMAILS_READ, EMAILS_ERASED, ERASE_FAILURES,
 		CHECK_VAR;
 	}
 
 	public Olivia(Writeable out, SocketChannel channel){
-		this.channel=channel;
-		this.out=out;
+		super(out, channel);
 	}
 
 
 	public void consult(String line) throws IOException, InterruptedException{
 		String[] command = line.split(" ");
+		if(command.length!=4){
+			invalidConfig();
+		}
 		String ans="";
-		Command c;
-		Variable v = null;
+		OliviaCommand c;
+		BrutusVariable v = null;
 		if(!command[0].equals("IN") || !command[2].equals("ASK")){
-			error("invalid command format");
+			invalidConfig();
 			return;
 		}
 		try{
-			c = Command.valueOf(command[3]);
+			c = OliviaCommand.valueOf(command[3]);
 		}catch(Exception e){
 			try{
-				v=Variable.valueOf(command[3]);
-				c=Command.CHECK_VAR;
+				v=BrutusVariable.valueOf(command[3]);
+				c=OliviaCommand.CHECK_VAR;
 			}catch(Exception e2){
-				error("invalid variable");
+				invalidConfig();				
 				return;
 			}
 		}
-		if(command[1].equals("GENERAL")){
+		if(command[1].equals("GENER@L")){
 			switch(c){
 			case BYTES:
 				writeSimple(bytesTransferred);
@@ -74,14 +71,14 @@ public class Olivia {
 
 			default:
 				//EROR
-				error("invalid variable");
+				invalidConfig();				
 				return;
 			}
 		}else{
-			User user = POPeye.getUserByName(command[1]);
+			User user = Popeye.getUserByName(command[1].trim());
 			if(user==null){
 				//ERROR
-				error("no info about user");
+				invalidConfig("no info about user");
 				return;
 			}
 			Statistics stats = user.getStats();
@@ -189,53 +186,45 @@ public class Olivia {
 				case VOWELS_T:
 					writeSimple(user.getTransformers().contains(VowelTransformer.getInstance())?"yes":"no");
 					break;
+				case APP:
+					ExternalAppExecuter app=user.getApp();
+					if(app==null){
+						writeSimple("no application set for this user");
+					}else{
+						writeSimple("Application path: "+app.getPath());
+					}
+					break;
 				default:
 					//ERROR;
-					error("invalid variable");
+					invalidConfig();					
 					break;
 				}
 				break;
 
 			default:
 				//EROR
-				error("invalid variable");
+				invalidConfig();				
 				return;	
 			}
 
 		}
 	}
-
-
-	public void writeSimple(int info) throws IOException, InterruptedException{
-		writeSimple(""+info);
-	}
-
-	public void writeSimple(String info) throws IOException, InterruptedException{
-		out.writeToClient(channel, info+"\n");
-	}
-
-	public void writeEndMultiline(){
-		//TODO
-	}
-
-	public void writeFullStats(Statistics stats) throws IOException, InterruptedException{
-		writeSimple("Connections: " + stats.getAccesses() +"\n");
-		writeSimple("Connections failed : " + stats.getAccessFailures() +"\n");
-		writeSimple("Bytes transferred: " + stats.getBytesTransferred() +"\n");
-		writeSimple("Emails erased: " + stats.getEmailsErased() +"\n");
-		writeSimple("Emails read: " + stats.getEmailsRead() +"\n");
-		writeSimple("Erase failures: " + stats.getEraseFailures() +"\n");
+	private void writeFullStats(Statistics stats) throws IOException, InterruptedException{
+		writeOK();
+		writeSimple("Connections: " + stats.getAccesses() );
+		writeSimple("Connections failed : " + stats.getAccessFailures() );
+		writeSimple("Bytes transferred: " + stats.getBytesTransferred() );
+		writeSimple("Emails erased: " + stats.getEmailsErased() );
+		writeSimple("Emails read: " + stats.getEmailsRead() );
+		writeSimple("Erase failures: " + stats.getEraseFailures() );
 		writeEndMultiline();
 	}
 
-	public void writeFullStats() throws IOException, InterruptedException{
-		writeSimple("Connections: " + connections +"\n");
-		writeSimple("Connections failed : " + successfulConnections +"\n");
-		writeSimple("Bytes transferred: " + bytesTransferred +"\n");
+	private void writeFullStats() throws IOException, InterruptedException{
+		writeOK();
+		writeSimple("Connections: " + connections);
+		writeSimple("Connections failed : " + successfulConnections);
+		writeSimple("Bytes transferred: " + bytesTransferred);
 		writeEndMultiline();
-	}
-	
-	public void error(String message) throws IOException, InterruptedException{
-		out.writeToClient(channel, ERROR+" "+message+"\r\n");
 	}
 }

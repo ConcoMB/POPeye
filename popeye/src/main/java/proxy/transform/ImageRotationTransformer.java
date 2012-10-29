@@ -43,6 +43,8 @@ public class ImageRotationTransformer implements MailTransformer{
 			String rotated = imageRotation(mail.getImage(mi));
 			list.add(rotated);
 		}
+		System.out.println("replace");
+
 		mail.replaceImages(list);
 	}
 	
@@ -58,9 +60,10 @@ public class ImageRotationTransformer implements MailTransformer{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+		System.out.println("image read");
 		BufferedImage outputImg =rotateImage(img,180);
-		
+		System.out.println("image rotated");
+
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		try {
 			ImageIO.write( outputImg, "jpg", bos);
@@ -83,7 +86,8 @@ public class ImageRotationTransformer implements MailTransformer{
 		}
 
 		byte[] o = bos.toByteArray();
-		
+		System.out.println("encode");
+
 		return encodeBase64(o);
 	
 	}
@@ -92,21 +96,29 @@ public class ImageRotationTransformer implements MailTransformer{
 	    return Base64.decodeBase64(s);
 	}
 	public String encodeBase64(byte[] b) {
-	    return Base64.encodeBase64String(b);
+	    String s = Base64.encodeBase64String(b);
+	    System.out.println(s);
+	    return s;
 	}
 
 	public static BufferedImage rotateImage(BufferedImage image, double angle) {
 		AffineTransform tx = new AffineTransform();
+		System.out.println("1");
 		tx.translate(image.getHeight()/2, image.getWidth()/2);
-		tx.rotate(Math.PI); // 1 radians (180 degrees)
+		System.out.println("2");
 		
+		tx.rotate(Math.PI); // 1 radians (180 degrees)
+		System.out.println("3");
+
 		// first - center image at the origin so rotate works OK
 		tx.translate(-image.getWidth()/2,-image.getHeight()/2);
-		
+		System.out.println("4");
+
 		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR);
 		BufferedImage outputImage =new BufferedImage(image.getHeight(), image.getWidth(), image.getType());
 		return op.filter(image, outputImage);
 	}
+	
 
 	public static ImageRotationTransformer getInstance() {
 		if(t==null){

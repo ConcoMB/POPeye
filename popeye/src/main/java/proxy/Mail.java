@@ -18,46 +18,50 @@ public class Mail {
 			CONTENTDISP="Content-Disposition: ", HTML="Content-Type: text/html";
 
 	private String date ; 
-//	private String subject; // "Subject: ";
-	private String from;
+	//	private String subject; // "Subject: ";
+	//private String from;
 	private int fromLine;
 	private Set<String> contentTypes = new HashSet<String>(), contentDispositions = new HashSet<String>();
 	private int bodyIndex, bodyEnd, htmlBeg, htmlEnd;
 	private List<MailImage> photos = new ArrayList<MailImage>();
 	private String message="";
-	
-	
+
+
 	public Mail(){
-		
+
 	}
-	
-	
+
+
 	public Mail(String message) {
 		this.message=message;
 		parse();
 	}
-	
-	public void add(String s){
-		message+=(s);
-	}
-	
 
-	
+	public void add(String s){
+//		if(message==null){
+//			message="";
+//		}else{
+			message+=(s);
+//		}
+	}
+
+
+
 	public void parse(){
 		boolean flag=false;
 		String[] m = message.split("\r\n");
 		Set<String> bounds = new HashSet<String>();
 		for(int i=0; i<m.length; i++){
 			if(m[i].startsWith(FROM)){
-				while(!m[i].contains("<")){i++;}
-				from = m[i].split("<")[1].split(">")[0];
+				//while(!m[i].contains("<")){i++;}
+				//from = m[i].split("<")[1].split(">")[0];
 				fromLine=i;
 			}else if(m[i].startsWith(DATE)){
 				String[] d2 = m[i].split(" ");
 				date = d2[2]+"/"+parseMonth(d2[3])+"/"+d2[4];
-//			}else if(nextBound!=null && m[i].equals("--"+nextBound)){
-//				bounds.add(nextBound);
-//				flag=true;
+				//			}else if(nextBound!=null && m[i].equals("--"+nextBound)){
+				//				bounds.add(nextBound);
+				//				flag=true;
 			}else if(m[i].startsWith(CONTENTTYPE)){
 				contentTypes.add(m[i].split(CONTENTTYPE)[1]);
 				if(m[i].startsWith(MULTIPART)){
@@ -125,8 +129,15 @@ public class Mail {
 					}
 					htmlEnd=i;
 				}else{
-					i++;
-					if(m[i].startsWith(CONTENTDISP)){
+					boolean cd=false;
+					if(m[i+1].startsWith(CONTENTDISP)){
+						i++;
+						cd=true;
+					}else if(m[i+2].startsWith(CONTENTDISP)){
+						i+=2;
+						cd=true;
+					}
+					if(cd){
 						String disp = m[i].split(CONTENTDISP)[1];
 						disp=disp.split(";")[0];
 						contentDispositions.add(disp);
@@ -135,8 +146,8 @@ public class Mail {
 			}
 		}
 	}
-	
-	
+
+
 	public Set<String> getContentDispositions(){
 		return contentDispositions;
 	}
@@ -180,23 +191,24 @@ public class Mail {
 		return null;
 	}
 
-	
+
 	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new FileReader("./mailexample.txt"));
-		String line;
-		String m="";
-		while((line=br.readLine())!=null){
-			m += line + '\n';
-		}
-		Mail mail = new Mail(m);
-		MailTransformer t = VowelTransformer.getInstance();
-		t.transform(mail);
-		mail.print();
+		//		BufferedReader br = new BufferedReader(new FileReader("./mailexample.txt"));
+		//		String line;
+		//		String m="";
+		//		while((line=br.readLine())!=null){
+		//			m += line + '\n';
+		//		}
+		//		Mail mail = new Mail(m);
+		//		MailTransformer t = VowelTransformer.getInstance();
+		//		t.transform(mail);
+		//		mail.print();
 		//System.out.println(mail.message);
+		
 	}
-	
+
 	private void print(){
-		System.out.println("From: "+from);
+		//System.out.println("From: "+from);
 		System.out.println("date: " + date);
 		for(String s : contentTypes){
 			System.out.println("ct: "+s);
@@ -204,11 +216,11 @@ public class Mail {
 		System.out.println("BODY");
 		printBody();
 		for(MailImage p: photos){
-//			System.out.println("PHOTO");
-//			System.out.println(p.startLine+" "+p.endLine);
+			//			System.out.println("PHOTO");
+			//			System.out.println(p.startLine+" "+p.endLine);
 			String[] s = message.split("\n");
-//			System.out.println(s[p.startLine]);
-//			System.out.println(s[p.endLine]);
+			//			System.out.println(s[p.startLine]);
+			//			System.out.println(s[p.endLine]);
 			for(int i=p.startLine; i<p.endLine; i++){
 				System.out.println(s[i]);
 			}
@@ -216,9 +228,11 @@ public class Mail {
 		for(String r: contentDispositions){
 			System.out.println(r);
 		}
+
+
 	}
 
-	
+
 	public void printBody(){
 		String[] s = message.split("\n");
 		for(int i = bodyIndex; i<bodyEnd; i++){
@@ -229,11 +243,11 @@ public class Mail {
 	public int getBodyIndex() {
 		return bodyIndex;
 	}
-	
+
 	public int getBodyEnd() {
 		return bodyEnd;
 	}
-	
+
 	public String getMessage(){
 		return message;
 	}
@@ -242,15 +256,15 @@ public class Mail {
 	public void setMessage(String message) {	
 		this.message=message;
 	}
-	
-	
+
+
 	public class MailImage{
 		private int startLine, endLine;
-		
+
 		public int getStartLine(){
 			return startLine;
 		}
-	
+
 		public int getEndLine(){
 			return endLine;
 		}
@@ -260,19 +274,42 @@ public class Mail {
 	public List<MailImage> getImages() {
 		return photos;
 	}
-	
+
 	public void replaceImages(List<String> newImages){
-		char[] newMessage = message.toCharArray();
-		int index, listIndex=0;
-		for(MailImage m : photos){
-			index=getIndexAtLine(m.startLine);
-			char[] image = newImages.get(listIndex++).toCharArray();
-			for(int j=0; j<image.length; j++, index++){
-				newMessage[index]=image[j];
+		String[] m = message.split("\n");
+		int i =0;
+		for(MailImage mi: photos){
+			m[mi.startLine]=newImages.get(i++);
+			shift(m, mi.startLine+1, mi.endLine);
+			int dif=mi.endLine-mi.startLine;
+			for(int j=i; j<newImages.size(); j++){
+				photos.get(j).endLine-=dif;
+				photos.get(j).startLine-=dif;
+			}
+			mi.endLine=mi.startLine;
+			for(int j=0; j<dif ;j++){
+				m[m.length-1-j]=null;
 			}
 		}
+		String newMessage="";
+		for(String s: m){
+			if(s==null){
+				break;
+			}
+			newMessage+=(s+"\n");
+		}
+		message=newMessage;
 	}
-	
+
+
+	private void shift(String[] mess, int from, int to) {
+		int dif= to-from+1;
+		for(int i = from ; i+dif<mess.length; i++){
+			mess[i]=mess[i+dif];
+		}
+	}
+
+
 	public int getIndexAtLine(int line){
 		char[] c = message.toCharArray();
 		int count = 0;
@@ -280,7 +317,7 @@ public class Mail {
 			if(c[i]=='\n'){
 				count++;
 				if(count==line){
-					return i;
+					return i+1;
 				}
 			}
 		}
@@ -295,18 +332,18 @@ public class Mail {
 			ans+=m[i];
 		}
 		return ans;
-		
+
 	}
 
 
 	public int getFromLine() {
 		return fromLine;
 	}
-	
-	
+
+
 	public void eraseFrom(){
 		fromLine=-1;
-		from="";
+		//from="";
 		bodyIndex--;
 		bodyEnd--;
 		for(MailImage mi : photos){
@@ -327,9 +364,9 @@ public class Mail {
 
 
 	public String getFrom() {
-		return from;
+		return message.split("\n")[fromLine];
 	}
-	
+
 	public String getDate(){
 		return date;
 	}
@@ -337,7 +374,7 @@ public class Mail {
 	public int getHTMLEnd() {
 		return htmlEnd;
 	}
-	
+
 	public int getHTMLIndex(){
 		return htmlBeg;
 	}

@@ -24,15 +24,19 @@ public class VowelTransformer implements MailTransformer {
 			for(i++; i<string.length && aux<end-beg ; i++){
 				switch(string[i]){
 				case 'a':
+				case 'A':
 					string[i]='4';
 					break;
 				case 'e':
+				case 'E':
 					string[i]='3';
 					break;
 				case 'i':
+				case 'I':
 					string[i]='1';
 					break;
 				case 'o':
+				case 'O':
 					string[i]='0';
 					break;
 				case '\n':
@@ -62,18 +66,22 @@ public class VowelTransformer implements MailTransformer {
 					inTag=false;
 					break;
 				case 'a':
+				case 'A':
 					if(!inTag)
 						string[i]='4';
 					break;
 				case 'e':
+				case 'E':
 					if(!inTag)
 						string[i]='3';
 					break;
 				case 'i':
+				case 'I':
 					if(!inTag)
 						string[i]='1';
 					break;
 				case 'o':
+				case 'O':
 					if(!inTag)
 						string[i]='0';
 					break;

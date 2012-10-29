@@ -5,6 +5,8 @@ import java.util.Set;
 
 import javax.imageio.ImageTranscoder;
 
+import nio.server.ExternalAppExecuter;
+
 import proxy.transform.AnonymousTransformer;
 import proxy.transform.ImageRotationTransformer;
 import proxy.transform.MailTransformer;
@@ -18,6 +20,7 @@ public class User {
 	private HourDenial hourDenial;
 	private EraseConditions eraseConditions;
 	private Set<MailTransformer> transformers = new HashSet<MailTransformer>();
+	private ExternalAppExecuter app;
 	
 	public User(){}
 	
@@ -29,8 +32,10 @@ public class User {
 		eraseConditions=new EraseConditions();
 		transformers.add(ImageRotationTransformer.getInstance());
 //		transformers.add(AnonymousTransformer.getInstance());
+//		transformers.add(VowelTransformer.getInstance());
+		//quantityDenial.setTop(1);
+		//hourDenial.setMaxMinute(5);
 
-		transformers.add(VowelTransformer.getInstance());
 	}
 	
 //	public User(String name,Statistics stats, String server, QuantityDenial quantityDenial,
@@ -83,16 +88,7 @@ public class User {
 	}
 
 	public boolean accessIsBlocked() {
-		if(hourDenial!=null && quantityDenial!=null){
-			return hourDenial.isBlocked() || quantityDenial.isBlocked();
-		}
-		if(hourDenial!=null){
-			return hourDenial.isBlocked();
-		}
-		if(quantityDenial!=null){
-			return quantityDenial.isBlocked();
-		}
-		return false;
+		return hourDenial.isBlocked() || quantityDenial.isBlocked();
 	}
 
 	public void addSuccessfulAccess() {
@@ -119,4 +115,15 @@ public class User {
 		transformers.remove(t);
 	}
 	
+	public void setApp(String path){
+		app=new ExternalAppExecuter(path);
+	}
+	
+	public void unsetApp(){
+		app=null;
+	}
+	
+	public ExternalAppExecuter getApp(){
+		return app;
+	}
 }

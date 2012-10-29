@@ -12,7 +12,7 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
-import proxy.POPeye;
+import proxy.Popeye;
 import proxy.Writeable;
 
 public class PopSelectorProtocol implements SelectorProtocol, Writeable {
@@ -20,8 +20,7 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 	private int defaultPort;
 	private Map<SocketChannel,SocketChannel> clientMap=new HashMap<SocketChannel,SocketChannel>();
 	private Map<SocketChannel,SocketChannel> serverMap=new HashMap<SocketChannel,SocketChannel>();
-	private Map<SocketChannel,POPeye> proxyMap=new HashMap<SocketChannel,POPeye>();
-	private Map<SocketChannel,ExternalAppExecuter> appMap=new HashMap<SocketChannel,ExternalAppExecuter>();
+	private Map<SocketChannel,Popeye> proxyMap=new HashMap<SocketChannel,Popeye>();
 	private Map<SocketChannel, Boolean> connection = new HashMap<SocketChannel, Boolean>();
 	private Selector selector;
 
@@ -36,13 +35,13 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 		String address=clntChan.socket().getRemoteSocketAddress().toString();
 		address=address.substring(1, address.indexOf(':'));
 		System.out.println(address);
-		if(!POPeye.isBlocked(address)){
+		if(!Popeye.isBlocked(address)){
 			clntChan.configureBlocking(false); // Must be nonblocking to register
 			// Register the selector with new channel for read and attach byte
 			// buffer
 			System.out.println("Accepted connection ->"+clntChan.socket().getRemoteSocketAddress());
 			clntChan.register(key.selector(), SelectionKey.OP_READ, new DoubleBuffer(bufSize));
-			proxyMap.put(clntChan, new POPeye(this,clntChan));
+			proxyMap.put(clntChan, new Popeye(this,clntChan));
 			connection.put(clntChan, true);
 			connectToServer(clntChan, "pop3.alu.itba.edu.ar");
 		}else{
@@ -62,7 +61,6 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 		System.out.println("host:"+hostChan);
 		clientMap.put(hostChan, clntChan);
 		serverMap.put(clntChan, hostChan);
-		appMap.put(clntChan, new ExternalAppExecuter("/home/fede/git/POPeye/apps/toUpper.o"));
 	}
 
 	private boolean isServer(SocketChannel channel){
@@ -111,7 +109,7 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 					String serverName=proxyMap.get(channel).login(line);
 					if(serverName==null){
 						//FAIL
-						writeToClient(channel, "-ERR");
+						writeToClient(channel, "-ERR\r\n");
 						return;
 					}else{
 						connection.put(channel, false);
@@ -181,10 +179,6 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 	}
 
 	private void writeToChannel(SocketChannel channel, String line) throws InterruptedException, IOException{
-		/*ExternalAppExecuter appExec=appMap.get(channel);
-		if(appExec!=null){
-			line=appExec.execute(line);
-		}*/
 		SelectionKey key=channel.keyFor(selector);
 		StringBuffer sBuf=((DoubleBuffer) key.attachment()).getWriteBuffer();
 		String before=sBuf.toString();
