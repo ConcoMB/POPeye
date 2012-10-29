@@ -96,6 +96,7 @@ public class ImageRotationTransformer implements MailTransformer{
 
 	public static BufferedImage rotateImage(BufferedImage image, double angle) {
 		AffineTransform tx = new AffineTransform();
+
 		tx.translate(image.getWidth()/2, image.getHeight()/2);
 
 		tx.rotate(Math.PI); // 1 radians (180 degrees)
@@ -108,6 +109,7 @@ public class ImageRotationTransformer implements MailTransformer{
 		BufferedImage outputImage =new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
 		return op.filter(image, outputImage);
 	}
+	
 
 	public static ImageRotationTransformer getInstance() {
 		if(t==null){
