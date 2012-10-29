@@ -41,9 +41,9 @@ public class Popeye {
 
 	private Mail mail = new Mail();
 	private int mailNum, topLines;
-	//private final static String defaultServer = "pop3.alu.itba.edu.ar";
+	private final static String defaultServer = "pop3.alu.itba.edu.ar";
 
-	private final static String defaultServer = "pop.aol.com";
+	//private final static String defaultServer = "pop.aol.com";
 
 	public Popeye(Writeable out, SocketChannel client) throws IOException{
 		this.client=client;
@@ -122,7 +122,7 @@ public class Popeye {
 			log.write(userName+" requested LIST");
 			out.writeToServer(client, line);
 			if(command.length==2){
-				command[1].trim();
+				command[1]=command[1].trim();
 				mailNum=Integer.valueOf(command[1]);
 				//lastCommand=LIST_MULTI;
 			}else{
@@ -173,8 +173,8 @@ public class Popeye {
 			}
 			log.write(userName + " requested TOP of mail "+ command[1]+ ", number of lines: "+ command[2]+ "\n");
 			out.writeToServer(client, line);		
-			command[1].trim();
-			command[2].trim();
+			command[1]=command[1].trim();
+			command[2]=command[2].trim();
 			mailNum=Integer.valueOf(command[1]);
 			topLines=Integer.valueOf(command[2]);
 			lastCommand=com;
@@ -186,7 +186,7 @@ public class Popeye {
 			log.write(userName + " requested UIDL\n");
 			out.writeToServer(client, line);
 			if(command.length==2){
-				command[1].trim();
+				command[1]=command[1].trim();
 				mailNum=Integer.valueOf(command[1]);
 				lastCommand=com;
 			}else{
