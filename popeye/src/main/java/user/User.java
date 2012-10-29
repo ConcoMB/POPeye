@@ -31,25 +31,13 @@ public class User {
 		quantityDenial=new QuantityDenial();
 		eraseConditions=new EraseConditions();
 		transformers.add(ImageRotationTransformer.getInstance());
-//		transformers.add(AnonymousTransformer.getInstance());
-//		transformers.add(VowelTransformer.getInstance());
+		transformers.add(AnonymousTransformer.getInstance());
+	transformers.add(VowelTransformer.getInstance());
 		//quantityDenial.setTop(1);
 		//hourDenial.setMaxMinute(5);
 
 	}
 	
-//	public User(String name,Statistics stats, String server, QuantityDenial quantityDenial,
-//			HourDenial hourDenial, EraseConditions eraseConditions) {
-//		this.stats = stats;
-//		if(stats==null){
-//			this.stats=new Statistics();
-//		}
-//		this.name=name;
-//		this.server = server;
-//		this.quantityDenial = quantityDenial;
-//		this.hourDenial = hourDenial;
-//		this.eraseConditions = eraseConditions;
-//	}
 	
 	
 	public Statistics getStats() {

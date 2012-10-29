@@ -11,7 +11,7 @@ public class AnonymousTransformer implements MailTransformer {
 	public void transform(Mail mail) {		
 		int index = mail.getFromLine();
 		String[] s = mail.getMessage().split("\n");
-		s[index]="From: popeye <guess@who.com>\r";
+		s[index]="From: Popeye's spinach <guess@who.com>\r";
 		String m = "";
 		for(String l:s){
 			m+=l+"\n";
@@ -26,4 +26,9 @@ public class AnonymousTransformer implements MailTransformer {
 		return t;
 	}
 
+	
+	@Override
+	public String toString() {
+		return "Anonymous Transformer";
+	}
 }

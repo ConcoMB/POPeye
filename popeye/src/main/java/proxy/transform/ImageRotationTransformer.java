@@ -37,14 +37,12 @@ public class ImageRotationTransformer implements MailTransformer{
 	 */
 
 	public void transform(Mail mail) {
-		String message = mail.getMessage();
 		List<String> list = new ArrayList<String>();
 		System.out.println("images to rotate: "+mail.getImages().size());
 		for(MailImage mi: mail.getImages()){
 			String rotated = imageRotation(mail.getImage(mi));
 			list.add(rotated);
 		}
-		System.out.println("replace");
 
 		mail.replaceImages(list);
 	}
@@ -61,33 +59,29 @@ public class ImageRotationTransformer implements MailTransformer{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("image read");
 		BufferedImage outputImg =rotateImage(img,180);
-		System.out.println("image rotated");
 
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		try {
 			ImageIO.write( outputImg, "jpg", bos);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return image;
 		}
 		try {
 			bos.flush();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return image;
 		}
-		byte[] imageInByte = bos.toByteArray();
 		try {
 			bos.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return image;
 		}
 
 		byte[] o = bos.toByteArray();
-		System.out.println("encode");
 
 		return encodeBase64(o);
 	
@@ -110,7 +104,7 @@ public class ImageRotationTransformer implements MailTransformer{
 		tx.translate(-image.getWidth()/2,-image.getHeight()/2);
 
 		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR);
-		System.out.println("height: "+image.getHeight()+" width: "+image.getWidth());
+		System.out.println("Height: "+image.getHeight()+" width: "+image.getWidth());
 		BufferedImage outputImage =new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
 		return op.filter(image, outputImage);
 	}
@@ -122,4 +116,9 @@ public class ImageRotationTransformer implements MailTransformer{
 		return t;
 	}
 
+	
+	@Override
+	public String toString() {
+		return "Image Rotation Transformer";
+	}
 }

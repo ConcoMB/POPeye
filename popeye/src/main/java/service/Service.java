@@ -10,7 +10,8 @@ public abstract class Service {
 
 	private SocketChannel channel;
 	private Writeable out;
-	private final static String OK=":)", ERROR=":(";
+	protected final static String OK=":)";
+	private static final String ERROR=":(";
 	
 	protected Service(Writeable out, SocketChannel channel){
 		this.channel=channel;
@@ -43,5 +44,8 @@ public abstract class Service {
 		System.out.println(ERROR+" "+s);
 	}
 	
-	
+	protected void byebye() throws IOException, InterruptedException{
+		writeSimple(OK+" byebye!");
+		channel.close();
+	}
 }
