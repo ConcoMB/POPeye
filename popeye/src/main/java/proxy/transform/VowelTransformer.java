@@ -100,5 +100,10 @@ public class VowelTransformer implements MailTransformer {
 		}
 		return t;
 	}
+	
+	@Override
+	public String toString() {
+		return "Vowel Transformer";
+	}
 
 }

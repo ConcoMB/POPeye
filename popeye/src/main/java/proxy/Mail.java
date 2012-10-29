@@ -48,6 +48,7 @@ public class Mail {
 
 
 	public void parse(){
+		System.out.println("Parsing mail...");
 		boolean flag=false;
 		String[] m = message.split("\r\n");
 		Set<String> bounds = new HashSet<String>();

@@ -32,6 +32,12 @@ public class Brutus extends Service{
 
 		// check correctness of command
 		String[] spl = command.split(" ");
+		if(spl.length==1){
+			if(command.equals("QUIT")){
+				byebye();
+				return;
+			}
+		}
 		if(spl.length!=6 || !spl[0].equals("IN") ||
 				!spl[2].equals("SET") || !spl[4].equals("VALUE")){
 			invalidConfig();

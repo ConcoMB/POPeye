@@ -15,8 +15,7 @@ import user.User;
 
 public class Olivia extends Service{
 	
-	private int bytesTransferred;
-	private int successfulConnections, connections;
+	private static int bytesTransferred, successfulConnections, connections;
 
 	private enum OliviaCommand{
 		BYTES, CONNECTIONS, FULL,SUCCESSFUL_CONNECTIONS, FAILED_CONNECTIONS, EMAILS_READ, EMAILS_ERASED, ERASE_FAILURES,
@@ -30,6 +29,12 @@ public class Olivia extends Service{
 
 	public void consult(String line) throws IOException, InterruptedException{
 		String[] command = line.split(" ");
+		if(command.length==1){
+			if(command.equals("QUIT")){
+				byebye();
+				return;
+			}
+		}
 		if(command.length!=4){
 			invalidConfig();
 		}
@@ -68,7 +73,6 @@ public class Olivia extends Service{
 			case FULL:
 				writeFullStats();
 				break;
-
 			default:
 				//EROR
 				invalidConfig();				
@@ -226,5 +230,18 @@ public class Olivia extends Service{
 		writeSimple("Connections failed : " + successfulConnections);
 		writeSimple("Bytes transferred: " + bytesTransferred);
 		writeEndMultiline();
+	}
+
+
+	public static void addConnection() {
+		connections++;
+	}
+	
+	public static void addSuccessfulConnection() {
+		successfulConnections++;
+	}
+	
+	public static void addBytes(int bytes) {
+		bytesTransferred+=bytes;
 	}
 }

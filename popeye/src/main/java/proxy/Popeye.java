@@ -12,6 +12,7 @@ import java.util.Set;
 
 import nio.server.ExternalAppExecuter;
 import proxy.transform.MailTransformer;
+import service.Olivia;
 import user.User;
 
 public class Popeye {
@@ -67,9 +68,7 @@ public class Popeye {
 			return null;
 		}
 		log.write("User "+userName+" attempting to connect\n");
-		//		if(users.containsKey(userName)){
-		//			user=users.get(userName);
-		//		}else{
+		Olivia.addConnection();
 		userName=command[1].trim();
 		user =users.get(userName);
 		System.out.println("usuario:("+userName+")");
@@ -77,9 +76,7 @@ public class Popeye {
 			user=new User(userName);
 			users.put(userName, user);
 		}
-		//			users.put(userName, user);
-		//		}
-
+		
 		if(user.accessIsBlocked()){
 			log.write("Access blocked by POPeye\n");
 			user.getStats().addAccessFailure();
@@ -125,6 +122,7 @@ public class Popeye {
 			log.write(userName+" requested LIST");
 			out.writeToServer(client, line);
 			if(command.length==2){
+				command[1]=command[1].trim();
 				mailNum=Integer.valueOf(command[1]);
 				//lastCommand=LIST_MULTI;
 			}else{
@@ -174,7 +172,9 @@ public class Popeye {
 				//ERROR
 			}
 			log.write(userName + " requested TOP of mail "+ command[1]+ ", number of lines: "+ command[2]+ "\n");
-			out.writeToServer(client, line);
+			out.writeToServer(client, line);		
+			command[1]=command[1].trim();
+			command[2]=command[2].trim();
 			mailNum=Integer.valueOf(command[1]);
 			topLines=Integer.valueOf(command[2]);
 			lastCommand=com;
@@ -186,6 +186,7 @@ public class Popeye {
 			log.write(userName + " requested UIDL\n");
 			out.writeToServer(client, line);
 			if(command.length==2){
+				command[1]=command[1].trim();
 				mailNum=Integer.valueOf(command[1]);
 				lastCommand=com;
 			}else{
@@ -225,6 +226,7 @@ public class Popeye {
 				log.write(userName+ "logged in\n");
 				state=State.TRANSACTION;
 				user.addSuccessfulAccess();
+				Olivia.addSuccessfulConnection();
 			}else if(line.startsWith(ERR)){
 				if(user!=null)
 					user.getStats().addAccessFailure();
@@ -253,10 +255,10 @@ public class Popeye {
 				log.write("Transforming mail\n");
 				
 				int bytes = mail.getSize();
-				System.out.println("transformadores:"+user.getTransformers().size());
+				System.out.println("transformers:"+user.getTransformers().size());
 				for(MailTransformer t: user.getTransformers()){
+					System.out.println(t);
 					t.transform(mail);
-					System.out.println("cubeta de agua!!"+t);
 				}
 				//TODO bytes
 				log.write(bytes+" bytes transferred\n");
@@ -273,6 +275,7 @@ public class Popeye {
 				out.writeToClient(client, message);
 				user.getStats().addBytes(bytes);
 				user.getStats().readEmail();
+				Olivia.addBytes(bytes);
 				mail=new Mail();
 			}
 			break;
