@@ -17,20 +17,23 @@ import user.User;
 public class Brutus extends Service{
 
 	private User user;
-
+	
 	enum BrutusVariable{
 		MINHOUR, MAXHOUR, QUANT, SERVER, ERASE_DATE, ERASE_FROM,
 		ERASE_CONTENTTYPE, ERASE_MINSIZE, ERASE_MAXSIZE, ERASE_ATTACHMENT, ERASE_HEADER,
-		ERASE_PICTURE, BLOCK_IP, ANONYMOUS_T, VOWELS_T, IMAGE_T, APP;
+		ERASE_PICTURE, BLOCK_IP, ANONYMOUS_T, VOWELS_T, IMAGE_T, ADD_APP, DEL_APP;
 	}
 
-	public Brutus(Writeable out, SocketChannel channel) {
+	public Brutus(Writeable out, SocketChannel channel) throws IOException {
 		super(out, channel);
 	}
 
 	public void apply(String command) throws IOException, InterruptedException{
 
 		// check correctness of command
+		if(!handleConnection(command)){
+			return;
+		}
 		String[] spl = command.split(" ");
 		if(spl.length==1){
 			if(command.equals("QUIT")){
@@ -179,12 +182,11 @@ public class Brutus extends Service{
 					user.removeTransformer(VowelTransformer.getInstance());
 				}
 				break;
-			case APP:
-				if(val.equals("0")){
-					user.unsetApp();
-				}else{
+			case ADD_APP:
 					user.setApp(val);
-				}
+				break;
+			case DEL_APP:
+				user.unsetApp(val);
 				break;
 			default:
 				//ERROR

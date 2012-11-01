@@ -20,7 +20,7 @@ public class User {
 	private HourDenial hourDenial;
 	private EraseConditions eraseConditions;
 	private Set<MailTransformer> transformers = new HashSet<MailTransformer>();
-	private ExternalAppExecuter app;
+	private Set<ExternalAppExecuter> apps = new HashSet<ExternalAppExecuter>();
 	
 	public User(){}
 	
@@ -30,12 +30,13 @@ public class User {
 		hourDenial=new HourDenial();
 		quantityDenial=new QuantityDenial();
 		eraseConditions=new EraseConditions();
-		transformers.add(ImageRotationTransformer.getInstance());
-		transformers.add(AnonymousTransformer.getInstance());
-	transformers.add(VowelTransformer.getInstance());
+		//transformers.add(ImageRotationTransformer.getInstance());
+		//transformers.add(AnonymousTransformer.getInstance());
+		//transformers.add(VowelTransformer.getInstance());
 		//quantityDenial.setTop(1);
 		//hourDenial.setMaxMinute(5);
-
+		apps.add(new ExternalAppExecuter("/Users/Conco/popeye/popeye/apps/toUpper.o"));
+		apps.add(new ExternalAppExecuter("/Users/Conco/popeye/popeye/apps/echo.o"));
 	}
 	
 	
@@ -104,14 +105,14 @@ public class User {
 	}
 	
 	public void setApp(String path){
-		app=new ExternalAppExecuter(path);
+		apps.add(new ExternalAppExecuter(path));
 	}
 	
-	public void unsetApp(){
-		app=null;
+	public void unsetApp(String path){
+		apps.remove(new ExternalAppExecuter(path));
 	}
 	
-	public ExternalAppExecuter getApp(){
-		return app;
+	public Set<ExternalAppExecuter> getApps(){
+		return apps;
 	}
 }

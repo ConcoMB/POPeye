@@ -30,6 +30,7 @@ public class BrutusSelectorProtocol implements SelectorProtocol, Writeable {
         configMap.put(clntChan, new Brutus(this,clntChan));
         clntChan.register(key.selector(), SelectionKey.OP_READ, new DoubleBuffer(bufSize));
         writeToClient(clntChan, ":) Brutus says hi\r\n");
+        writeToClient(clntChan, "Password:");
     }
     
     public void handleRead(SelectionKey key) throws IOException, InterruptedException {

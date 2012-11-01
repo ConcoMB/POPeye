@@ -30,6 +30,7 @@ public class OliviaSelectorProtocol implements SelectorProtocol, Writeable {
         providerMap.put(clntChan, new Olivia(this,clntChan));
         clntChan.register(key.selector(), SelectionKey.OP_READ, new DoubleBuffer(bufSize));
         writeToClient(clntChan, ":) Olivia says hi\r\n");
+        writeToClient(clntChan, "Password:");
     }
     
     public void handleRead(SelectionKey key) throws IOException, InterruptedException {

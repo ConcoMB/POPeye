@@ -2,6 +2,7 @@ package service;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
+import java.util.Set;
 
 import nio.server.ExternalAppExecuter;
 import proxy.Popeye;
@@ -14,29 +15,33 @@ import user.Statistics;
 import user.User;
 
 public class Olivia extends Service{
-	
+
 	private static int bytesTransferred, successfulConnections, connections;
 
 	private enum OliviaCommand{
-		BYTES, CONNECTIONS, FULL,SUCCESSFUL_CONNECTIONS, FAILED_CONNECTIONS, EMAILS_READ, EMAILS_ERASED, ERASE_FAILURES,
+		BYTES, CONNECTIONS, FULL,SUCCESSFUL_CONNECTIONS, FAILED_CONNECTIONS, EMAILS_READ, EMAILS_ERASED, ERASE_FAILURES, APPS,
 		CHECK_VAR;
 	}
 
-	public Olivia(Writeable out, SocketChannel channel){
+	public Olivia(Writeable out, SocketChannel channel) throws IOException{
 		super(out, channel);
 	}
 
 
 	public void consult(String line) throws IOException, InterruptedException{
+		if(!handleConnection(line)){
+			return;
+		}
 		String[] command = line.split(" ");
 		if(command.length==1){
-			if(command.equals("QUIT")){
+			if(line.equals("QUIT")){
 				byebye();
 				return;
 			}
 		}
 		if(command.length!=4){
 			invalidConfig();
+			return;
 		}
 		String ans="";
 		OliviaCommand c;
@@ -59,16 +64,16 @@ public class Olivia extends Service{
 		if(command[1].equals("GENER@L")){
 			switch(c){
 			case BYTES:
-				writeSimple(bytesTransferred);
+				writeSimple(OK+" "+bytesTransferred);
 				break;
 			case CONNECTIONS:
-				writeSimple(connections);
+				writeSimple(OK+" "+connections);
 				break;
 			case SUCCESSFUL_CONNECTIONS:
-				writeSimple(successfulConnections);
+				writeSimple(OK+" "+successfulConnections);
 				break;
 			case FAILED_CONNECTIONS:
-				writeSimple(successfulConnections-connections);
+				writeSimple(OK+" "+(successfulConnections-connections));
 				break;
 			case FULL:
 				writeFullStats();
@@ -88,126 +93,133 @@ public class Olivia extends Service{
 			Statistics stats = user.getStats();
 			switch (c){
 			case BYTES:
-				writeSimple(stats.getBytesTransferred());
+				writeSimple(OK+" "+stats.getBytesTransferred());
 				break;
 			case CONNECTIONS:
-				writeSimple(stats.getAccesses());
+				writeSimple(OK+" "+stats.getAccesses());
 				break;
 			case SUCCESSFUL_CONNECTIONS:
-				writeSimple(stats.getAccesses()-stats.getAccessFailures());
+				writeSimple(OK+" "+(stats.getAccesses()-stats.getAccessFailures()));
 				break;
 			case FAILED_CONNECTIONS:
-				writeSimple(stats.getAccessFailures());
+				writeSimple(OK+" "+stats.getAccessFailures());
 				break;
 			case EMAILS_READ:
-				writeSimple(stats.getEmailsRead());
+				writeSimple(OK+" "+stats.getEmailsRead());
 				break;
 			case EMAILS_ERASED:
-				writeSimple(stats.getEmailsErased());
+				writeSimple(OK+" "+stats.getEmailsErased());
 				break;
 			case ERASE_FAILURES:
-				writeSimple(stats.getEraseFailures());
+				writeSimple(OK+" "+stats.getEraseFailures());
 				break;
 			case FULL:
 				writeFullStats(stats);
+				break;
+			case APPS:
+				Set<ExternalAppExecuter> apps=user.getApps();
+				if(apps.size()==0){
+					writeSimple(OK+" "+"no application set for this user");
+				}else{
+					writeOK();
+					for(ExternalAppExecuter app: apps){
+						writeSimple(app.getPath());
+					}
+				}
+				writeEndMultiline();
 				break;
 			case CHECK_VAR:
 				switch(v){
 
 				case MINHOUR:
-					writeSimple(user.getHourDenial().getMinHour() +":"+user.getHourDenial().getMinMinute());
+					writeSimple(OK+" "+user.getHourDenial().getMinHour() +":"+user.getHourDenial().getMinMinute());
 					break;
 				case MAXHOUR:
-					writeSimple(user.getHourDenial().getMaxHour() +":"+user.getHourDenial().getMaxMinute());
+					writeSimple(OK+" "+user.getHourDenial().getMaxHour() +":"+user.getHourDenial().getMaxMinute());
 					break;
 				case QUANT: 
-					writeSimple(""+user.getQuantityDenial().getTop());
+					writeSimple(OK+" "+user.getQuantityDenial().getTop());
 					break;
 				case SERVER: 
 					ans = user.getServer();
 					if(ans==null){
-						writeSimple("default server");
+						writeSimple(OK+" "+"default server");
 					}else{
-						writeSimple(ans);
+						writeSimple(OK+" "+ans);
 					}
 					break;
 				case ERASE_DATE: 
-					writeSimple(""+user.getEraseConditions().getDateLimitFrom());
+					writeSimple(OK+" "+user.getEraseConditions().getDateLimitFrom());
 					break;
 				case ERASE_FROM:
-					for(String s: user.getEraseConditions().getFrom()){
-						ans+=(s+" ");
-					}
-					if(ans.equals("")){
-						writeSimple("no conditions");
+					if(user.getEraseConditions().getFrom().size()==0){
+						writeSimple(OK+" "+"no conditions");
 					}else{
-						writeSimple(ans);
+						writeOK();
+						for(String s: user.getEraseConditions().getFrom()){
+							writeSimple(s);
+						}
+						writeEndMultiline();
 					}
 					break;
 				case ERASE_CONTENTTYPE:
-					for(String s: user.getEraseConditions().getContentTypes()){
-						ans+=(s+" ");
-					}
-					if(ans.equals("")){
-						writeSimple("no conditions");
+					if(user.getEraseConditions().getContentTypes().size()==0){
+						writeSimple(OK+" "+"no conditions");
 					}else{
-						writeSimple(ans);
+						writeOK();
+						for(String s: user.getEraseConditions().getContentTypes()){
+							writeSimple(s);
+						}
+						writeEndMultiline();
 					}
 					break;
 				case ERASE_MINSIZE: 
-					writeSimple(user.getEraseConditions().getMinSize()+"");
+					writeSimple(OK+" "+user.getEraseConditions().getMinSize());
 					break;
 				case ERASE_MAXSIZE: 
-					writeSimple(user.getEraseConditions().getMaxSize()+"");
+					writeSimple(OK+" "+user.getEraseConditions().getMaxSize());
 					break;
 				case ERASE_ATTACHMENT:
 					int i = user.getEraseConditions().getWithAttachment();
 					if(i==1){
-						writeSimple("must have attachment");
+						writeSimple(OK+" "+"must have attachment");
 					}else if(i==0){
-						writeSimple("no conditions");
+						writeSimple(OK+" "+"no conditions");
 					}else{
-						writeSimple("mustn't have attachment");
+						writeSimple(OK+" "+"mustn't have attachment");
 					}
 					break;
 				case ERASE_HEADER:
-					for(String s: user.getEraseConditions().getGeneralHeaders()){
-						ans+=(s+" ");
-					}
-					if(ans.equals("")){
-						writeSimple("no conditions");
+					if(user.getEraseConditions().getGeneralHeaders().size()==0){
+						writeSimple(OK+" "+"no conditions");
 					}else{
-						writeSimple(ans);
+						writeOK();
+						for(String s: user.getEraseConditions().getGeneralHeaders()){
+							writeSimple(s);
+						}
+						writeEndMultiline();
 					}
 					break;
 				case ERASE_PICTURE:
 					i = user.getEraseConditions().getWithPicture();
 					if(i==1){
-						writeSimple("must have pictures");
+						writeSimple(OK+" "+"must have pictures");
 					}else if(i==0){
-						writeSimple("no conditions");
+						writeSimple(OK+" "+"no conditions");
 					}else{
-						writeSimple("mustn't have pictures");
+						writeSimple(OK+" "+"mustn't have pictures");
 					}
 					break;
 				case ANONYMOUS_T:
-					writeSimple(user.getTransformers().contains(AnonymousTransformer.getInstance())?"yes":"no");
+					writeSimple(user.getTransformers().contains(AnonymousTransformer.getInstance())?OK+" yes":OK+" no");
 					break;
 				case IMAGE_T:
-					writeSimple(user.getTransformers().contains(ImageRotationTransformer.getInstance())?"yes":"no");
-
+					writeSimple(user.getTransformers().contains(ImageRotationTransformer.getInstance())?OK+" yes":OK+" no");
 					break;
 				case VOWELS_T:
-					writeSimple(user.getTransformers().contains(VowelTransformer.getInstance())?"yes":"no");
+					writeSimple(user.getTransformers().contains(VowelTransformer.getInstance())?OK+" yes":OK+" no");
 					break;
-				case APP:
-					ExternalAppExecuter app=user.getApp();
-					if(app==null){
-						writeSimple("no application set for this user");
-					}else{
-						writeSimple("Application path: "+app.getPath());
-					}
-					break;
+				
 				default:
 					//ERROR;
 					invalidConfig();					
@@ -246,11 +258,11 @@ public class Olivia extends Service{
 	public static void addConnection() {
 		connections++;
 	}
-	
+
 	public static void addSuccessfulConnection() {
 		successfulConnections++;
 	}
-	
+
 	public static void addBytes(int bytes) {
 		bytesTransferred+=bytes;
 	}
