@@ -35,8 +35,8 @@ public class User {
 		//transformers.add(VowelTransformer.getInstance());
 		//quantityDenial.setTop(1);
 		//hourDenial.setMaxMinute(5);
-		apps.add(new ExternalAppExecuter("/Users/Conco/popeye/popeye/apps/toUpper.o"));
-		apps.add(new ExternalAppExecuter("/Users/Conco/popeye/popeye/apps/echo.o"));
+//		apps.add(new ExternalAppExecuter("/Users/Conco/popeye/popeye/apps/toUpper.o"));
+//		apps.add(new ExternalAppExecuter("/Users/Conco/popeye/popeye/apps/echo.o"));
 	}
 	
 	

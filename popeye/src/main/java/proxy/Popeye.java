@@ -103,7 +103,7 @@ public class Popeye {
 		case PASS:
 			if(state!=State.AUTHORIZATION_PASS || lastCommand!=Command.USER
 			|| command.length!=2){
-				//ERROR
+				return;
 			}
 			out.writeToServer(client, line);
 
@@ -112,7 +112,7 @@ public class Popeye {
 
 		case LIST:
 			if(state!=State.TRANSACTION || command.length>2){
-				//ERROR
+				return;
 			}
 			out.writeToServer(client, line);
 			if(command.length==2){
@@ -125,7 +125,7 @@ public class Popeye {
 			break;
 		case RETR:
 			if(state!=State.TRANSACTION || command.length!=2){
-				//ERROR
+				return;
 			}
 			command[1]=command[1].trim();
 			mailNum=Integer.valueOf(command[1]);
@@ -134,12 +134,12 @@ public class Popeye {
 			break;
 		case DELE :
 			if(state!=State.TRANSACTION || command.length!=2){
-				//ERROR
+				return;
 			}
 			try{
 				Integer.parseInt(command[1]);
 			}catch(Exception e){
-				//ERROR
+				return;
 			}
 			out.writeToServer(client, "RETR "+command[1]);
 			mailToDelete=command[1].trim();
@@ -148,19 +148,17 @@ public class Popeye {
 		case STAT:
 		case NOOP:
 		case RSET:
+		case APOP:
 
 			if(state!=State.TRANSACTION || command.length!=1){
-				//ERROR
+				return;
 			}
 			out.writeToServer(client, line);
 			lastCommand=com;
 			break;
-		case APOP:
-			//TODO
-			break;
 		case TOP: 
 			if(state!=State.TRANSACTION || command.length!=3){
-				//ERROR
+				return;
 			}
 			out.writeToServer(client, line);		
 			command[1]=command[1].trim();
@@ -171,7 +169,7 @@ public class Popeye {
 			break;
 		case UIDL:
 			if(state!=State.TRANSACTION || command.length>2){
-				//ERROR
+				return;
 			}
 			out.writeToServer(client, line);
 			if(command.length==2){
@@ -184,7 +182,7 @@ public class Popeye {
 			break;
 		case QUIT:
 			if(command.length!=1){
-				//ERROR
+				return;
 			}
 			out.writeToServer(client, line);
 
@@ -282,6 +280,7 @@ public class Popeye {
 		case STAT:
 		case NOOP:
 		case RSET:
+		case APOP:
 			out.writeToClient(client, line);
 			break;
 		case TOP:
