@@ -149,7 +149,7 @@ public class Olivia extends Service{
 					}
 					break;
 				case ERASE_DATE: 
-					writeSimple(OK+" "+user.getEraseConditions().getDateLimitFrom());
+					writeSimple(OK+" "+user.getEraseConditions().getDateExactCondition());
 					break;
 				case ERASE_FROM:
 					if(user.getEraseConditions().getFrom().size()==0){

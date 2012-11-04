@@ -122,12 +122,7 @@ public class Brutus extends Service{
 				}
 				break;
 			case ERASE_FROM:
-				try {
-					e.eraseFromDate(val);
-				} catch (ParseException e2) {
-					invalidConfig();
-					return;
-				}
+				e.eraseFrom(val);
 				break;
 			case ERASE_HEADER:
 				e.addHeader(val);
@@ -142,7 +137,7 @@ public class Brutus extends Service{
 				e.eraseMaxSize(val);
 				break;
 			case ERASE_ATTACHMENT:
-				if(!val.equals("1") || !val.equals("0") || !val.equals("-1")){
+				if(!val.equals("1") && !val.equals("0") && !val.equals("-1")){
 					//EROR
 					invalidConfig();
 					return;
@@ -151,7 +146,7 @@ public class Brutus extends Service{
 				}
 				break;
 			case ERASE_PICTURE:
-				if(!val.equals("1") || !val.equals("0") || !val.equals("-1")){
+				if(!val.equals("1") && !val.equals("0") && !val.equals("-1")){
 					//EROR
 					invalidConfig();
 					return;
