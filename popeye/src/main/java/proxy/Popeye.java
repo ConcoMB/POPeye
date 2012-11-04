@@ -84,6 +84,7 @@ public class Popeye {
 			serverName=defaultServer;
 		}
 		lastCommand=Command.USER;
+		state=State.AUTHORIZATION_PASS;
 		return serverName;
 
 	}
@@ -101,6 +102,8 @@ public class Popeye {
 
 
 		case PASS:
+			System.out.println("pass");
+			System.out.println(state);
 			if(state!=State.AUTHORIZATION_PASS || lastCommand!=Command.USER
 			|| command.length!=2){
 				return;
