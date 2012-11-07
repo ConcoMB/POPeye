@@ -1,5 +1,6 @@
 package user;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -11,21 +12,15 @@ import proxy.Mail;
 
 public class EraseConditions {
 
-	private Date dateLimitFrom;
-
 	private Date dateExactCondition;
 
-	private Set<String> from = new HashSet<String>(), contentTypes= new HashSet<String>();
+	private Set<String> from = new HashSet<String>(), contentTypes= new HashSet<String>(), generalHeaders = new HashSet<String>();
 
 	private int minSize, maxSize;
 
 	private int withAttachment, withPicture;
 
 	// o Algun patron sobre cabeceras (Ejemplo: List-Id eq// <foo.example.org>)
-
-	public Date getDateLimitFrom() {
-		return dateLimitFrom;
-	}
 
 	public Date getDateExactCondition() {
 		return dateExactCondition;
@@ -55,27 +50,37 @@ public class EraseConditions {
 		return withPicture;
 	}
 
+	public Set<String> getGeneralHeaders(){
+		return generalHeaders;
+	}
+
 	public EraseConditions() {
 		// DEFAULT VALUES?
 	}
 
 	public boolean canErase(Mail mail) throws ParseException {
-		if (dateLimitFrom != null) {
+		if (dateExactCondition != null) {
 			String s = mail.getDate();
-
 			Date date = parseDate(s);
-			if (dateLimitFrom.compareTo(date) > 0) {
+			if (dateExactCondition.compareTo(date) > 0) {
 				return false;
 			}
 		}
 		if (from.size() > 0) {
 			String f = mail.getFrom();
+			f = f.substring(f.indexOf('<')+1, f.indexOf('>'));
+			System.out.println(f+"\n");
 			if (from.contains(f)) {
 				return false;
 			}
 		}
 		if (contentTypes.size() > 0) {
-			Set<String> s = mail.getContentTypes();
+			Set<String> full = mail.getContentTypes();
+			Set<String> s = new HashSet<String>();
+			for(String ct: full){
+				String reduced = ct.substring(0,ct.indexOf(';'));
+				s.add(reduced);
+			}
 			for (String ct : contentTypes) {
 				if (s.contains(ct)) {
 					return false;
@@ -83,6 +88,7 @@ public class EraseConditions {
 			}
 		}
 		int size = mail.getSize();
+		System.out.println("size:"+size+" minsize:"+minSize+" maxSize:"+maxSize);
 		if ((minSize != 0 && size < minSize)
 				|| (maxSize != 0 && size > maxSize)) {
 			return false;
@@ -103,6 +109,16 @@ public class EraseConditions {
 		} else if (withPicture == -1 && mail.getImages().size() != 0) {
 			return false;
 		}
+
+		for(String header: generalHeaders){
+			try{
+				if(mail.containsHeader(header)){
+					return false;
+				}
+			}catch(IOException e){
+
+			}
+		}
 		return true;
 	}
 
@@ -113,10 +129,11 @@ public class EraseConditions {
 
 	public void eraseOnDate(String val) throws ParseException {
 		dateExactCondition = parseDate(val);
+		System.out.println(dateExactCondition);
 	}
 
-	public void eraseFromDate(String val) throws ParseException {
-		dateLimitFrom = parseDate(val);
+	public void eraseFrom(String val) {
+		from.add(val);
 	}
 
 	public void eraseMinSize(String val) {
@@ -139,4 +156,8 @@ public class EraseConditions {
 		withPicture = Integer.valueOf(val);
 	}
 
+	public void addHeader(String header){
+		generalHeaders.add(header);
+	}
 }
+
