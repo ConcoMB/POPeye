@@ -43,7 +43,7 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 			clntChan.register(key.selector(), SelectionKey.OP_READ, new DoubleBuffer(bufSize));
 			proxyMap.put(clntChan, new Popeye(this,clntChan));
 			connection.put(clntChan, true);
-			connectToServer(clntChan, "pop3.alu.itba.edu.ar");
+			connectToServer(clntChan, "pop.aol.com");
 		}else{
 			System.out.println("Blocked: "+address);
 			disconnectClient(clntChan);
@@ -51,6 +51,15 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 	}
 
 	private void connectToServer(SocketChannel clntChan, String serverName) throws IOException{
+		SocketChannel server=serverMap.get(clntChan);
+		if(server!=null){
+			String address=server.getRemoteAddress().toString();
+			if(address.substring(0, address.indexOf('/')).equals(serverName)){
+				System.out.println("same address");
+				//return;
+			}
+			connection.put(clntChan, false);
+		}
 		System.out.println("Server:"+serverName+" port:"+defaultPort);
 		SocketChannel hostChan = SocketChannel.open(new InetSocketAddress(serverName, defaultPort));
 		hostChan.configureBlocking(false); // Must be nonblocking to register
@@ -112,7 +121,6 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 						writeToClient(channel, "-ERR\r\n");
 						return;
 					}else{
-						connection.put(channel, false);
 						connectToServer(channel, serverName);
 						writeToServer(channel, line);
 					}

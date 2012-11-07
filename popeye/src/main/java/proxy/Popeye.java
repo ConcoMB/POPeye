@@ -140,7 +140,7 @@ public class Popeye {
 				return;
 			}
 			try{
-				Integer.parseInt(command[1]);
+				Integer.parseInt(command[1].trim());
 			}catch(Exception e){
 				return;
 			}
