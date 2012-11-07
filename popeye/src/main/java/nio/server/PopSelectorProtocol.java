@@ -54,7 +54,7 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 	private void connectToServer(SocketChannel clntChan, String serverName) throws IOException{
 		SocketChannel server=serverMap.get(clntChan);
 		if(server!=null){
-			String address=server.getRemoteAddress().toString();
+			String address=server.socket().getRemoteSocketAddress().toString();
 			if(address.substring(0, address.indexOf('/')).equals(serverName)){
 				System.out.println("same address");
 				//return;

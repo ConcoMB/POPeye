@@ -65,12 +65,15 @@ public class ImageRotationTransformer implements MailTransformer{
 				i++;
 			}
 			String base64 = line;
-			while( i<end && (line=reader.readLine())!=null){
+			while( i<=end && (line=reader.readLine())!=null){
 				base64+=line;
 				i++;
 			}
 			String rotated = imageRotation(base64);
 			writer.write((rotated+"\r\n").getBytes());
+		}
+		while((line=reader.readLine())!=null){
+			writer.write((line+"\r\n").getBytes());
 		}
 		file2.delete();
 		file.renameTo(file2);
