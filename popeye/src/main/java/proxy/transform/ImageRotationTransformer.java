@@ -103,7 +103,7 @@ public class ImageRotationTransformer implements MailTransformer{
 
 		// first - center image at the origin so rotate works OK
 		tx.translate(-image.getWidth()/2,-image.getHeight()/2);
-
+		
 		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR);
 		System.out.println("Height: "+image.getHeight()+" width: "+image.getWidth());
 		BufferedImage outputImage =new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
