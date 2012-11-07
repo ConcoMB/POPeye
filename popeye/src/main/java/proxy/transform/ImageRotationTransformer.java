@@ -5,8 +5,11 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -19,40 +22,66 @@ import proxy.Mail.MailImage;
 public class ImageRotationTransformer implements MailTransformer{
 
 	private static ImageRotationTransformer t;
-	
+
 	private ImageRotationTransformer(){
-		
+
 	}
-	
+
 	/** TEST METHOD
 	public static void main(String args[]){
 		ImageRotationTransformer imt = new ImageRotationTransformer();
 		System.out.println(imt.transform(args[0].toString()));
 	}*/
-	
+
 	/** Takes a base64 string, decodes it and creates a java2d image. 
 	 *  Rotates the image, saves it to byte buffer and encodes it to base64 for return.
 	 * @param the image to convert in String base64 format
 	 * @return the image rotated, in String base64 format 
+	 * @throws IOException 
 	 */
 
-	public void transform(Mail mail) {
+	public void transform(Mail mail) throws IOException {
 		List<String> list = new ArrayList<String>();
-		System.out.println("images to rotate: "+mail.getImages().size());
-		for(MailImage mi: mail.getImages()){
-			String rotated = imageRotation(mail.getImage(mi));
-			list.add(rotated);
+		int cant = mail.getImages().size();
+		System.out.println("images to rotate: "+cant);
+		if(cant==0){
+			return;
 		}
 
-		mail.replaceImages(list);
+		File file = new File("./mailT.txt");
+		file.createNewFile();
+		File file2 = new File("./mail0.txt");
+		RandomAccessFile reader = new RandomAccessFile("./mail0.txt", "r");
+		RandomAccessFile writer = new RandomAccessFile("./mailT.txt", "rw");
+		String line="";
+		int i = 0;
+		Iterator<MailImage> iter = mail.getImages().iterator();
+		while(iter.hasNext()){
+			MailImage image = iter.next();
+			int beg = image.getStartLine();
+			int end = image.getEndLine();
+			while( i<beg && (line=reader.readLine())!=null){
+				writer.write((line+"\r\n").getBytes());
+				i++;
+			}
+			String base64 = line;
+			while( i<end && (line=reader.readLine())!=null){
+				base64+=line;
+				i++;
+			}
+			String rotated = imageRotation(base64);
+			writer.write((rotated+"\r\n").getBytes());
+		}
+		file2.delete();
+		file.renameTo(file2);
 	}
-	
+	//TODO habira q actualizar indices
 	public String imageRotation(String image) {
-		
+
 		byte[] b  = decodeBase64(image);
-		
+
 		ByteArrayInputStream in = new ByteArrayInputStream(b);
-	
+
 		BufferedImage img = null;
 		try {
 			img = ImageIO.read(in);
@@ -84,14 +113,14 @@ public class ImageRotationTransformer implements MailTransformer{
 		byte[] o = bos.toByteArray();
 
 		return encodeBase64(o);
-	
+
 	}
 
 	public byte[] decodeBase64(String s) {
-	    return Base64.decodeBase64(s);
+		return Base64.decodeBase64(s);
 	}
 	public String encodeBase64(byte[] b) {
-	    return Base64.encodeBase64String(b);
+		return Base64.encodeBase64String(b);
 	}
 
 	public static BufferedImage rotateImage(BufferedImage image, double angle) {
@@ -109,7 +138,7 @@ public class ImageRotationTransformer implements MailTransformer{
 		BufferedImage outputImage =new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
 		return op.filter(image, outputImage);
 	}
-	
+
 
 	public static ImageRotationTransformer getInstance() {
 		if(t==null){
@@ -118,7 +147,7 @@ public class ImageRotationTransformer implements MailTransformer{
 		return t;
 	}
 
-	
+
 	@Override
 	public String toString() {
 		return "Image Rotation Transformer";

@@ -1,7 +1,18 @@
 	package nio.server;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.List;
+
+import proxy.Mail;
 
 public class ExternalAppExecuter {
 	private ProcessBuilder builder;
@@ -16,7 +27,7 @@ public class ExternalAppExecuter {
 		builder = new ProcessBuilder(command);
 	}
 	
-	public String execute(String mail) throws InterruptedException, IOException {
+	public void execute(Mail mail) throws InterruptedException, IOException {
 		// Map<String, String> environ = builder.environment();
 		//builder.directory(new File(System.getenv("temp")));
 
@@ -28,15 +39,29 @@ public class ExternalAppExecuter {
 		OutputStreamWriter osw = new OutputStreamWriter(os);
 		BufferedReader br = new BufferedReader(isr);
 		BufferedWriter bw = new BufferedWriter(osw);
-		bw.write(mail);
+		
+		File file = new File("./mailT.txt");
+		file.createNewFile();
+		File file2 = new File("./mail0.txt");
+		RandomAccessFile r = new RandomAccessFile("./mail0.txt", "r");
+		String s;
+		while((s=r.readLine())!=null){
+			bw.write(s);
+		}
 		bw.close();
 		process.waitFor();
 		int c;
-		StringBuffer result = new StringBuffer();
+		
+		RandomAccessFile w = new RandomAccessFile("./mailT.txt", "rw");
+		//StringBuffer result = new StringBuffer();
+		//TODO probar esto
 		while ((c = br.read()) != -1) {
-			result.append((char)c);
+			w.write((char)c);
 		}
-		return result.toString();
+		//return result.toString();
+		
+		file2.delete();
+		file.renameTo(file2);
 	}
 
 	public String getPath() {

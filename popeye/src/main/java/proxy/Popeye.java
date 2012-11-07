@@ -1,8 +1,10 @@
 package proxy;
 
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.channels.SocketChannel;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -42,7 +44,7 @@ public class Popeye {
 	private int mailNum, topLines;
 	//private final static String defaultServer = "pop3.alu.itba.edu.ar";
 
-	private final static String defaultServer = "pop.aol.com";
+	private final static String defaultServer = "10.6.0.223";
 
 	public Popeye(Writeable out, SocketChannel client) throws IOException{
 		this.client=client;
@@ -131,7 +133,7 @@ public class Popeye {
 				return;
 			}
 			command[1]=command[1].trim();
-			mailNum=Integer.valueOf(command[1]);
+			mailNum=Integer.valueOf(command[1].trim());
 			out.writeToServer(client, line);
 			lastCommand=com;
 			break;
@@ -140,11 +142,11 @@ public class Popeye {
 				return;
 			}
 			try{
-				Integer.parseInt(command[1]);
+				Integer.parseInt(command[1].trim());
 			}catch(Exception e){
 				return;
 			}
-			out.writeToServer(client, "RETR "+command[1]);
+			out.writeToServer(client, "RETR "+command[1].trim());
 			mailToDelete=command[1].trim();
 			lastCommand=com;
 			break;
@@ -245,18 +247,20 @@ public class Popeye {
 				}
 				//TODO bytes
 				Set<ExternalAppExecuter> apps=user.getApps();
-				String message=mail.getMessage();
+				//String message=mail.getMessage();
 				System.out.println("external apps:"+apps.size());
 				for(ExternalAppExecuter app: apps){
 					try{
-						message=app.execute(message);
+						//message=app.execute(message);
+						app.execute(mail);
 						System.out.println(app.getPath());
 					}catch(IOException e){
 						//TODO
 						System.out.println("app: \""+app.getPath()+"\" not found");
 					}
 				}
-				out.writeToClient(client, message);
+				writeMail(mail);
+				//out.writeToClient(client, message);
 				user.getStats().addBytes(bytes);
 				user.getStats().readEmail();
 				Olivia.addBytes(bytes);
@@ -312,6 +316,14 @@ public class Popeye {
 		default:
 		case UNKNOWN:
 			out.writeToClient(client, line);
+		}
+	}
+
+	private void writeMail(Mail mail2) throws IOException, InterruptedException {
+		RandomAccessFile r = new RandomAccessFile("./mail0.txt", "r");
+		String s;
+		while((s=r.readLine())!=null){
+			out.writeToClient(client, s+"\r\n");
 		}
 	}
 

@@ -43,7 +43,7 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 			clntChan.register(key.selector(), SelectionKey.OP_READ, new DoubleBuffer(bufSize));
 			proxyMap.put(clntChan, new Popeye(this,clntChan));
 			connection.put(clntChan, true);
-			connectToServer(clntChan, "pop3.alu.itba.edu.ar");
+			connectToServer(clntChan, "10.6.0.223");
 		}else{
 			System.out.println("Blocked: "+address);
 			disconnectClient(clntChan);

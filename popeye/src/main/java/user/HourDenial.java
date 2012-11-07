@@ -31,7 +31,7 @@ public class HourDenial implements Denial{
 		String[] hhmm=time.split(":");
 		int h = Integer.valueOf(hhmm[0]);
 		int m = Integer.valueOf(hhmm[1]);
-
+        //TODO arreglar esto
 		if((minHour!=-1 && h<minHour) || (maxHour!=-1 && h>maxHour)){
 			return true;
 		}
