@@ -42,9 +42,9 @@ public class Popeye {
 
 	private Mail mail = new Mail();
 	private int mailNum, topLines;
-	//private final static String defaultServer = "pop3.alu.itba.edu.ar";
+	private final static String defaultServer = "pop3.alu.itba.edu.ar";
 
-	private final static String defaultServer = "10.6.0.223";
+	//private final static String defaultServer = "10.6.0.223";
 
 	public Popeye(Writeable out, SocketChannel client) throws IOException{
 		this.client=client;
@@ -264,6 +264,7 @@ public class Popeye {
 				user.getStats().addBytes(bytes);
 				user.getStats().readEmail();
 				Olivia.addBytes(bytes);
+				Olivia.addEmailsRead();
 				mail=new Mail();
 			}
 			break;
@@ -275,9 +276,11 @@ public class Popeye {
 					System.out.println("Permission to erase dennied\n");
 					out.writeToClient(client, ERR+" POPeye says you can't erase that!\n");
 					user.getStats().addErsaseFailure();
+					Olivia.addErasedFailures();
 				}else{
 					System.out.println("Marking mail as deleted\n");
 					user.getStats().eraseEmail();
+					Olivia.addEmailsErased();
 					out.writeToServer(client, "DELE "+mailToDelete+"\r\n");
 				}
 				lastCommand=Command.UNKNOWN;
@@ -334,6 +337,9 @@ public class Popeye {
 
 	public User getCurrentUser() {
 		return user;
+	}
+	public static Map<String, User> getUsers(){
+		return users;
 	}
 
 	public String getCurrentUserName(){
