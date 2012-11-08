@@ -10,13 +10,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import nio.server.ExternalAppExecuter;
+
 import proxy.transform.AnonymousTransformer;
+import proxy.transform.ImageRotationTransformer;
 import proxy.transform.VowelTransformer;
 
 public class Mail {
 
-	public static void main(String[] args) throws IOException {
-		BufferedReader b = new BufferedReader(new FileReader("./mailExample.txt"));
+	public static void main(String[] args) throws IOException, InterruptedException {
+		BufferedReader b = new BufferedReader(new FileReader("./foto.txt"));
 		Mail m = new Mail();
 		String line;
 
@@ -30,6 +33,9 @@ public class Mail {
 		}
 		AnonymousTransformer.getInstance().transform(m);
 		VowelTransformer.getInstance().transform(m);
+		ImageRotationTransformer.getInstance().transform(m);
+//		ExternalAppExecuter a = new ExternalAppExecuter("./apps/toUpper.o");
+//		a.execute(m);
 	}
 
 
@@ -49,6 +55,7 @@ public class Mail {
 
 	public Mail() throws IOException {
 		File f = new File("./mail0.txt");
+		f.delete();
 		f.createNewFile();
 		reader = new RandomAccessFile("./mail0.txt", "r");
 		writer = new RandomAccessFile("./mail0.txt", "rw");
@@ -182,6 +189,7 @@ public class Mail {
 			}
 			i++;
 		}
+		reader.close();
 	}
 
 

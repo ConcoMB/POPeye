@@ -28,10 +28,7 @@ public class ExternalAppExecuter {
 	}
 	
 	public void execute(Mail mail) throws InterruptedException, IOException {
-		// Map<String, String> environ = builder.environment();
-		//builder.directory(new File(System.getenv("temp")));
 
-		//builder.inheritIO();
 		final Process process = builder.start();
 		InputStream is = process.getInputStream();
 		OutputStream os = process.getOutputStream();

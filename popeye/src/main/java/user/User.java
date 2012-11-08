@@ -30,6 +30,7 @@ public class User {
 		hourDenial=new HourDenial();
 		quantityDenial=new QuantityDenial();
 		eraseConditions=new EraseConditions();
+		hourDenial.setMinHour(11);
 		//transformers.add(ImageRotationTransformer.getInstance());
 		//transformers.add(AnonymousTransformer.getInstance());
 		//transformers.add(VowelTransformer.getInstance());
