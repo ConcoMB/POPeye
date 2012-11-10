@@ -1,0 +1,17 @@
++OK 433 octets
+From: "Alguien de Algun lugar" <alguien@example.org>
+To: foo@example.org
+Subject: BORRADO-CONDICIONAL-003
+Date: Tue, 14 Jun 2011 23:11:12 -0300
+MIME-Version: 1.0
+Message-Id: <201106142311.12638.juan@example.org>
+X-Borrable: yes
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+
+hola borrado! este es un mail plain text de una =FAnica parte.
+
+=2D-=20
+Buenos Aires, Argentina
+.
