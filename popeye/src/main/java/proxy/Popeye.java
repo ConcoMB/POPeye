@@ -286,6 +286,7 @@ public class Popeye {
 				user.getStats().addBytes(bytes);
 				user.getStats().readEmail();
 				Olivia.addBytes(bytes);
+				Olivia.addEmailsRead();
 				mail=new Mail();
 			}
 			break;
@@ -297,9 +298,12 @@ public class Popeye {
 					System.out.println("Permission to erase dennied\n");
 					out.writeToClient(con, ERR+" POPeye says you can't erase that!\n");
 					user.getStats().addErsaseFailure();
+					Olivia.addErasedFailures();
+
 				}else{
 					System.out.println("Marking mail as deleted\n");
 					user.getStats().eraseEmail();
+					Olivia.addEmailsErased();
 					out.writeToServer(con, "DELE "+mailToDelete+"\r\n");
 				}
 				lastCommand=Command.UNKNOWN;
