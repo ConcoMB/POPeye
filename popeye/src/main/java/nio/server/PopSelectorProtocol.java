@@ -144,8 +144,10 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 	private void disconnectClient(PopConnection con) throws IOException {
 		SocketChannel server=con.getServer();
 		if(server!=null){
+			server.keyFor(selector).cancel();
 			server.close();
 		}
+		con.getClient().keyFor(selector).cancel();
 		con.getClient().close();
 	}
 

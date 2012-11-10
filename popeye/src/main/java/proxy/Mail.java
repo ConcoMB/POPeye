@@ -306,7 +306,7 @@ public class Mail {
 			if(line.equals("") || line.equals("\r")|| line.equals("\r\n")){
 				return false;
 			}
-			if(line.startsWith(header)){
+			if(line.toLowerCase().startsWith(header)){
 				return true;
 			}
 		}

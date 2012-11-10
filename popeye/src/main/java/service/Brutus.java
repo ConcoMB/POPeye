@@ -30,7 +30,7 @@ public class Brutus extends Service {
 		if (!handleConnection(command)) {
 			return;
 		}
-		String[] spl = command.split(" ");
+		String[] spl = command.split(" ",6);
 		if (spl.length == 1) {
 			if (command.equals("QUIT")) {
 				byebye();
