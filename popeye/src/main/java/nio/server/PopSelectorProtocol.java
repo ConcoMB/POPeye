@@ -60,7 +60,7 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 			String address=server.socket().getRemoteSocketAddress().toString();
 			if(address.substring(0, address.indexOf('/')).equals(serverName)){
 				System.out.println("same address");
-				//return;
+				return;
 			}
 			con.setConnection(false);
 		}
@@ -126,7 +126,6 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 						writeToClient(con, "-ERR\r\n");
 						return;
 					}else{
-						con.setConnection(false);
 						connectToServer(con, serverName);
 						writeToServer(con, line);
 					}
@@ -151,6 +150,7 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 
 	public void disconnect(SocketChannel channel) throws IOException{
 		SelectionKey key=channel.keyFor(selector);
+		System.out.println(selector.keys().size());
 		if(key!=null){
 			key.cancel();
 		}
