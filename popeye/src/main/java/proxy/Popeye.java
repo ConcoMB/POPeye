@@ -1,9 +1,6 @@
 package proxy;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.channels.SocketChannel;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +11,8 @@ import nio.server.ExternalAppExecuter;
 import proxy.transform.MailTransformer;
 import service.Olivia;
 import user.User;
+import config.Configuration;
+import connection.Connection;
 
 public class Popeye {
 
@@ -34,7 +33,7 @@ public class Popeye {
 	//private Map<String, User> users;
 	private User user;
 	private String userName;
-	private SocketChannel client;
+	private Connection con;
 	private String mailToDelete;
 
 
@@ -42,10 +41,8 @@ public class Popeye {
 	private int mailNum, topLines;
 	//private final static String defaultServer = "pop3.alu.itba.edu.ar";
 
-	private final static String defaultServer = "pop.aol.com";
-
-	public Popeye(Writeable out, SocketChannel client) throws IOException{
-		this.client=client;
+	public Popeye(Writeable out, Connection client) throws IOException{
+		this.con=client;
 		this.out=out;
 		state = State.AUTHORIZATION_USER;
 		lastCommand = Command.UNKNOWN;
@@ -81,7 +78,7 @@ public class Popeye {
 		}
 		String serverName = user.getServer();
 		if(serverName==null){
-			serverName=defaultServer;
+			serverName=Configuration.getInstance().getDefaultServer();
 		}
 		lastCommand=Command.USER;
 		state=State.AUTHORIZATION_PASS;
@@ -89,6 +86,13 @@ public class Popeye {
 
 	}
 
+	private void unknownCommand(String line) throws IOException, InterruptedException{
+		//LO DEJO PASAR
+		System.out.println("Received unknown command");
+		out.writeToServer(con, line);
+		lastCommand=Command.UNKNOWN;
+	}
+	
 	public void proxyClient(String line) throws IOException, InterruptedException {
 		//out.write(welcomeLine.getBytes());
 		String command[] = line.split(" ");
@@ -106,18 +110,20 @@ public class Popeye {
 			System.out.println(state);
 			if(state!=State.AUTHORIZATION_PASS || lastCommand!=Command.USER
 			|| command.length!=2){
+				unknownCommand(line);
 				return;
 			}
-			out.writeToServer(client, line);
+			out.writeToServer(con, line);
 
 			lastCommand=com;
 			break;
 
 		case LIST:
 			if(state!=State.TRANSACTION || command.length>2){
+				unknownCommand(line);
 				return;
 			}
-			out.writeToServer(client, line);
+			out.writeToServer(con, line);
 			if(command.length==2){
 				command[1]=command[1].trim();
 				mailNum=Integer.valueOf(command[1]);
@@ -128,23 +134,27 @@ public class Popeye {
 			break;
 		case RETR:
 			if(state!=State.TRANSACTION || command.length!=2){
+				unknownCommand(line);
 				return;
 			}
+			System.out.println("RETR");
 			command[1]=command[1].trim();
 			mailNum=Integer.valueOf(command[1]);
-			out.writeToServer(client, line);
+			out.writeToServer(con, line);
 			lastCommand=com;
 			break;
 		case DELE :
 			if(state!=State.TRANSACTION || command.length!=2){
+				unknownCommand(line);
 				return;
 			}
 			try{
 				Integer.parseInt(command[1]);
 			}catch(Exception e){
+				unknownCommand(line);
 				return;
 			}
-			out.writeToServer(client, "RETR "+command[1]);
+			out.writeToServer(con, "RETR "+command[1]);
 			mailToDelete=command[1].trim();
 			lastCommand=com;
 			break;
@@ -154,16 +164,18 @@ public class Popeye {
 		case APOP:
 
 			if(state!=State.TRANSACTION || command.length!=1){
+				unknownCommand(line);
 				return;
 			}
-			out.writeToServer(client, line);
+			out.writeToServer(con, line);
 			lastCommand=com;
 			break;
 		case TOP: 
 			if(state!=State.TRANSACTION || command.length!=3){
+				unknownCommand(line);
 				return;
 			}
-			out.writeToServer(client, line);		
+			out.writeToServer(con, line);		
 			command[1]=command[1].trim();
 			command[2]=command[2].trim();
 			mailNum=Integer.valueOf(command[1]);
@@ -172,9 +184,10 @@ public class Popeye {
 			break;
 		case UIDL:
 			if(state!=State.TRANSACTION || command.length>2){
+				unknownCommand(line);
 				return;
 			}
-			out.writeToServer(client, line);
+			out.writeToServer(con, line);
 			if(command.length==2){
 				command[1]=command[1].trim();
 				mailNum=Integer.valueOf(command[1]);
@@ -185,15 +198,16 @@ public class Popeye {
 			break;
 		case QUIT:
 			if(command.length!=1){
+				unknownCommand(line);
 				return;
 			}
-			out.writeToServer(client, line);
+			out.writeToServer(con, line);
 
 
 			lastCommand=com;
 			break;
 		default:
-			out.writeToServer(client, line);
+			unknownCommand(line);
 		}
 	}
 
@@ -207,7 +221,7 @@ public class Popeye {
 			}else if(line.startsWith(ERR)){
 				user.getStats().addAccessFailure();
 			}
-			out.writeToClient(client, line);
+			out.writeToClient(con, line);
 			break;
 		case PASS:
 			if(line.startsWith(OK)){
@@ -215,21 +229,22 @@ public class Popeye {
 				user.addSuccessfulAccess();
 				Olivia.addSuccessfulConnection();
 			}else if(line.startsWith(ERR)){
+				state=State.AUTHORIZATION_USER;
 				if(user!=null)
 					user.getStats().addAccessFailure();
 				user=null;
 			}
-			out.writeToClient(client, line);	
+			out.writeToClient(con, line);	
 			break;
 		case LIST:
-			out.writeToClient(client, line);	
+			out.writeToClient(con, line);	
 			break;
 		case LIST_MULTI:
 
 			if(line.equals(END)){
 				lastCommand=null;
 			}
-			out.writeToClient(client,line);
+			out.writeToClient(con,line);
 			break;
 		case RETR:
 			//System.out.print("Line: "+line);
@@ -256,7 +271,7 @@ public class Popeye {
 						System.out.println("app: \""+app.getPath()+"\" not found");
 					}
 				}
-				out.writeToClient(client, message);
+				out.writeToClient(con, message);
 				user.getStats().addBytes(bytes);
 				user.getStats().readEmail();
 				Olivia.addBytes(bytes);
@@ -269,12 +284,12 @@ public class Popeye {
 				mail.parse();
 				if(!canErase(mail)){
 					System.out.println("Permission to erase dennied\n");
-					out.writeToClient(client, ERR+" POPeye says you can't erase that!\n");
+					out.writeToClient(con, ERR+" POPeye says you can't erase that!\n");
 					user.getStats().addErsaseFailure();
 				}else{
 					System.out.println("Marking mail as deleted\n");
 					user.getStats().eraseEmail();
-					out.writeToServer(client, "DELE "+mailToDelete+"\r\n");
+					out.writeToServer(con, "DELE "+mailToDelete+"\r\n");
 				}
 				lastCommand=Command.UNKNOWN;
 				mail=new Mail();
@@ -284,34 +299,34 @@ public class Popeye {
 		case NOOP:
 		case RSET:
 		case APOP:
-			out.writeToClient(client, line);
+			out.writeToClient(con, line);
 			break;
 		case TOP:
 			if(line.equals(END)){
 				lastCommand=null;
 			}
-			out.writeToClient(client, line);
+			out.writeToClient(con, line);
 			break;
 		case UIDL:
-			out.writeToClient(client, line);
+			out.writeToClient(con, line);
 			break;
 		case UIDL_MULTI:
 			if(line.equals(END)){
 				lastCommand=null;
 			}
-			out.writeToClient(client, line);
+			out.writeToClient(con, line);
 
 			break;
 		case QUIT:
 			if(state==State.TRANSACTION){
 				state=State.UPDATE;
 			}
-			out.writeToClient(client, line);
+			out.writeToClient(con, line);
 			//closeConnections();
 			break;
 		default:
 		case UNKNOWN:
-			out.writeToClient(client, line);
+			out.writeToClient(con, line);
 		}
 	}
 

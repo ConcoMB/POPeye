@@ -9,8 +9,4 @@ public interface SelectorProtocol {
       void handleAccept(SelectionKey key) throws IOException, InterruptedException;
       void handleRead(SelectionKey key) throws IOException, InterruptedException, ParseException;
       void handleWrite(SelectionKey key) throws IOException;
-	void writeToClient(SocketChannel client, String line) throws IOException,
-			InterruptedException;
-	void writeToServer(SocketChannel client, String line) throws IOException,
-			InterruptedException;
 }

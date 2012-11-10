@@ -45,7 +45,7 @@ public class PopeyeServer {
 		listnChannel.register(blutoSelector, SelectionKey.OP_ACCEPT);
 		
 		// Create a handler that will implement the protocol
-		SelectorProtocol protocol = new PopSelectorProtocol(BUFSIZE,defaultPort,selector);
+		SelectorProtocol protocol = new PopSelectorProtocol(BUFSIZE,selector);
 		SelectorProtocol oliveProtocol = new OliviaSelectorProtocol(BUFSIZE,oliveSelector);
 		SelectorProtocol blutoProtocol = new BrutusSelectorProtocol(BUFSIZE,blutoSelector);
 		Thread oliveThread = new SelectorThread(oliveSelector, oliveProtocol);

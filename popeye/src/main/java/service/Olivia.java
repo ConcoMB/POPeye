@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.Set;
 
+import connection.Connection;
+import connection.OliviaConnection;
+
 import nio.server.ExternalAppExecuter;
 import proxy.Popeye;
 import proxy.Writeable;
@@ -23,8 +26,8 @@ public class Olivia extends Service{
 		CHECK_VAR;
 	}
 
-	public Olivia(Writeable out, SocketChannel channel) throws IOException{
-		super(out, channel);
+	public Olivia(Writeable out, Connection con) throws IOException{
+		super(out, con);
 	}
 
 

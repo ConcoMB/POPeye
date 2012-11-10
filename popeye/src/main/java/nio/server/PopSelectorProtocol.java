@@ -7,27 +7,29 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.CharacterCodingException;
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
 
 import proxy.Popeye;
 import proxy.Writeable;
+import config.Configuration;
+import connection.Connection;
+import connection.PopConnection;
 
 public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 	private int bufSize; // Size of I/O buffer
 	private int defaultPort;
-	private Map<SocketChannel,SocketChannel> clientMap=new HashMap<SocketChannel,SocketChannel>();
-	private Map<SocketChannel,SocketChannel> serverMap=new HashMap<SocketChannel,SocketChannel>();
-	private Map<SocketChannel,Popeye> proxyMap=new HashMap<SocketChannel,Popeye>();
-	private Map<SocketChannel, Boolean> connection = new HashMap<SocketChannel, Boolean>();
+	private String defaultServer;
+	//private Map<SocketChannel,SocketChannel> clientMap=new HashMap<SocketChannel,SocketChannel>();
+	//private Map<SocketChannel,SocketChannel> serverMap=new HashMap<SocketChannel,SocketChannel>();
+	//private Map<SocketChannel,Popeye> proxyMap=new HashMap<SocketChannel,Popeye>();
+	//private Map<SocketChannel, Boolean> connection = new HashMap<SocketChannel, Boolean>();
 	private Selector selector;
 
-	public PopSelectorProtocol(int bufSize, int dp, Selector selector) {
+	public PopSelectorProtocol(int bufSize, Selector selector) {
 		this.bufSize = bufSize;
-		this.defaultPort=dp;
+		this.defaultPort=Configuration.getInstance().getDefaultPort();
 		this.selector=selector;
+		this.defaultServer=Configuration.getInstance().getDefaultServer();
 	}
 
 	public void handleAccept(SelectionKey key) throws IOException {
@@ -40,49 +42,50 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 			// Register the selector with new channel for read and attach byte
 			// buffer
 			System.out.println("Accepted connection ->"+clntChan.socket().getRemoteSocketAddress());
-			clntChan.register(key.selector(), SelectionKey.OP_READ, new DoubleBuffer(bufSize));
-			proxyMap.put(clntChan, new Popeye(this,clntChan));
-			connection.put(clntChan, true);
-			connectToServer(clntChan, "pop3.alu.itba.edu.ar");
+			PopConnection con = new PopConnection(bufSize,this,clntChan);
+			clntChan.register(key.selector(), SelectionKey.OP_READ, con);
+			connectToServer(con, defaultServer);
 		}else{
 			System.out.println("Blocked: "+address);
-			disconnectClient(clntChan);
+			clntChan.close();
 		}
 	}
 
-	private void connectToServer(SocketChannel clntChan, String serverName) throws IOException{
+	private void connectToServer(PopConnection con, String serverName) throws IOException{
+		SocketChannel clntChan = con.getClient();
 		System.out.println("Server:"+serverName+" port:"+defaultPort);
 		SocketChannel hostChan = SocketChannel.open(new InetSocketAddress(serverName, defaultPort));
 		hostChan.configureBlocking(false); // Must be nonblocking to register
 		System.out.println("Creating connection ->"+hostChan.socket().getRemoteSocketAddress());
-		DoubleBuffer dBuf=new DoubleBuffer(bufSize);
-		hostChan.register(selector, SelectionKey.OP_READ, dBuf);
+		hostChan.register(selector, SelectionKey.OP_READ, con);
 		System.out.println("client:"+clntChan);
 		System.out.println("host:"+hostChan);
-		clientMap.put(hostChan, clntChan);
-		serverMap.put(clntChan, hostChan);
-	}
-
-	private boolean isServer(SocketChannel channel){
-		return serverMap.containsValue(channel);
+		con.setServer(hostChan);
 	}
 
 	public void handleRead(SelectionKey key) throws IOException, InterruptedException, ParseException {
 		// Client socket channel has pending data
 		SocketChannel channel = (SocketChannel) key.channel();
-		StringBuffer sBuf = ((DoubleBuffer) key.attachment()).getReadBuffer();
+		PopConnection con =((PopConnection) key.attachment());
+		StringBuffer sBuf;
+		boolean isClient=con.isClient(channel);
+		if(con.isClient(channel)){
+			sBuf = con.getClientBuffer().getReadBuffer();
+		}else {
+			sBuf = con.getServerBuffer().getReadBuffer();
+		}
 		ByteBuffer buf=ByteBuffer.allocate(bufSize);
 		long bytesRead = channel.read(buf);
 		buf.flip();
 		if (bytesRead == -1) { // Did the other end close?
-			if(isServer(channel)){
+			if(!isClient){
 				//SERVER DISCONNECTED
-				System.out.println("Server disconnected (client:"+clientMap.get(channel).socket().getRemoteSocketAddress()+")");
-				disconnectClient(clientMap.get(channel));
+				System.out.println("Server disconnected (client:"+con.getClient().socket().getRemoteSocketAddress()+")");
+				disconnectClient(con);
 			}else{
 				//CLIENT DISCONNECTED
 				System.out.println("Client disconnected:"+channel.socket().getRemoteSocketAddress());
-				disconnectClient(channel);
+				disconnectClient(con);
 			}
 		} else if (bytesRead > 0) {
 			String line=BufferUtils.bufferToString(buf);
@@ -93,10 +96,10 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 			line=sBuf.toString();
 			sBuf.delete(0, sBuf.length());
 			//System.out.print("READ:"+bytesRead+" "+line);
-			if(isServer(channel)){
+			if(!isClient){
 				//SERVER
 				for(String s: line.split("\r\n")){
-					proxyMap.get(clientMap.get(channel)).proxyServer(s.concat("\r\n"));
+					con.getProxy().proxyServer(s.concat("\r\n"));
 				}
 				//proxyMap.get(clientMap.get(channel)).proxyServer(line);
 			}else{
@@ -106,20 +109,20 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 				if(line.startsWith("USER")){
 					//AUTHENTICATION
 					System.out.println("AUTHENTICATION");
-					String serverName=proxyMap.get(channel).login(line);
+					String serverName=con.getProxy().login(line);
 					if(serverName==null){
 						//FAIL
-						writeToClient(channel, "-ERR\r\n");
+						writeToClient(con, "-ERR\r\n");
 						return;
 					}else{
-						connection.put(channel, false);
-						connectToServer(channel, serverName);
-						writeToServer(channel, line);
+						con.setConnection(false);
+						connectToServer(con, serverName);
+						writeToServer(con, line);
 					}
 				}else{
 					//NORMAL FLOW
 					for(String s: line.split("\r\n")){
-						proxyMap.get(channel).proxyClient(s.concat("\r\n"));
+						con.getProxy().proxyClient(s.concat("\r\n"));
 					}
 					//proxyMap.get(channel).proxyClient(line);
 				}
@@ -127,25 +130,24 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 		}
 	}
 
-	private void disconnectClient(SocketChannel client) throws IOException {
-		SocketChannel server=serverMap.get(client);
+	private void disconnectClient(PopConnection con) throws IOException {
+		SocketChannel server=con.getServer();
 		if(server!=null){
-			serverMap.remove(client);
-			clientMap.remove(server);
 			server.close();
 		}
-		client.close();
+		con.getClient().close();
 	}
 
 	public void handleWrite(SelectionKey key) throws IOException {
+		PopConnection con = ((PopConnection) key.attachment());
 		/*
 		 * Channel is available for writing, and key is valid (i.e., client
 		 * channel not closed).
 		 */
 		// Retrieve data read earlier
-		StringBuffer sBuf = ((DoubleBuffer) key.attachment()).getWriteBuffer();
 		//buf.flip(); // Prepare buffer for writing
 		SocketChannel channel = (SocketChannel) key.channel();
+		StringBuffer sBuf = con.getBuffer(channel).getWriteBuffer();
 		//System.out.println("write ("+sBuf+")");
 		//buf.flip();
 		ByteBuffer buf=ByteBuffer.wrap(sBuf.toString().getBytes());
@@ -161,26 +163,29 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 		buf.clear();
 	}
 
-	public void writeToClient(SocketChannel client, String line) throws IOException, InterruptedException {
-		if(!connection.get(client)){
-			connection.put(client, true);
+	public void writeToClient(Connection con, String line) throws IOException, InterruptedException {
+		PopConnection pcon = (PopConnection)con;
+		SocketChannel client = con.getClient();
+		if(!pcon.getConnection()){
+			pcon.setConnection(true);
 		}else{
 			String message=line.length()>30?line.substring(0, 30)+"...\n":line;
 			System.out.print("S--> "+message);
-			writeToChannel(client,line);
+			writeToChannel(client,line, con.getClientBuffer().getWriteBuffer());
 		}
 	}
 
-	public void writeToServer(SocketChannel client, String line) throws IOException, InterruptedException {
+	public void writeToServer(Connection con, String line) throws IOException, InterruptedException {
+		PopConnection pcon=(PopConnection)con;
 		String message=line.length()>30?line.substring(0, 30)+"...\n":line;
 		System.out.print("C--> "+message);
-		SocketChannel server=serverMap.get(client);
-		writeToChannel(server, line);
+		SocketChannel server=pcon.getServer();
+		StringBuffer buffer = pcon.getServerBuffer().getWriteBuffer();
+		writeToChannel(server, line, buffer);
 	}
 
-	private void writeToChannel(SocketChannel channel, String line) throws InterruptedException, IOException{
+	private void writeToChannel(SocketChannel channel, String line, StringBuffer sBuf) throws InterruptedException, IOException{
 		SelectionKey key=channel.keyFor(selector);
-		StringBuffer sBuf=((DoubleBuffer) key.attachment()).getWriteBuffer();
 		String before=sBuf.toString();
 		/*if(buf.hasRemaining()){
 			buf.compact();

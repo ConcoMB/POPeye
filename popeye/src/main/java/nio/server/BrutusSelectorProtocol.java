@@ -10,11 +10,12 @@ import java.util.HashMap;
 
 import proxy.Writeable;
 import service.Brutus;
+import connection.BrutusConnection;
+import connection.Connection;
 
 public class BrutusSelectorProtocol implements SelectorProtocol, Writeable {
     private int bufSize; // Size of I/O buffer
 	private Selector selector;
-	private HashMap<SocketChannel,Brutus> configMap=new HashMap<SocketChannel,Brutus>();
 
     public BrutusSelectorProtocol(int bufSize, Selector selector) {
         this.bufSize = bufSize;
@@ -27,16 +28,17 @@ public class BrutusSelectorProtocol implements SelectorProtocol, Writeable {
         // Register the selector with new channel for read and attach byte
         // buffer
         System.out.println("BRUTUS: Accepted connection ->"+clntChan.socket().getRemoteSocketAddress());
-        configMap.put(clntChan, new Brutus(this,clntChan));
-        clntChan.register(key.selector(), SelectionKey.OP_READ, new DoubleBuffer(bufSize));
-        writeToClient(clntChan, ":) Brutus says hi\r\n");
-        writeToClient(clntChan, "Password:");
+        BrutusConnection con = new BrutusConnection(bufSize,this,clntChan);
+        clntChan.register(key.selector(), SelectionKey.OP_READ, con);
+        writeToClient(con, ":) Brutus says hi\r\n");
+        writeToClient(con, "Password:");
     }
     
     public void handleRead(SelectionKey key) throws IOException, InterruptedException {
+    	BrutusConnection con = ((BrutusConnection) key.attachment());
         // Client socket channel has pending data
         SocketChannel channel = (SocketChannel) key.channel();
-        StringBuffer sBuf = ((DoubleBuffer) key.attachment()).getReadBuffer();
+        StringBuffer sBuf = con.getClientBuffer().getReadBuffer();
         ByteBuffer buf=ByteBuffer.allocate(bufSize);
         long bytesRead = channel.read(buf);
         buf.flip();
@@ -53,22 +55,22 @@ public class BrutusSelectorProtocol implements SelectorProtocol, Writeable {
         	System.out.println("BRUTUS: C--> "+line);
         	sBuf.delete(0, sBuf.length());
         	//System.out.print("READ:"+bytesRead+" "+line);
-        	configMap.get(channel).apply(line.trim());
+        	con.getBrutus().apply(line.trim());
         }
     }
 
     private void disconnectClient(SocketChannel client) throws IOException {
-    	configMap.remove(client);
     	client.close();
 	}
     
     public void handleWrite(SelectionKey key) throws IOException {
+    	BrutusConnection con = ((BrutusConnection) key.attachment());
         /*
          * Channel is available for writing, and key is valid (i.e., client
          * channel not closed).
          */
         // Retrieve data read earlier
-        StringBuffer sBuf = ((DoubleBuffer) key.attachment()).getWriteBuffer();
+        StringBuffer sBuf = con.getClientBuffer().getWriteBuffer();
         //buf.flip(); // Prepare buffer for writing
         SocketChannel channel = (SocketChannel) key.channel();
         //System.out.println("write ("+sBuf+")");
@@ -86,19 +88,18 @@ public class BrutusSelectorProtocol implements SelectorProtocol, Writeable {
         buf.clear();
     }
 
-	public void writeToClient(SocketChannel client, String line) throws IOException, InterruptedException {
+	public void writeToClient(Connection con, String line) throws IOException, InterruptedException {
 		String message=line.length()>30?line.substring(0, 30)+"...\n":line;
 		System.out.print("BRUTUS: S--> "+message);
-		writeToChannel(client,line);
+		writeToChannel(con.getClient(),line, con.getClientBuffer().getWriteBuffer());
 	}
 
-	public void writeToServer(SocketChannel client, String line) throws IOException, InterruptedException {
+	public void writeToServer(Connection con, String line) throws IOException, InterruptedException {
 		//NADA
 	}
 	
-	private void writeToChannel(SocketChannel channel, String line) throws InterruptedException, IOException{
+	private void writeToChannel(SocketChannel channel, String line, StringBuffer sBuf) throws InterruptedException, IOException{
 		SelectionKey key=channel.keyFor(selector);
-		StringBuffer sBuf=((DoubleBuffer) key.attachment()).getWriteBuffer();
 		String before=sBuf.toString();
 		/*if(buf.hasRemaining()){
 			buf.compact();
