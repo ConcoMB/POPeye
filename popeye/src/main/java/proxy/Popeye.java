@@ -109,7 +109,7 @@ public class Popeye {
 		String command[] = line.split(" ");
 		Command com;
 		try{
-			com = Command.valueOf(command[0].trim());
+			com = Command.valueOf(command[0].trim().toUpperCase());
 		}catch(IllegalArgumentException e){
 			com = Command.UNKNOWN;
 		}
