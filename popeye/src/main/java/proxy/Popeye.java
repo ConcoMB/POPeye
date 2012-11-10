@@ -283,9 +283,9 @@ public class Popeye {
 				}
 				writeMail(mail);
 				//out.writeToClient(client, message);
-				user.getStats().addBytes(bytes);
+				//user.getStats().addBytes(bytes);
 				user.getStats().readEmail();
-				Olivia.addBytes(bytes);
+				//Olivia.addBytes(bytes);
 				Olivia.addEmailsRead();
 				mail=new Mail();
 			}

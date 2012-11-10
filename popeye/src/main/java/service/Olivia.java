@@ -133,10 +133,10 @@ public class Olivia extends Service{
 				switch(v){
 
 				case MINHOUR:
-					writeSimple(OK+" "+user.getHourDenial().getMinHour() +":"+user.getHourDenial().getMinMinute());
+					writeSimple(OK+" "+user.getHourDenial().getMinHour());
 					break;
 				case MAXHOUR:
-					writeSimple(OK+" "+user.getHourDenial().getMaxHour() +":"+user.getHourDenial().getMaxMinute());
+					writeSimple(OK+" "+user.getHourDenial().getMaxHour());
 					break;
 				case QUANT: 
 					writeSimple(OK+" "+user.getQuantityDenial().getTop());

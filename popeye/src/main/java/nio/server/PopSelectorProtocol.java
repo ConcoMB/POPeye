@@ -11,6 +11,8 @@ import java.text.ParseException;
 
 import proxy.Popeye;
 import proxy.Writeable;
+import service.Olivia;
+import user.User;
 import config.Configuration;
 import connection.Connection;
 import connection.PopConnection;
@@ -90,12 +92,12 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 			if(!isClient){
 				//SERVER DISCONNECTED
 				System.out.println("Server disconnected (client:"+con.getClient().socket().getRemoteSocketAddress()+")");
-				disconnectClient(con);
 			}else{
 				//CLIENT DISCONNECTED
 				System.out.println("Client disconnected:"+channel.socket().getRemoteSocketAddress());
-				disconnectClient(con);
 			}
+			disconnectClient(con);
+			return;
 		} else if (bytesRead > 0) {
 			String line=BufferUtils.bufferToString(buf);
 			sBuf.append(line);
@@ -181,6 +183,7 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 			String message=line.length()>30?line.substring(0, 30)+"...\n":line;
 			System.out.print("S--> "+message + " to " +getUser(pcon));
 			writeToChannel(client,line,pcon.getClientBuffer().getWriteBuffer());
+			countBytes(pcon, line.length());
 		}
 	}
 
@@ -195,6 +198,15 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 		System.out.print("C ("+getUser(pcon)+")--> "+message);
 		SocketChannel server=pcon.getServer();
 		writeToChannel(server, line, pcon.getServerBuffer().getWriteBuffer());
+		countBytes(pcon, line.length());
+	}
+	
+	private void countBytes(PopConnection con, int size){
+		Olivia.addBytes(size);
+		User u =con.getProxy().getCurrentUser();
+		if(u!=null){
+			u.getStats().addBytes(size);
+		}
 	}
 
 	private void writeToChannel(SocketChannel channel, String line, StringBuffer sBuf) throws InterruptedException, IOException{
