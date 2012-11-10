@@ -382,4 +382,8 @@ public class Popeye {
 	public static boolean isBlocked(String ip){
 		return blockedIPs.contains(ip);
 	}
+	
+	public static Map<String,User> getUsers(){
+		return users;
+	}
 }

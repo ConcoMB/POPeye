@@ -1,7 +1,6 @@
 package service;
 
 import java.io.IOException;
-import java.nio.channels.SocketChannel;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,6 +13,7 @@ import proxy.transform.VowelTransformer;
 import service.Brutus.BrutusVariable;
 import user.Statistics;
 import user.User;
+import connection.Connection;
 
 public class Olivia extends Service{
 
@@ -24,8 +24,8 @@ public class Olivia extends Service{
 		CHECK_VAR;
 	}
 
-	public Olivia(Writeable out, SocketChannel channel) throws IOException{
-		super(out, channel);
+	public Olivia(Writeable out, Connection con) throws IOException{
+		super(out, con);
 	}
 
 
@@ -251,7 +251,7 @@ public class Olivia extends Service{
 	private void writeFullStats() throws IOException, InterruptedException{
 		writeOK();
 		writeSimple("Connections: " + connections);
-		writeSimple("Connections failed : " + (connection-successfulConnections));
+		writeSimple("Connections failed : " + (connections-successfulConnections));
 		writeSimple("Bytes transferred: " + bytesTransferred);
 		writeSimple("Emails erased: " + emailsErased);
 		writeSimple("Emails read: " + emailsRead);
