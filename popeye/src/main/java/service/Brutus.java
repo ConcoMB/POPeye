@@ -80,28 +80,22 @@ public class Brutus extends Service {
 
 			switch (v) {
 			case MINHOUR:
-				String[] s = val.split(":");
-				h = Integer.valueOf(s[0]);
-				m = Integer.valueOf(s[1]);
-				if (!validateHour(h) || !validateMin(m)) {
+				h = Integer.valueOf(val);
+				if (!validateHour(h)) {
 					// ERROR
 					invalidConfig();
 					return;
 				} else {
 					hd.setMinHour(h);
-					hd.setMinMinute(m);
 				}
 				break;
 			case MAXHOUR:
-				String[] s2 = val.split(":");
-				h = Integer.valueOf(s2[0]);
-				m = Integer.valueOf(s2[1]);
-				if (!validateHour(h) || !validateMin(m)) {
+				h = Integer.valueOf(val);
+				if (!validateHour(h) ) {
 					invalidConfig();
 					return;
 				} else {
 					hd.setMaxHour(h);
-					hd.setMaxMinute(h);
 				}
 				break;
 
