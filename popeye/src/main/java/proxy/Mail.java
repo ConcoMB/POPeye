@@ -19,7 +19,7 @@ import proxy.transform.VowelTransformer;
 public class Mail {
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BufferedReader b = new BufferedReader(new FileReader("./mails/examples/grande"));
+		BufferedReader b = new BufferedReader(new FileReader("./mails/examples/foto.txt"));
 		Mail m = new Mail();
 		String line;
 
@@ -32,8 +32,8 @@ public class Mail {
 			System.out.println(image.startLine);
 		}
 		AnonymousTransformer.getInstance().transform(m);
-		VowelTransformer.getInstance().transform(m);
-		//ImageRotationTransformer.getInstance().transform(m);
+		//VowelTransformer.getInstance().transform(m);
+		ImageRotationTransformer.getInstance().transform(m);
 		//		ExternalAppExecuter a = new ExternalAppExecuter("./apps/toUpper.o");
 		//		a.execute(m);
 	}
