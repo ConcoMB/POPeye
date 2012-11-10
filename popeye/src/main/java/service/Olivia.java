@@ -268,8 +268,11 @@ public class Olivia extends Service{
 		Map<String, User> m = Popeye.getUsers();
 		for(Map.Entry<String, User> e : m.entrySet()){
 			String userName = e.getKey();
-			String userAccesses = String.valueOf(e.getValue().getStats().getAccesses());
-			writeSimple("User: " +userName+ " Accesses: " +userAccesses);
+			int userAccesses = e.getValue().getStats().getAccesses();
+			int userSuccAcc = e.getValue().getStats().getSuccessfulAccesses();
+			int fails=  e.getValue().getStats().getAccessFailures();
+			writeSimple("User: " +userName+ " Accesses: " +userAccesses+" (Successfull accesses: " +userSuccAcc+
+					" fails: "+ fails+")");
 		}
 	}
 
