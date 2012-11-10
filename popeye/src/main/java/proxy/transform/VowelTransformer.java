@@ -14,13 +14,14 @@ public class VowelTransformer implements MailTransformer {
 	private VowelTransformer(){}
 
 	public void transform(Mail mail) throws IOException {
-		File file = new File("./mail"+mail.id()+"T.txt");
+		File file = new File("./mails/mail"+mail.id()+"T.txt");
 		file.createNewFile();
-		File file2 = new File("./mail"+mail.id()+".txt");
+		File file2 = new File("./mails/mail"+mail.id()+".txt");
 		RandomAccessFile reader = new RandomAccessFile("./mails/mail"+mail.id()+".txt", "r");
 		RandomAccessFile writer = new RandomAccessFile("./mails/mail"+mail.id()+"T.txt", "rw");
 		String line;
 		int i = 1;
+		boolean qp = mail.hasQP();
 		writer.write((reader.readLine()+"\r\n").getBytes());
 		int bodyEnd = mail.getBodyEnd();
 		int bodyBeg = mail.getBodyIndex();
@@ -30,29 +31,44 @@ public class VowelTransformer implements MailTransformer {
 		while((line=reader.readLine())!=null){
 			if(i==bodyBeg){
 				while(i<bodyEnd){
-					writer.write((leet(line)+"\r\n").getBytes());
+					if(line==null){
+						file2.delete();
+						file.renameTo(file2);
+						return;
+					}
+					writer.write((leet(line, qp)+"\r\n").getBytes());
 					i++;
 					line=reader.readLine();
 				}
 			}
 			if(i==htmlBeg){
 				while(i<bodyEnd){
+					if(line==null){
+						file2.delete();
+						file.renameTo(file2);
+						return;
+					}
 					writer.write((leetHTML(line)+"\r\n").getBytes());
 					i++;
-					line=reader.readLine();
+						line=reader.readLine();
 				}
 			}
 			i++;
-			writer.write((line+"\r\n").getBytes());
+			if(line!=null){
+				writer.write((line+"\r\n").getBytes());
+			}
 		}
 		file2.delete();
 		file.renameTo(file2);
 	}
 
-	private String leet(String line){
+	private String leet(String line, boolean qp){
 		char[] c = line.toCharArray();
 		for(int i =0; i<c.length; i++){
 			switch(c[i]){
+			case '=':
+				i+=2;
+				break;
 			case 'a':
 			case 'A':
 				c[i]='4';

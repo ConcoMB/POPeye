@@ -19,7 +19,7 @@ import proxy.transform.VowelTransformer;
 public class Mail {
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BufferedReader b = new BufferedReader(new FileReader("./foto.txt"));
+		BufferedReader b = new BufferedReader(new FileReader("./mails/examples/qp.txt"));
 		Mail m = new Mail();
 		String line;
 
@@ -33,7 +33,7 @@ public class Mail {
 		}
 		AnonymousTransformer.getInstance().transform(m);
 		VowelTransformer.getInstance().transform(m);
-		ImageRotationTransformer.getInstance().transform(m);
+		//ImageRotationTransformer.getInstance().transform(m);
 //		ExternalAppExecuter a = new ExternalAppExecuter("./apps/toUpper.o");
 //		a.execute(m);
 	}
@@ -41,7 +41,7 @@ public class Mail {
 
 	private static final String FROM = "From:", DATE="Date: ", MULTIPART= "Content-Type: multipart", CONTENTTYPE="Content-Type: ",
 			TEXT="Content-Type: text/plain", CTE= "Content-Transfer-Encoding: ", PIC="Content-Type: image", 
-			CONTENTDISP="Content-Disposition: ", HTML="Content-Type: text/html";
+			CONTENTDISP="Content-Disposition: ", HTML="Content-Type: text/html", Q_PRINT="Content-Transfer-Encoding: quoted-printable";
 	private static int serial;
 	
 	private String date ;
@@ -54,6 +54,7 @@ public class Mail {
 	private List<MailImage> photos = new ArrayList<MailImage>();
 	private RandomAccessFile reader, writer;
 	private int size;
+	private boolean quotedPrint;
 
 	public Mail() throws IOException {
 		id=(serial++)%1000;
@@ -66,7 +67,7 @@ public class Mail {
 
 	public void add(String line) throws IOException{
 		size+=line.length();
-		writer.write((line+"\r\n").getBytes());
+		writer.write((line).getBytes());
 	}
 
 	public int getSize() {
@@ -81,18 +82,18 @@ public class Mail {
 		writer.close();
 		String line;
 		while((line=reader.readLine())!=null){
-			if(line.startsWith(FROM)){
+			if(line.toLowerCase().startsWith(FROM.toLowerCase())){
 				//while(!line.contains("<")){i++;}
 				//from = line.split("<")[1].split(">")[0];
 				fromLine=i;
 				from=line.split(FROM)[1];
-			}else if(line.startsWith(DATE)){
+			}else if(line.toLowerCase().startsWith(DATE.toLowerCase())){
 				String[] d2 = line.split(" ");
 				date = d2[2]+"/"+parseMonth(d2[3])+"/"+d2[4];
 				//			}else if(nextBound!=null && line.equals("--"+nextBound)){
 				//				bounds.add(nextBound);
 				//				flag=true;
-			}else if(line.startsWith(CONTENTTYPE)){
+			}else if(line.toLowerCase().startsWith(CONTENTTYPE.toLowerCase())){
 				contentTypes.add(line.split(CONTENTTYPE)[1]);
 				if(line.startsWith(MULTIPART)){
 					String b;
@@ -105,7 +106,7 @@ public class Mail {
 						b=b.split("\"")[1];
 					}
 					bounds.add(b);
-				}else if (line.startsWith(TEXT)){
+				}else if (line.toLowerCase().startsWith(TEXT.toLowerCase())){
 					while(line!=null & !line.equals("")){
 						i++;
 						line=reader.readLine();
@@ -127,7 +128,7 @@ public class Mail {
 						}
 					}
 					bodyEnd=i;
-				}else if(line.startsWith(PIC)){
+				}else if(line.toLowerCase().startsWith(PIC.toLowerCase())){
 					i++;
 					line=reader.readLine();
 					while(line!=null && !line.equals("")){
@@ -147,8 +148,11 @@ public class Mail {
 					image.endLine=i-1;
 					//photo+=line;
 					photos.add(image);
-				}else if(line.startsWith(HTML)){
+				}else if(line.toLowerCase().startsWith(HTML.toLowerCase())){
 					while(line!=null && !line.equals("")){
+						if(line.toLowerCase().contains(Q_PRINT.toLowerCase())){
+							quotedPrint=true;
+						}
 						i++;
 						line=reader.readLine();
 
@@ -174,11 +178,11 @@ public class Mail {
 					String line2=reader.readLine();
 					String line3=reader.readLine();
 
-					if(line2.startsWith(CONTENTDISP)){
+					if(line2.toLowerCase().startsWith(CONTENTDISP.toLowerCase())){
 						i++;
 						cd=true;
 						line=line2;
-					}else if(line3.startsWith(CONTENTDISP)){
+					}else if(line3.toLowerCase().startsWith(CONTENTDISP.toLowerCase())){
 						i+=2;
 						cd=true;
 						line=line3;
@@ -311,5 +315,9 @@ public class Mail {
 	
 	public int id(){
 		return id;
+	}
+
+	public boolean hasQP() {
+		return quotedPrint;
 	}
 }

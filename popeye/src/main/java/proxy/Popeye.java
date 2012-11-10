@@ -321,7 +321,7 @@ public class Popeye {
 	}
 
 	private void writeMail(Mail mail2) throws IOException, InterruptedException {
-		RandomAccessFile r = new RandomAccessFile("./mail0.txt", "r");
+		RandomAccessFile r = new RandomAccessFile("./mails/mail"+mail.id()+".txt", "r");
 		String s;
 		while((s=r.readLine())!=null){
 			out.writeToClient(client, s+"\r\n");
