@@ -11,6 +11,8 @@ import java.text.ParseException;
 
 import proxy.Popeye;
 import proxy.Writeable;
+import service.Olivia;
+import user.User;
 import config.Configuration;
 import connection.Connection;
 import connection.PopConnection;
@@ -90,12 +92,12 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 			if(!isClient){
 				//SERVER DISCONNECTED
 				System.out.println("Server disconnected (client:"+con.getClient().socket().getRemoteSocketAddress()+")");
-				disconnectClient(con);
 			}else{
 				//CLIENT DISCONNECTED
 				System.out.println("Client disconnected:"+channel.socket().getRemoteSocketAddress());
-				disconnectClient(con);
 			}
+			disconnectClient(con);
+			return;
 		} else if (bytesRead > 0) {
 			String line=BufferUtils.bufferToString(buf);
 			sBuf.append(line);
@@ -142,11 +144,19 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 	private void disconnectClient(PopConnection con) throws IOException {
 		SocketChannel server=con.getServer();
 		if(server!=null){
-			server.close();
+			disconnect(server);
 		}
-		con.getClient().close();
+		disconnect(con.getClient());
 	}
 
+	public void disconnect(SocketChannel channel) throws IOException{
+		SelectionKey key=channel.keyFor(selector);
+		if(key!=null){
+			key.cancel();
+		}
+		channel.close();
+	}
+	
 	public void handleWrite(SelectionKey key) throws IOException {
 		PopConnection con = ((PopConnection) key.attachment());
 		/*
@@ -180,6 +190,7 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 		}else{
 			String message=line.length()>30?line.substring(0, 30)+"...\n":line;
 			writeToChannel(client,line,pcon.getClientBuffer().getWriteBuffer());
+			countBytes(pcon, line.length());
 		}
 	}
 
@@ -193,6 +204,15 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 		String message=line.length()>30?line.substring(0, 30)+"...\n":line;
 		SocketChannel server=pcon.getServer();
 		writeToChannel(server, line, pcon.getServerBuffer().getWriteBuffer());
+		countBytes(pcon, line.length());
+	}
+	
+	private void countBytes(PopConnection con, int size){
+		Olivia.addBytes(size);
+		User u =con.getProxy().getCurrentUser();
+		if(u!=null){
+			u.getStats().addBytes(size);
+		}
 	}
 
 	private void writeToChannel(SocketChannel channel, String line, StringBuffer sBuf) throws InterruptedException, IOException{

@@ -1,0 +1,24 @@
+.
+Buenos Aires, Argentina
+=2D-=20
+
+hola pepe! este es un mail plain text de una =FAnica parte.
+
+X-KMail-MDN-Sent:  
+X-KMail-SignatureState: N
+X-KMail-EncryptionState: N
+X-Status: RQ
+Status: RO
+Message-Id: <201106142308.29342.juan@example.org>
+X-KMail-Recipients: alguien@example.org
+Content-Transfer-Encoding: quoted-printable
+  charset="iso-8859-1"
+Content-Type: Text/Plain;
+MIME-Version: 1.0
+X-KMail-QuotePrefix: > 
+User-Agent: KMail/1.13.6 (Linux/2.6.38-8-generic; KDE/4.6.2; x86_64; ; )
+Date: Tue, 14 Jun 2011 23:08:28 -0300
+Subject: hola pepe
+To: alguien@example.org
+From: "Juan F. Codagnone" <juan@example.org>
++OK 637 octets

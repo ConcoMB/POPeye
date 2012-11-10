@@ -48,6 +48,11 @@ public class ExternalAppExecuter {
 		bw.close();
 		process.waitFor();
 		int c;
+		if(process.exitValue()!=0){
+			file.delete();
+			r.close();
+			return;
+		}
 		
 		RandomAccessFile w = new RandomAccessFile("./mails/mail"+mail.id()+"T.txt", "rw");
 		//StringBuffer result = new StringBuffer();

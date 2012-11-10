@@ -15,9 +15,7 @@ import user.User;
 import connection.Connection;
 
 public class Brutus extends Service {
-
-	private User user;
-
+	
 	enum BrutusVariable {
 		MINHOUR, MAXHOUR, QUANT, SERVER, ERASE_DATE, ERASE_FROM, ERASE_CONTENTTYPE, ERASE_MINSIZE, ERASE_MAXSIZE, ERASE_ATTACHMENT, ERASE_HEADER, ERASE_PICTURE, BLOCK_IP, ANONYMOUS_T, VOWELS_T, IMAGE_T, ADD_APP, DEL_APP;
 	}
@@ -27,12 +25,12 @@ public class Brutus extends Service {
 	}
 
 	public void apply(String command) throws IOException, InterruptedException {
-
+		User user=null;
 		// check correctness of command
 		if (!handleConnection(command)) {
 			return;
 		}
-		String[] spl = command.split(" ");
+		String[] spl = command.split(" ",6);
 		if (spl.length == 1) {
 			if (command.equals("QUIT")) {
 				byebye();
