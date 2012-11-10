@@ -14,11 +14,11 @@ public class VowelTransformer implements MailTransformer {
 	private VowelTransformer(){}
 
 	public void transform(Mail mail) throws IOException {
-		File file = new File("./mailT.txt");
+		File file = new File("./mail"+mail.id()+"T.txt");
 		file.createNewFile();
-		File file2 = new File("./mail0.txt");
-		RandomAccessFile reader = new RandomAccessFile("./mail0.txt", "r");
-		RandomAccessFile writer = new RandomAccessFile("./mailT.txt", "rw");
+		File file2 = new File("./mail"+mail.id()+".txt");
+		RandomAccessFile reader = new RandomAccessFile("./mail"+mail.id()+".txt", "r");
+		RandomAccessFile writer = new RandomAccessFile("./mail"+mail.id()+"T.txt", "rw");
 		String line;
 		int i = 1;
 		writer.write((reader.readLine()+"\r\n").getBytes());

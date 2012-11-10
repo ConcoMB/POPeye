@@ -48,11 +48,11 @@ public class ImageRotationTransformer implements MailTransformer{
 			return;
 		}
 
-		File file = new File("./mailT.txt");
+		File file = new File("./mail"+mail.id()+"T.txt");
 		file.createNewFile();
-		File file2 = new File("./mail0.txt");
-		RandomAccessFile reader = new RandomAccessFile("./mail0.txt", "r");
-		RandomAccessFile writer = new RandomAccessFile("./mailT.txt", "rw");
+		File file2 = new File("./mail"+mail.id()+".txt");
+		RandomAccessFile reader = new RandomAccessFile("./mail"+mail.id()+".txt", "r");
+		RandomAccessFile writer = new RandomAccessFile("./mail"+mail.id()+"T.txt", "rw");
 		String line="";
 		int i = 0;
 		Iterator<MailImage> iter = mail.getImages().iterator();

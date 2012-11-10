@@ -42,8 +42,10 @@ public class Mail {
 	private static final String FROM = "From:", DATE="Date: ", MULTIPART= "Content-Type: multipart", CONTENTTYPE="Content-Type: ",
 			TEXT="Content-Type: text/plain", CTE= "Content-Transfer-Encoding: ", PIC="Content-Type: image", 
 			CONTENTDISP="Content-Disposition: ", HTML="Content-Type: text/html";
-
-	private String date ; 
+	private static int serial;
+	
+	private String date ;
+	private int id;
 	//	private String subject; // "Subject: ";
 	private String from;
 	private int fromLine;
@@ -54,11 +56,12 @@ public class Mail {
 	private int size;
 
 	public Mail() throws IOException {
-		File f = new File("./mail0.txt");
+		id=(serial++)%1000;
+		File f = new File("./mail"+id+".txt");
 		f.delete();
 		f.createNewFile();
-		reader = new RandomAccessFile("./mail0.txt", "r");
-		writer = new RandomAccessFile("./mail0.txt", "rw");
+		reader = new RandomAccessFile("./mail"+id+".txt", "r");
+		writer = new RandomAccessFile("./mail"+id+".txt", "rw");
 	}
 
 	public void add(String line) throws IOException{
@@ -304,5 +307,9 @@ public class Mail {
 			}
 		}
 		return false;
+	}
+	
+	public int id(){
+		return id;
 	}
 }

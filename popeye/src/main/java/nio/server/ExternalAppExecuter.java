@@ -37,10 +37,10 @@ public class ExternalAppExecuter {
 		BufferedReader br = new BufferedReader(isr);
 		BufferedWriter bw = new BufferedWriter(osw);
 		
-		File file = new File("./mailT.txt");
+		File file = new File("./mail"+mail.id()+"T.txt");
 		file.createNewFile();
-		File file2 = new File("./mail0.txt");
-		RandomAccessFile r = new RandomAccessFile("./mail0.txt", "r");
+		File file2 = new File("./mail"+mail.id()+".txt");
+		RandomAccessFile r = new RandomAccessFile("./mail"+mail.id()+".txt", "r");
 		String s;
 		while((s=r.readLine())!=null){
 			bw.write(s);
@@ -49,7 +49,7 @@ public class ExternalAppExecuter {
 		process.waitFor();
 		int c;
 		
-		RandomAccessFile w = new RandomAccessFile("./mailT.txt", "rw");
+		RandomAccessFile w = new RandomAccessFile("./mail"+mail.id()+"T.txt", "rw");
 		//StringBuffer result = new StringBuffer();
 		//TODO probar esto
 		while ((c = br.read()) != -1) {
