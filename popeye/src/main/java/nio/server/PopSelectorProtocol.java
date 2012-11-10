@@ -175,14 +175,18 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 			connection.put(client, true);
 		}else{
 			String message=line.length()>30?line.substring(0, 30)+"...\n":line;
-			System.out.print("S--> "+message);
+			System.out.print("S--> "+message + " to " +getUser(client));
 			writeToChannel(client,line);
 		}
 	}
 
+	private String getUser(SocketChannel client) {
+		return proxyMap.get(client).getCurrentUserName();
+	}
+
 	public void writeToServer(SocketChannel client, String line) throws IOException, InterruptedException {
 		String message=line.length()>30?line.substring(0, 30)+"...\n":line;
-		System.out.print("C--> "+message);
+		System.out.print("C ("+getUser(client)+")--> "+message);
 		SocketChannel server=serverMap.get(client);
 		writeToChannel(server, line);
 	}

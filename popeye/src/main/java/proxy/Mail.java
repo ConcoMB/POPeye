@@ -57,11 +57,11 @@ public class Mail {
 
 	public Mail() throws IOException {
 		id=(serial++)%1000;
-		File f = new File("./mail"+id+".txt");
+		File f = new File("./mails/mail"+id+".txt");
 		f.delete();
 		f.createNewFile();
-		reader = new RandomAccessFile("./mail"+id+".txt", "r");
-		writer = new RandomAccessFile("./mail"+id+".txt", "rw");
+		reader = new RandomAccessFile("./mails/mail"+id+".txt", "r");
+		writer = new RandomAccessFile("./mails/mail"+id+".txt", "rw");
 	}
 
 	public void add(String line) throws IOException{
@@ -296,7 +296,7 @@ public class Mail {
 	}
 
 	public boolean containsHeader(String header) throws IOException {
-		RandomAccessFile r = new RandomAccessFile("./mail0.txt", "r");
+		RandomAccessFile r = new RandomAccessFile("./mails/mail"+id+".txt", "r");
 		String line;
 		while((line=r.readLine())!=null){
 			if(line.equals("") || line.equals("\r")|| line.equals("\r\n")){

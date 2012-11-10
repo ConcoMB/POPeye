@@ -15,12 +15,12 @@ public class AnonymousTransformer implements MailTransformer {
 	
 	public void transform(Mail mail) throws IOException {		
 		int index = mail.getFromLine();
-		File file = new File("./mail"+mail.id()+"T.txt");
+		File file = new File("./mails/mail"+mail.id()+"T.txt");
 		file.createNewFile();
-		File file2 = new File("./mail"+mail.id()+".txt");
+		File file2 = new File("./mails/mail"+mail.id()+".txt");
 
-		RandomAccessFile reader = new RandomAccessFile("./mail"+mail.id()+".txt", "r");
-		RandomAccessFile writer = new RandomAccessFile("./mail"+mail.id()+"T.txt", "rw");
+		RandomAccessFile reader = new RandomAccessFile("./mails/mail"+mail.id()+".txt", "r");
+		RandomAccessFile writer = new RandomAccessFile("./mails/mail"+mail.id()+"T.txt", "rw");
 		String line;
 		int i = 0;
 		while((line=reader.readLine())!=null){

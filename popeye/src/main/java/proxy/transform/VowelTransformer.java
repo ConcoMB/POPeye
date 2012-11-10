@@ -17,8 +17,8 @@ public class VowelTransformer implements MailTransformer {
 		File file = new File("./mail"+mail.id()+"T.txt");
 		file.createNewFile();
 		File file2 = new File("./mail"+mail.id()+".txt");
-		RandomAccessFile reader = new RandomAccessFile("./mail"+mail.id()+".txt", "r");
-		RandomAccessFile writer = new RandomAccessFile("./mail"+mail.id()+"T.txt", "rw");
+		RandomAccessFile reader = new RandomAccessFile("./mails/mail"+mail.id()+".txt", "r");
+		RandomAccessFile writer = new RandomAccessFile("./mails/mail"+mail.id()+"T.txt", "rw");
 		String line;
 		int i = 1;
 		writer.write((reader.readLine()+"\r\n").getBytes());

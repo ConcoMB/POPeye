@@ -32,8 +32,8 @@ public class User {
 		eraseConditions=new EraseConditions();
 		hourDenial.setMinHour(11);
 		//transformers.add(ImageRotationTransformer.getInstance());
-		//transformers.add(AnonymousTransformer.getInstance());
-		//transformers.add(VowelTransformer.getInstance());
+		transformers.add(AnonymousTransformer.getInstance());
+		transformers.add(VowelTransformer.getInstance());
 		//quantityDenial.setTop(1);
 		//hourDenial.setMaxMinute(5);
 //		apps.add(new ExternalAppExecuter("/Users/Conco/popeye/popeye/apps/toUpper.o"));
