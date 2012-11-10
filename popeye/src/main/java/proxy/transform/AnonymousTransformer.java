@@ -1,5 +1,10 @@
 package proxy.transform;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+
 import proxy.Mail;
 
 public class AnonymousTransformer implements MailTransformer {
@@ -8,15 +13,26 @@ public class AnonymousTransformer implements MailTransformer {
 	
 	private AnonymousTransformer(){}
 	
-	public void transform(Mail mail) {		
+	public void transform(Mail mail) throws IOException {		
 		int index = mail.getFromLine();
-		String[] s = mail.getMessage().split("\n");
-		s[index]="From: Popeye's spinach <guess@who.com>\r";
-		String m = "";
-		for(String l:s){
-			m+=l+"\n";
+		File file = new File("./mails/mail"+mail.id()+"T.txt");
+		file.createNewFile();
+		File file2 = new File("./mails/mail"+mail.id()+".txt");
+
+		RandomAccessFile reader = new RandomAccessFile("./mails/mail"+mail.id()+".txt", "r");
+		RandomAccessFile writer = new RandomAccessFile("./mails/mail"+mail.id()+"T.txt", "rw");
+		String line;
+		int i = 0;
+		while((line=reader.readLine())!=null){
+			if(i==index){
+				writer.write(("From: Popeye's spinach <guess@who.com>\r\n").getBytes());
+			}else{
+				writer.write((line+"\r\n").getBytes());
+			}
+			i++;
 		}
-		mail.setMessage(m);
+		file2.delete();
+		file.renameTo(file2);
 	}
 
 	public static MailTransformer getInstance() {

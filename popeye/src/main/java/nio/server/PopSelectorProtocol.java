@@ -53,6 +53,15 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 
 	private void connectToServer(PopConnection con, String serverName) throws IOException{
 		SocketChannel clntChan = con.getClient();
+		SocketChannel server=con.getServer();
+		if(server!=null){
+			String address=server.socket().getRemoteSocketAddress().toString();
+			if(address.substring(0, address.indexOf('/')).equals(serverName)){
+				System.out.println("same address");
+				//return;
+			}
+			con.setConnection(false);
+		}
 		System.out.println("Server:"+serverName+" port:"+defaultPort);
 		SocketChannel hostChan = SocketChannel.open(new InetSocketAddress(serverName, defaultPort));
 		hostChan.configureBlocking(false); // Must be nonblocking to register
@@ -170,18 +179,22 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 			pcon.setConnection(true);
 		}else{
 			String message=line.length()>30?line.substring(0, 30)+"...\n":line;
-			System.out.print("S--> "+message);
-			writeToChannel(client,line, con.getClientBuffer().getWriteBuffer());
+			System.out.print("S--> "+message + " to " +getUser(pcon));
+			writeToChannel(client,line,pcon.getClientBuffer().getWriteBuffer());
 		}
+	}
+
+	private String getUser(PopConnection con) {
+		return con.getProxy().getCurrentUserName();
 	}
 
 	public void writeToServer(Connection con, String line) throws IOException, InterruptedException {
 		PopConnection pcon=(PopConnection)con;
+		SocketChannel client=con.getClient();
 		String message=line.length()>30?line.substring(0, 30)+"...\n":line;
-		System.out.print("C--> "+message);
+		System.out.print("C ("+getUser(pcon)+")--> "+message);
 		SocketChannel server=pcon.getServer();
-		StringBuffer buffer = pcon.getServerBuffer().getWriteBuffer();
-		writeToChannel(server, line, buffer);
+		writeToChannel(server, line, pcon.getServerBuffer().getWriteBuffer());
 	}
 
 	private void writeToChannel(SocketChannel channel, String line, StringBuffer sBuf) throws InterruptedException, IOException{

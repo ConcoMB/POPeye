@@ -1,5 +1,6 @@
 package user;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -52,7 +53,7 @@ public class EraseConditions {
 	public Set<String> getGeneralHeaders(){
 		return generalHeaders;
 	}
-	
+
 	public EraseConditions() {
 		// DEFAULT VALUES?
 	}
@@ -108,10 +109,14 @@ public class EraseConditions {
 		} else if (withPicture == -1 && mail.getImages().size() != 0) {
 			return false;
 		}
-		
+
 		for(String header: generalHeaders){
-			if(mail.containsHeader(header)){
-				return false;
+			try{
+				if(mail.containsHeader(header)){
+					return false;
+				}
+			}catch(IOException e){
+
 			}
 		}
 		return true;

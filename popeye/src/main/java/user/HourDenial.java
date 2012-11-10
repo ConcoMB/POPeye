@@ -31,13 +31,27 @@ public class HourDenial implements Denial{
 		String[] hhmm=time.split(":");
 		int h = Integer.valueOf(hhmm[0]);
 		int m = Integer.valueOf(hhmm[1]);
-
-		if((minHour!=-1 && h<minHour) || (maxHour!=-1 && h>maxHour)){
-			return true;
+        //TODO arreglar esto
+		if(minHour!=-1 && maxHour!=-1 && minHour<maxHour){
+			if((h<minHour) || (h>maxHour)){
+				return true;
+			}
+		}else if(minHour!=-1 && maxHour!=-1 && minHour>maxHour){
+			if((h<minHour) && (h>maxHour)){
+				return true;
+			}
+		}else if(minHour==-1){
+			if(h>maxHour){
+				return true;
+			}
+		}else if(maxHour==-1){
+			if(h<minHour){
+				return true;
+			}
 		}
-		if((minMinute!=-1 && m<minMinute) || (maxMinute!=-1 && m>maxMinute)){
-			return true;
-		}
+//		if((minMinute!=-1 && m<minMinute) || (maxMinute!=-1 && m>maxMinute)){
+//			return true;
+//		}
 		
 		return false;
 	}
