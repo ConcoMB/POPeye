@@ -2,10 +2,8 @@ package service;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
+import java.util.Map;
 import java.util.Set;
-
-import connection.Connection;
-import connection.OliviaConnection;
 
 import nio.server.ExternalAppExecuter;
 import proxy.Popeye;
@@ -19,15 +17,15 @@ import user.User;
 
 public class Olivia extends Service{
 
-	private static int bytesTransferred, successfulConnections, connections;
+	private static int bytesTransferred, successfulConnections, connections, emailsRead, emailsErased, erasedFailures;
 
 	private enum OliviaCommand{
 		BYTES, CONNECTIONS, FULL,SUCCESSFUL_CONNECTIONS, FAILED_CONNECTIONS, EMAILS_READ, EMAILS_ERASED, ERASE_FAILURES, APPS,
 		CHECK_VAR;
 	}
 
-	public Olivia(Writeable out, Connection con) throws IOException{
-		super(out, con);
+	public Olivia(Writeable out, SocketChannel channel) throws IOException{
+		super(out, channel);
 	}
 
 
@@ -222,7 +220,7 @@ public class Olivia extends Service{
 				case VOWELS_T:
 					writeSimple(user.getTransformers().contains(VowelTransformer.getInstance())?OK+" yes":OK+" no");
 					break;
-				
+
 				default:
 					//ERROR;
 					invalidConfig();					
@@ -246,21 +244,40 @@ public class Olivia extends Service{
 		writeSimple("Emails erased: " + stats.getEmailsErased() );
 		writeSimple("Emails read: " + stats.getEmailsRead() );
 		writeSimple("Erase failures: " + stats.getEraseFailures() );
+
 		writeEndMultiline();
 	}
 
 	private void writeFullStats() throws IOException, InterruptedException{
 		writeOK();
 		writeSimple("Connections: " + connections);
-		writeSimple("Connections failed : " + successfulConnections);
+		writeSimple("Connections failed : " + (connection-successfulConnections));
 		writeSimple("Bytes transferred: " + bytesTransferred);
+		writeSimple("Emails erased: " + emailsErased);
+		writeSimple("Emails read: " + emailsRead);
+		writeSimple("Erase failures: " + erasedFailures );
+
+		writeSimple("Histogram: ");
+		createHistogram();
+
 		writeEndMultiline();
+	}
+
+
+	private void createHistogram() throws IOException, InterruptedException {
+		Map<String, User> m = Popeye.getUsers();
+		for(Map.Entry<String, User> e : m.entrySet()){
+			String userName = e.getKey();
+			String userAccesses = String.valueOf(e.getValue().getStats().getAccesses());
+			writeSimple("User: " +userName+ " Accesses: " +userAccesses);
+		}
 	}
 
 
 	public static void addConnection() {
 		connections++;
 	}
+
 
 	public static void addSuccessfulConnection() {
 		successfulConnections++;
@@ -269,4 +286,16 @@ public class Olivia extends Service{
 	public static void addBytes(int bytes) {
 		bytesTransferred+=bytes;
 	}
+	public static void addEmailsErased() {
+		emailsErased++;
+	}
+
+	public static void addEmailsRead() {
+		emailsRead++;
+	}
+
+	public static void addErasedFailures() {
+		erasedFailures++;
+	}
+
 }
