@@ -179,7 +179,6 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 			pcon.setConnection(true);
 		}else{
 			String message=line.length()>30?line.substring(0, 30)+"...\n":line;
-			System.out.print("S--> "+message + " to " +getUser(pcon));
 			writeToChannel(client,line,pcon.getClientBuffer().getWriteBuffer());
 		}
 	}
@@ -192,7 +191,6 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 		PopConnection pcon=(PopConnection)con;
 		SocketChannel client=con.getClient();
 		String message=line.length()>30?line.substring(0, 30)+"...\n":line;
-		System.out.print("C ("+getUser(pcon)+")--> "+message);
 		SocketChannel server=pcon.getServer();
 		writeToChannel(server, line, pcon.getServerBuffer().getWriteBuffer());
 	}

@@ -34,8 +34,8 @@ public class Mail {
 		AnonymousTransformer.getInstance().transform(m);
 		VowelTransformer.getInstance().transform(m);
 		//ImageRotationTransformer.getInstance().transform(m);
-//		ExternalAppExecuter a = new ExternalAppExecuter("./apps/toUpper.o");
-//		a.execute(m);
+		//		ExternalAppExecuter a = new ExternalAppExecuter("./apps/toUpper.o");
+		//		a.execute(m);
 	}
 
 
@@ -43,7 +43,7 @@ public class Mail {
 			TEXT="Content-Type: text/plain", CTE= "Content-Transfer-Encoding: ", PIC="Content-Type: image", 
 			CONTENTDISP="Content-Disposition: ", HTML="Content-Type: text/html", Q_PRINT="Content-Transfer-Encoding: quoted-printable";
 	private static int serial;
-	
+
 	private String date ;
 	private int id;
 	//	private String subject; // "Subject: ";
@@ -108,6 +108,14 @@ public class Mail {
 					bounds.add(b);
 				}else if (line.toLowerCase().startsWith(TEXT.toLowerCase())){
 					while(line!=null & !line.equals("")){
+						if(line.toLowerCase().startsWith(CONTENTDISP.toLowerCase())){
+							String disp = line.split(CONTENTDISP)[1];
+							disp=disp.split(";")[0];
+							contentDispositions.add(disp);
+						}
+						if(line.toLowerCase().contains(Q_PRINT.toLowerCase())){
+							quotedPrint=true;
+						}
 						i++;
 						line=reader.readLine();
 					}
@@ -132,6 +140,11 @@ public class Mail {
 					i++;
 					line=reader.readLine();
 					while(line!=null && !line.equals("")){
+						if(line.toLowerCase().startsWith(CONTENTDISP.toLowerCase())){
+							String disp = line.split(CONTENTDISP)[1];
+							disp=disp.split(";")[0];
+							contentDispositions.add(disp);
+						}
 						i++;
 						line=reader.readLine();
 					}
@@ -152,6 +165,11 @@ public class Mail {
 					while(line!=null && !line.equals("")){
 						if(line.toLowerCase().contains(Q_PRINT.toLowerCase())){
 							quotedPrint=true;
+						}
+						if(line.toLowerCase().startsWith(CONTENTDISP.toLowerCase())){
+							String disp = line.split(CONTENTDISP)[1];
+							disp=disp.split(";")[0];
+							contentDispositions.add(disp);
 						}
 						i++;
 						line=reader.readLine();
@@ -174,27 +192,14 @@ public class Mail {
 					}
 					htmlEnd=i;
 				}else{
-					//TODO esto
-					boolean cd=false;
-					String line2=reader.readLine();
-					String line3=reader.readLine();
-					if(line2.toLowerCase().startsWith(CONTENTDISP.toLowerCase())){
+					while(!line.equals("") && line!=null){
+						if(line.toLowerCase().startsWith(CONTENTDISP.toLowerCase())){
+							String disp = line.split(CONTENTDISP)[1];
+							disp=disp.split(";")[0];
+							contentDispositions.add(disp);
+						}
 						i++;
-						cd=true;
-					}
-					if(line2.toLowerCase().startsWith(CONTENTDISP.toLowerCase())){
-						i++;
-						cd=true;
-						line=line2;
-					}else if(line3.toLowerCase().startsWith(CONTENTDISP.toLowerCase())){
-						i+=2;
-						cd=true;
-						line=line3;
-					}
-					if(cd){
-						String disp = line.split(CONTENTDISP)[1];
-						disp=disp.split(";")[0];
-						contentDispositions.add(disp);
+						line=reader.readLine();
 					}
 				}
 			}
@@ -316,7 +321,7 @@ public class Mail {
 		}
 		return false;
 	}
-	
+
 	public int id(){
 		return id;
 	}

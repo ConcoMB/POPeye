@@ -43,7 +43,7 @@ public class ExternalAppExecuter {
 		RandomAccessFile r = new RandomAccessFile("./mails/mail"+mail.id()+".txt", "r");
 		String s;
 		while((s=r.readLine())!=null){
-			bw.write(s);
+			bw.write(s+"\r\n");
 		}
 		bw.close();
 		process.waitFor();

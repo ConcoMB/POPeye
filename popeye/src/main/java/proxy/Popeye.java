@@ -45,7 +45,6 @@ public class Popeye {
 	private Mail mail = new Mail();
 	private int mailNum, topLines;
 	//private final static String defaultServer = "pop3.alu.itba.edu.ar";
-	private final static String defaultServer = "pop.aol.com";
 
 	//private final static String defaultServer = "10.6.0.223";
 
@@ -63,17 +62,19 @@ public class Popeye {
 			com = Command.valueOf(command[0]);
 		}catch(IllegalArgumentException e){
 			//decir q todo mal al cli:
+			System.out.println("connection error");
 			return null;
 		}
 		if(com!=Command.USER || state!=State.AUTHORIZATION_USER
 				|| command.length!=2){
 			//decir q todo mal al cli:
+			System.out.println("connection error");
 			return null;
 		}
 		Olivia.addConnection();
 		userName=command[1].trim();
 		user =users.get(userName);
-		System.out.println("usuario:("+userName+")");
+		System.out.println("user connecting:("+userName+")");
 		if(user==null){
 			user=new User(userName);
 			users.put(userName, user);
@@ -82,6 +83,7 @@ public class Popeye {
 		if(user.accessIsBlocked()){
 			user.getStats().addAccessFailure();
 			user=null;
+			System.out.println(userName+" access blocked");
 			return null;
 		}
 		String serverName = user.getServer();
@@ -103,6 +105,7 @@ public class Popeye {
 	
 	public void proxyClient(String line) throws IOException, InterruptedException {
 		//out.write(welcomeLine.getBytes());
+		System.out.println(userName+": "+line);
 		String command[] = line.split(" ");
 		Command com;
 		try{
@@ -114,8 +117,6 @@ public class Popeye {
 
 
 		case PASS:
-			System.out.println("pass");
-			System.out.println(state);
 			if(state!=State.AUTHORIZATION_PASS || lastCommand!=Command.USER
 			|| command.length!=2){
 				unknownCommand(line);
@@ -145,7 +146,6 @@ public class Popeye {
 				unknownCommand(line);
 				return;
 			}
-			System.out.println("RETR");
 			command[1]=command[1].trim();
 			mailNum=Integer.valueOf(command[1]);
 			out.writeToServer(con, line);
@@ -211,8 +211,6 @@ public class Popeye {
 				return;
 			}
 			out.writeToServer(con, line);
-
-
 			lastCommand=com;
 			break;
 		default:
@@ -226,8 +224,8 @@ public class Popeye {
 		switch(lastCommand){
 		case USER:	
 			if(line.startsWith(OK)){
-				System.out.println("OK!\n");
 			}else if(line.startsWith(ERR)){
+				System.out.println(userName+ " access failure");
 				user.getStats().addAccessFailure();
 			}
 			out.writeToClient(con, line);
