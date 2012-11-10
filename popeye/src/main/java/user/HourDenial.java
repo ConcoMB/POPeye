@@ -6,22 +6,14 @@ import java.util.Date;
 
 public class HourDenial implements Denial{
 
-	private int minHour=-1, minMinute=-1, maxHour=-1, maxMinute=-1;
+	private int minHour=-1, maxHour=-1;
 
 	public int getMinHour() {
 		return minHour;
 	}
 
-	public int getMinMinute() {
-		return minMinute;
-	}
-
 	public int getMaxHour() {
 		return maxHour;
-	}
-
-	public int getMaxMinute() {
-		return maxMinute;
 	}
 
 	public boolean isBlocked() {
@@ -49,13 +41,9 @@ public class HourDenial implements Denial{
 				return true;
 			}
 		}
-//		if((minMinute!=-1 && m<minMinute) || (maxMinute!=-1 && m>maxMinute)){
-//			return true;
-//		}
 		
 		return false;
 	}
-
 
 
 	public void setMinHour(int val) {
@@ -71,19 +59,4 @@ public class HourDenial implements Denial{
 		}
 		maxHour = val;
 	}
-
-	public void setMaxMinute(int val) {
-		if(val<0 || val>59){
-			return;
-		}
-		maxMinute = val;
-	}
-
-	public void setMinMinute(int val) {
-		if(val<0 || val>59){
-			return;
-		}
-		minMinute = val;
-	}
-
 }
