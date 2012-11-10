@@ -112,7 +112,7 @@ public class EraseConditions {
 
 		for(String header: generalHeaders){
 			try{
-				if(mail.containsHeader(header)){
+				if(mail.containsHeader(header.toLowerCase())){
 					return false;
 				}
 			}catch(IOException e){
