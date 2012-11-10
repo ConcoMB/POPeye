@@ -8,13 +8,15 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 
+
 import proxy.Writeable;
 import service.Olivia;
+import connection.Connection;
+import connection.OliviaConnection;
 
 public class OliviaSelectorProtocol implements SelectorProtocol, Writeable {
     private int bufSize; // Size of I/O buffer
 	private Selector selector;
-	private HashMap<SocketChannel,Olivia> providerMap=new HashMap<SocketChannel,Olivia>();
 
     public OliviaSelectorProtocol(int bufSize, Selector selector) {
         this.bufSize = bufSize;
@@ -27,16 +29,17 @@ public class OliviaSelectorProtocol implements SelectorProtocol, Writeable {
         // Register the selector with new channel for read and attach byte
         // buffer
         System.out.println("OLIVIA: Accepted connection ->"+clntChan.socket().getRemoteSocketAddress());
-        providerMap.put(clntChan, new Olivia(this,clntChan));
-        clntChan.register(key.selector(), SelectionKey.OP_READ, new DoubleBuffer(bufSize));
-        writeToClient(clntChan, ":) Olivia says hi\r\n");
-        writeToClient(clntChan, "Password:");
+        OliviaConnection con = new OliviaConnection(bufSize, this,clntChan);
+        clntChan.register(key.selector(), SelectionKey.OP_READ, con );
+        writeToClient(con, ":) Olivia says hi\r\n");
+        writeToClient(con, "Password:");
     }
     
     public void handleRead(SelectionKey key) throws IOException, InterruptedException {
         // Client socket channel has pending data
         SocketChannel channel = (SocketChannel) key.channel();
-        StringBuffer sBuf = ((DoubleBuffer) key.attachment()).getReadBuffer();
+        OliviaConnection con =  ((OliviaConnection) key.attachment());
+        StringBuffer sBuf = con.getClientBuffer().getReadBuffer();
         ByteBuffer buf=ByteBuffer.allocate(bufSize);
         long bytesRead = channel.read(buf);
         buf.flip();
@@ -53,22 +56,22 @@ public class OliviaSelectorProtocol implements SelectorProtocol, Writeable {
         	System.out.println("OLIVIA: C--> "+line);
         	sBuf.delete(0, sBuf.length());
         	//System.out.print("READ:"+bytesRead+" "+line);
-        	providerMap.get(channel).consult(line.trim());
+        	con.getOlivia().consult(line.trim());
         }
     }
 
     private void disconnectClient(SocketChannel client) throws IOException {
-    	providerMap.remove(client);
     	client.close();
 	}
     
     public void handleWrite(SelectionKey key) throws IOException {
+    	OliviaConnection con = ((OliviaConnection) key.attachment());
         /*
          * Channel is available for writing, and key is valid (i.e., client
          * channel not closed).
          */
         // Retrieve data read earlier
-        StringBuffer sBuf = ((DoubleBuffer) key.attachment()).getWriteBuffer();
+        StringBuffer sBuf = con.getClientBuffer().getWriteBuffer();
         //buf.flip(); // Prepare buffer for writing
         SocketChannel channel = (SocketChannel) key.channel();
         //System.out.println("write ("+sBuf+")");
@@ -86,19 +89,19 @@ public class OliviaSelectorProtocol implements SelectorProtocol, Writeable {
         buf.clear();
     }
 
-	public void writeToClient(SocketChannel client, String line) throws IOException, InterruptedException {
+	public void writeToClient(Connection con, String line) throws IOException, InterruptedException {
+		SocketChannel client = con.getClient();
 		String message=line.length()>30?line.substring(0, 30)+"...\n":line;
 		System.out.print("OLIVIA: S--> "+message);
-		writeToChannel(client,line);
+		writeToChannel(client,line, con.getClientBuffer().getWriteBuffer());
 	}
 
-	public void writeToServer(SocketChannel client, String line) throws IOException, InterruptedException {
+	public void writeToServer(Connection con, String line) throws IOException, InterruptedException {
 		//NADA
 	}
 	
-	private void writeToChannel(SocketChannel channel, String line) throws InterruptedException, IOException{
+	private void writeToChannel(SocketChannel channel, String line, StringBuffer sBuf) throws InterruptedException, IOException{
 		SelectionKey key=channel.keyFor(selector);
-		StringBuffer sBuf=((DoubleBuffer) key.attachment()).getWriteBuffer();
 		String before=sBuf.toString();
 		/*if(buf.hasRemaining()){
 			buf.compact();

@@ -18,25 +18,25 @@ import proxy.transform.VowelTransformer;
 
 public class Mail {
 
-	public static void main(String[] args) throws IOException, InterruptedException {
-		BufferedReader b = new BufferedReader(new FileReader("./mails/examples/qp.txt"));
-		Mail m = new Mail();
-		String line;
-
-		while((line=b.readLine())!=null){
-			m.add(line);
-		}
-		m.parse();
-		System.out.println(m.fromLine+" "+ m.date+" "+m.bodyEnd + " "+m.bodyIndex+ " "+m.from);
-		for(MailImage image: m.photos){
-			System.out.println(image.startLine);
-		}
-		AnonymousTransformer.getInstance().transform(m);
-		VowelTransformer.getInstance().transform(m);
-		//ImageRotationTransformer.getInstance().transform(m);
-//		ExternalAppExecuter a = new ExternalAppExecuter("./apps/toUpper.o");
-//		a.execute(m);
-	}
+//	public static void main(String[] args) throws IOException, InterruptedException {
+//		BufferedReader b = new BufferedReader(new FileReader("./mails/examples/qp.txt"));
+//		Mail m = new Mail();
+//		String line;
+//
+//		while((line=b.readLine())!=null){
+//			m.add(line);
+//		}
+//		m.parse();
+//		System.out.println(m.fromLine+" "+ m.date+" "+m.bodyEnd + " "+m.bodyIndex+ " "+m.from);
+//		for(MailImage image: m.photos){
+//			System.out.println(image.startLine);
+//		}
+//		AnonymousTransformer.getInstance().transform(m);
+//		VowelTransformer.getInstance().transform(m);
+//		//ImageRotationTransformer.getInstance().transform(m);
+////		ExternalAppExecuter a = new ExternalAppExecuter("./apps/toUpper.o");
+////		a.execute(m);
+//	}
 
 
 	private static final String FROM = "From:", DATE="Date: ", MULTIPART= "Content-Type: multipart", CONTENTTYPE="Content-Type: ",
