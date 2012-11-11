@@ -1,0 +1,106 @@
+From: "Juan F. Codagnone" <juan@zaubersoftware.com>
+Organization: Zauber S.A.
+X-KMail-Transport: zaubersoftware.com
+To: alguien@example.org
+Subject: mail grande multipart firmado
+Date: Tue, 14 Jun 2011 23:52:53 -0300
+User-Agent: KMail/1.13.6 (Linux/2.6.38-8-generic; KDE/4.6.2; x86_64; ; )
+X-KMail-QuotePrefix: > 
+MIME-Version: 1.0
+Content-Type: multipart/signed;
+  boundary="nextPart29077347.S9fb1S8fLF";
+  protocol="application/pgp-signature";
+  micalg=pgp-sha1
+Content-Transfer-Encoding: 7bit
+X-KMail-Recipients: alguien@example.org
+Message-Id: <201106142353.02596.juan@zaubersoftware.com>
+Status: RO
+X-Status: RQT
+X-KMail-EncryptionState: N
+X-KMail-SignatureState: F
+X-KMail-MDN-Sent:  
+
+--nextPart29077347.S9fb1S8fLF
+Content-Type: multipart/mixed;
+  boundary="Boundary-01=_G6B+N3CvSc+gBNY"
+Content-Transfer-Encoding: 7bit
+
+
+--Boundary-01=_G6B+N3CvSc+gBNY
+Content-Type: Text/Plain;
+  charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+este es un mail para probar pdc.
+  Tiene un .doc
+  un iconito.gif
+  un sonar-2.8.zip
+  y una foto.
+
+tambien tambien esta firmado
+
+--Boundary-01=_G6B+N3CvSc+gBNY
+Content-Type: application/msword;
+  name="FORMAS DE PAGO ALL.doc"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+	filename="FORMAS DE PAGO ALL.doc"
+
+0AAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAGsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/////////
+//////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAP7/
+AwoAAP////8GCQIAAAAAAMAAAAAAAABGGQAAAERvY3VtZW50byBNaWNyb3NvZnQgV29yZAAKAAAA
+TVNXb3JkRG9jABAAAABXb3JkLkRvY3VtZW50LjgA9DmycQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAP7/AAAFAQIAAAAAAAAAAAAAAAAAAAAAAAIAAAAC1c3VnC4bEJOXCAArLPmuRAAA
+AAXVzdWcLhsQk5cIACss+a48AQAA+AAAAAwAAAABAAAAaAAAAA8AAABwAAAABQAAAHwAAAAGAAAA
+hAAAABEAAACMAAAAFwAAAJQAAAALAAAAnAAAABAAAACkAAAAEwAAAKwAAAAWAAAAtAAAAA0AAAC8
+AAAADAAAANcAAAACAAAA5AQAAB4AAAABAAAAAABlAAMAAAAIAAAAAwAAAAIAAAADAAAAcQQAAAMA
+AABBCgoACwAAAAAAAAALAAAAAAAAAAsAAAAAAAAACwAAAAAAAAAeEAAAAQAAAA8AAABGT1JNQVMg
+REUgUEFHTwAMEAAAAgAAAB4AAAAHAAAAVO10dWxvAAMAAAABAAAAAAD4AQAABwAAAAAAAABAAAAA
+AQAAAPAAAAACAAAA+AAAAAMAAAAIAQAABAAAAGwBAAAFAAAAuAEAAAYAAAAAAQAABgAAAA==
+
+--Boundary-01=_G6B+N3CvSc+gBNY
+Content-Type: image/gif;
+  name="iconito.gif"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+	filename="iconito.gif"
+
+R0lGODlhEAAQAPcAAAAAhBghYyEhWikxYzlCY0pKY1JSY2Nrc4SEhIyMjJyclJylnP/WAP//AP//
+pf//xv//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////ywAAAAAEAAQAAAIcgAhCBxI
+cOADBQMKKoTgQIEAAAsJOljwEGJEhhQBaLzogMEAjRofLHTQ4ABIjQ4UklQQ4CQABSkHkmRQ8eSB
+BjFnGnCpUQADnBAaNEjAE+RNoQ0YECiqccBPoUSZakQgVKnUnj+jXgVggMHOrRoLfJQaEAA7
+
+--Boundary-01=_G6B+N3CvSc+gBNY
+Content-Type: application/zip;
+  name="sonar-2.8.zip"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+	filename="sonar-2.8.zip"
+
+
+  sdklañfdjaskdjaskdlask

@@ -18,25 +18,26 @@ import proxy.transform.VowelTransformer;
 
 public class Mail {
 
-	public static void main(String[] args) throws IOException, InterruptedException {
-		BufferedReader b = new BufferedReader(new FileReader("./mails/examples/foto.txt"));
-		Mail m = new Mail();
-		String line;
-
-		while((line=b.readLine())!=null){
-			m.add(line+"\r\n");
-		}
-		m.parse();
-		System.out.println(m.fromLine+" "+ m.date+" "+m.bodyEnd + " "+m.bodyIndex+ " "+m.from);
-		for(MailImage image: m.photos){
-			System.out.println(image.startLine);
-		}
-		AnonymousTransformer.getInstance().transform(m);
-		//VowelTransformer.getInstance().transform(m);
-		ImageRotationTransformer.getInstance().transform(m);
-		//		ExternalAppExecuter a = new ExternalAppExecuter("./apps/toUpper.o");
-		//		a.execute(m);
-	}
+//	public static void main(String[] args) throws IOException, InterruptedException {
+//		BufferedReader b = new BufferedReader(new FileReader("/Users/Conco/Desktop/mail/borrado/new/grande"));
+//		Mail m = new Mail();
+//		String line;
+//
+//		while((line=b.readLine())!=null){
+//			m.add(line+"\r\n");
+//		}
+//		m.parse();
+//		System.out.println(m.fromLine+" "+ m.date+" "+m.bodyEnd + " "+m.bodyIndex+ " "+m.from);
+////		for(MailImage image: m.photos){
+////			System.out.println(image.startLine);
+////		}
+//		System.out.println(m.header);
+//		//AnonymousTransformer.getInstance().transform(m);
+//		//VowelTransformer.getInstance().transform(m);
+//		//ImageRotationTransformer.getInstance().transform(m);
+//		//		ExternalAppExecuter a = new ExternalAppExecuter("./apps/toUpper.o");
+//		//		a.execute(m);
+//	}
 
 
 	private static final String FROM = "From:", DATE="Date: ", MULTIPART= "Content-Type: multipart", CONTENTTYPE="Content-Type: ",
@@ -55,6 +56,7 @@ public class Mail {
 	private RandomAccessFile reader, writer;
 	private int size;
 	private boolean quotedPrint;
+	private String header="";
 
 	public Mail() throws IOException {
 		id=(serial++)%1000;
@@ -82,6 +84,7 @@ public class Mail {
 		writer.close();
 		String line;
 		while((line=reader.readLine())!=null){
+			header+=line+"\r\n";
 			if(line.toLowerCase().startsWith(FROM.toLowerCase())){
 				//while(!line.contains("<")){i++;}
 				//from = line.split("<")[1].split(">")[0];
@@ -99,8 +102,10 @@ public class Mail {
 					String b;
 					while(line!=null && !line.contains("boundary")){
 						i++;
+						header+=line+"\r\n";
 						line=reader.readLine();
 					}
+					header+=line+"\r\n";
 					b = line.split("boundary=")[1];
 					if(b.contains("\"")){
 						b=b.split("\"")[1];
@@ -116,9 +121,11 @@ public class Mail {
 						if(line.toLowerCase().contains(Q_PRINT.toLowerCase())){
 							quotedPrint=true;
 						}
+						header+=line+"\r\n";
 						i++;
 						line=reader.readLine();
 					}
+					header+=line+"\r\n";
 					bodyIndex=++i;
 					line=reader.readLine();
 					flag=false;
@@ -145,9 +152,11 @@ public class Mail {
 							disp=disp.split(";")[0];
 							contentDispositions.add(disp);
 						}
+						header+=line+"\r\n";
 						i++;
 						line=reader.readLine();
 					}
+					header+=line+"\r\n";
 					i++;
 					line=reader.readLine();
 					MailImage image = new MailImage();
@@ -171,10 +180,11 @@ public class Mail {
 							disp=disp.split(";")[0];
 							contentDispositions.add(disp);
 						}
+						header+=line+"\r\n";
 						i++;
 						line=reader.readLine();
-
 					}
+					header+=line+"\r\n";
 					htmlBeg=i++;
 					flag=false;
 					while(!flag && line!=null && !line.equals("--=20")){
@@ -192,11 +202,26 @@ public class Mail {
 					}
 					htmlEnd=i;
 				}else{
-					while(!line.equals("") && line!=null){
+					while(line!=null && !line.equals("")){
 						if(line.toLowerCase().startsWith(CONTENTDISP.toLowerCase())){
 							String disp = line.split(CONTENTDISP)[1];
 							disp=disp.split(";")[0];
 							contentDispositions.add(disp);
+						}
+						header+=line+"\r\n";
+						i++;
+						line=reader.readLine();
+					}
+					while(line!=null && line.equals("")){
+						line=reader.readLine();
+					}
+					boolean bound = false;
+					while(line!=null && !line.equals("") && !bound){
+						for(String b: bounds){
+							if(line.startsWith("--"+b) || line.equals(b)){
+								bound=true;
+								break;
+							}
 						}
 						i++;
 						line=reader.readLine();
@@ -309,17 +334,18 @@ public class Mail {
 	}
 
 	public boolean containsHeader(String header) throws IOException {
-		RandomAccessFile r = new RandomAccessFile("./mails/mail"+id+".txt", "r");
-		String line;
-		while((line=r.readLine())!=null){
-			if(line.equals("") || line.equals("\r")|| line.equals("\r\n")){
-				return false;
-			}
-			if(line.toLowerCase().startsWith(header)){
-				return true;
-			}
-		}
-		return false;
+//		RandomAccessFile r = new RandomAccessFile("./mails/mail"+id+".txt", "r");
+//		String line;
+//		while((line=r.readLine())!=null){
+//			if(line.equals("") || line.equals("\r")|| line.equals("\r\n")){
+//				return false;
+//			}
+//			if(line.toLowerCase().startsWith(header)){
+//				return true;
+//			}
+//		}
+//		return false;
+		return header.contains(header);
 	}
 
 	public int id(){
