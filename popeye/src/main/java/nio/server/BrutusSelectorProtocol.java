@@ -43,7 +43,7 @@ public class BrutusSelectorProtocol implements SelectorProtocol, Writeable {
         long bytesRead = channel.read(buf);
         buf.flip();
         if (bytesRead == -1) { // Did the other end close?
-    		System.out.println("BRUTUS: Client disconnected:"+channel.socket().getRemoteSocketAddress());
+    		System.out.println("BRUTUS: Connecion disconnected:"+channel.socket().getRemoteSocketAddress());
         	disconnectClient(channel);
         } else if (bytesRead > 0) {
         	String line=BufferUtils.bufferToString(buf);
@@ -52,7 +52,7 @@ public class BrutusSelectorProtocol implements SelectorProtocol, Writeable {
         		return;
         	}
         	line=sBuf.toString();
-        	System.out.println("BRUTUS: C--> "+line);
+        	System.out.println("BRUTUS: "+line);
         	sBuf.delete(0, sBuf.length());
         	//System.out.print("READ:"+bytesRead+" "+line);
         	con.getBrutus().apply(line.trim());
@@ -90,7 +90,7 @@ public class BrutusSelectorProtocol implements SelectorProtocol, Writeable {
 
 	public void writeToClient(Connection con, String line) throws IOException, InterruptedException {
 		String message=line.length()>30?line.substring(0, 30)+"...\n":line;
-		System.out.print("BRUTUS: S--> "+message);
+//		System.out.print("BRUTUS: S--> "+message);
 		writeToChannel(con.getClient(),line, con.getClientBuffer().getWriteBuffer());
 	}
 

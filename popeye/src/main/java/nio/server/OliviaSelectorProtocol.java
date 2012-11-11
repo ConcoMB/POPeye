@@ -44,7 +44,7 @@ public class OliviaSelectorProtocol implements SelectorProtocol, Writeable {
         long bytesRead = channel.read(buf);
         buf.flip();
         if (bytesRead == -1) { // Did the other end close?
-    		System.out.println("OLIVIA: Client disconnected:"+channel.socket().getRemoteSocketAddress());
+    		System.out.println("OLIVIA: Connection disconnected:"+channel.socket().getRemoteSocketAddress());
         	disconnectClient(channel);
         } else if (bytesRead > 0) {
         	String line=BufferUtils.bufferToString(buf);
@@ -53,7 +53,7 @@ public class OliviaSelectorProtocol implements SelectorProtocol, Writeable {
         		return;
         	}
         	line=sBuf.toString();
-        	System.out.println("OLIVIA: C--> "+line);
+        	System.out.println("OLIVIA: "+line);
         	sBuf.delete(0, sBuf.length());
         	//System.out.print("READ:"+bytesRead+" "+line);
         	con.getOlivia().consult(line.trim());
@@ -92,7 +92,7 @@ public class OliviaSelectorProtocol implements SelectorProtocol, Writeable {
 	public void writeToClient(Connection con, String line) throws IOException, InterruptedException {
 		SocketChannel client = con.getClient();
 		String message=line.length()>30?line.substring(0, 30)+"...\n":line;
-		System.out.print("OLIVIA: S--> "+message);
+//		System.out.print("OLIVIA: S--> "+message);
 		writeToChannel(client,line, con.getClientBuffer().getWriteBuffer());
 	}
 

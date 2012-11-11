@@ -88,15 +88,15 @@ public class EraseConditions {
 			}
 		}
 		int size = mail.getSize();
-		System.out.println("size:"+size+" minsize:"+minSize+" maxSize:"+maxSize);
-		if ((minSize != 0 && size < minSize)
-				|| (maxSize != 0 && size > maxSize)) {
+		if(minSize!=0 && size<minSize)
 			return false;
-		}
-		System.out.println(withAttachment+":"+(withAttachment==1));
-		for(String s:mail.getContentDispositions()){
-			System.out.println(s);
-		}
+		if(maxSize!=0 && size>maxSize)
+			return false;
+		
+//		System.out.println(withAttachment+":"+(withAttachment==1));
+//		for(String s:mail.getContentDispositions()){
+//			System.out.println(s);
+//		}
 		if (withAttachment == 1
 				&& mail.getContentDispositions().contains("attachment")) {
 			return false;
@@ -111,13 +111,9 @@ public class EraseConditions {
 		}
 
 		for(String header: generalHeaders){
-			try{
-				if(mail.containsHeader(header.toLowerCase())){
+				if(mail.containsHeader(header))
 					return false;
-				}
-			}catch(IOException e){
-
-			}
+				
 		}
 		return true;
 	}

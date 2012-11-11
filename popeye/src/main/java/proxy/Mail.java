@@ -1,20 +1,12 @@
 package proxy;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import nio.server.ExternalAppExecuter;
-
-import proxy.transform.AnonymousTransformer;
-import proxy.transform.ImageRotationTransformer;
-import proxy.transform.VowelTransformer;
 
 public class Mail {
 
@@ -333,7 +325,7 @@ public class Mail {
 		return from;
 	}
 
-	public boolean containsHeader(String header) throws IOException {
+	public boolean containsHeader(String regex){
 //		RandomAccessFile r = new RandomAccessFile("./mails/mail"+id+".txt", "r");
 //		String line;
 //		while((line=r.readLine())!=null){
@@ -345,7 +337,7 @@ public class Mail {
 //			}
 //		}
 //		return false;
-		return header.contains(header);
+		return header.toLowerCase().contains(regex.toLowerCase());
 	}
 
 	public int id(){
