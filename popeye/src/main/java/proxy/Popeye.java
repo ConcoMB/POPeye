@@ -384,4 +384,8 @@ public class Popeye {
 	public static Map<String,User> getUsers(){
 		return users;
 	}
+
+	public boolean mustAuthenticate() {
+		return state.equals(State.AUTHORIZATION_USER);
+	}
 }
