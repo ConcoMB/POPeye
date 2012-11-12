@@ -150,7 +150,6 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 
 	public void disconnect(SocketChannel channel) throws IOException{
 		SelectionKey key=channel.keyFor(selector);
-		System.out.println(selector.keys().size());
 		if(key!=null){
 			key.cancel();
 		}
