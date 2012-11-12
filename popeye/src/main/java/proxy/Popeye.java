@@ -59,7 +59,7 @@ public class Popeye {
 		String command[] = line.split(" ");
 		Command com;
 		try{
-			com = Command.valueOf(command[0]);
+			com = Command.valueOf(command[0].toUpperCase());
 		}catch(IllegalArgumentException e){
 			//decir q todo mal al cli:
 			System.out.println("connection error");

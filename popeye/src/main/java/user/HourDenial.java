@@ -24,7 +24,7 @@ public class HourDenial implements Denial{
 		int h = Integer.valueOf(hhmm[0]);
 		int m = Integer.valueOf(hhmm[1]);
         //TODO arreglar esto
-		
+		System.out.println("hour:"+h);
 		if(minHour!=-1 && maxHour!=-1 && minHour<maxHour){
 			if((h<minHour) || (h>maxHour)){
 				return true;
