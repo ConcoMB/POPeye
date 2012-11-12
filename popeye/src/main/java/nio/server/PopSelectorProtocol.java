@@ -117,7 +117,7 @@ public class PopSelectorProtocol implements SelectorProtocol, Writeable {
 				//CLIENT
 				//TODO turbio
 				//if(serverMap.get(channel)==null){
-				if(line.toUpperCase().startsWith("USER")){
+				if(line.toUpperCase().startsWith("USER")&&con.getProxy().mustAuthenticate()){
 					//AUTHENTICATION
 					System.out.println("AUTHENTICATION");
 					String serverName=con.getProxy().login(line);
