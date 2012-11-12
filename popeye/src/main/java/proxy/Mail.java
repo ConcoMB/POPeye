@@ -1,6 +1,8 @@
 package proxy;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
@@ -8,35 +10,38 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import proxy.transform.VowelTransformer;
+
 public class Mail {
 
-//	public static void main(String[] args) throws IOException, InterruptedException {
-//		BufferedReader b = new BufferedReader(new FileReader("/Users/Conco/Desktop/mail/borrado/new/grande"));
-//		Mail m = new Mail();
-//		String line;
-//
-//		while((line=b.readLine())!=null){
-//			m.add(line+"\r\n");
+	public static void main(String[] args) throws IOException, InterruptedException {
+		BufferedReader b = new BufferedReader(new FileReader("/Users/Conco/Desktop/mail/borrado/new/alguien"));
+		Mail m = new Mail();
+		String line;
+
+		while((line=b.readLine())!=null){
+			m.add(line+"\r\n");
+		}
+		m.parse();
+		System.out.println(m.fromLine+" "+ m.date+" "+m.bodyEnd + " "+m.bodyIndex+ " "+m.from);
+//		for(MailImage image: m.photos){
+//			System.out.println(image.startLine);
 //		}
-//		m.parse();
-//		System.out.println(m.fromLine+" "+ m.date+" "+m.bodyEnd + " "+m.bodyIndex+ " "+m.from);
-////		for(MailImage image: m.photos){
-////			System.out.println(image.startLine);
-////		}
-//		System.out.println(m.header);
-//		//AnonymousTransformer.getInstance().transform(m);
-//		//VowelTransformer.getInstance().transform(m);
-//		//ImageRotationTransformer.getInstance().transform(m);
-//		//		ExternalAppExecuter a = new ExternalAppExecuter("./apps/toUpper.o");
-//		//		a.execute(m);
-//	}
+		System.out.println(m.header);
+		//AnonymousTransformer.getInstance().transform(m);
+		VowelTransformer.getInstance().transform(m);
+		//ImageRotationTransformer.getInstance().transform(m);
+		//		ExternalAppExecuter a = new ExternalAppExecuter("./apps/toUpper.o");
+		//		a.execute(m);
+	}
 
 
 	private static final String FROM = "From:", DATE="Date: ", MULTIPART= "Content-Type: multipart", CONTENTTYPE="Content-Type: ",
 			TEXT="Content-Type: text/plain", CTE= "Content-Transfer-Encoding: ", PIC="Content-Type: image", 
 			CONTENTDISP="Content-Disposition: ", HTML="Content-Type: text/html", Q_PRINT="Content-Transfer-Encoding: quoted-printable";
 	private static int serial;
-
+	public static int cantMails = 1000;
+	
 	private String date ;
 	private int id;
 	//	private String subject; // "Subject: ";
@@ -51,7 +56,7 @@ public class Mail {
 	private String header="";
 
 	public Mail() throws IOException {
-		id=(serial++)%1000;
+		id=(serial++)%cantMails;
 		File f = new File("./mails/mail"+id+".txt");
 		f.delete();
 		f.createNewFile();

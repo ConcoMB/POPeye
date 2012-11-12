@@ -11,9 +11,9 @@ import java.util.Iterator;
 public class PopeyeServer {
 	private static final int BUFSIZE = 1024 * 1024; // Buffer size (bytes)
 	private static final int TIMEOUT = 3000; // Wait timeout (milliseconds)
-	private static final int defaultPort = 110;
 
 	public static void main(String[] args) throws IOException, InterruptedException, ParseException {
+		System.out.println("Starting...");
 		int ports[]={4040};
 		/*if (args.length < 1) { // Test for correct # of args
             throw new IllegalArgumentException("Parameter(s): <Port> ...");

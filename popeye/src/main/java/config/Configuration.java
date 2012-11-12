@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import proxy.Mail;
+
 public class Configuration {
 	private static Configuration instance;
 	private String defaultServer;
@@ -15,14 +17,15 @@ public class Configuration {
 	private Configuration(){
 		this.properties = new Properties();
 		try {
-			InputStream is=Configuration.class.getResourceAsStream("general.properties");
+			InputStream is=getClass().getClassLoader().getResourceAsStream("general.properties");
 		    properties.load(is);
 		} catch (IOException ex) {
 		    ex.printStackTrace();
 		}
 		defaultServer=properties.getProperty("defaultServer", "localhost");
 		defaultPort=Integer.valueOf(properties.getProperty("defaultPort", "110"));
-		adminPassword=properties.getProperty("adminPassword", "admin");
+		adminPassword=properties.getProperty("adminPassword", "protos");
+		Mail.cantMails=Integer.valueOf(properties.getProperty("cantMails"));
 	}
 	
 	public static Configuration getInstance(){
