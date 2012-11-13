@@ -402,11 +402,8 @@ public class Popeye {
 			user.getStats().readEmail();
 			//Olivia.addBytes(bytes);
 			Olivia.addEmailsRead();
-			}catch(IOException e){
-				//
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			}catch(Exception e){
+				System.out.println("Error retreiving mail");
 			}
 		}
 		
