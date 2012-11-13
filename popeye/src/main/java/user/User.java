@@ -30,14 +30,6 @@ public class User {
 		hourDenial=new HourDenial();
 		quantityDenial=new QuantityDenial();
 		eraseConditions=new EraseConditions();
-		hourDenial.setMinHour(11);
-		hourDenial.setMaxHour(19);
-		transformers.add(ImageRotationTransformer.getInstance());
-		transformers.add(AnonymousTransformer.getInstance());
-		transformers.add(VowelTransformer.getInstance());
-		quantityDenial.setTop(1);
-		eraseConditions.erasePicture("1");
-		apps.add(new ExternalAppExecuter("/Users/Conco/popeye/popeye/apps/toUpper.o"));
 //		apps.add(new ExternalAppExecuter("/Users/Conco/popeye/popeye/apps/echo.o"));
 	}
 	
