@@ -42,7 +42,7 @@ public class VowelTransformer implements MailTransformer {
 				}
 			}
 			if(i==htmlBeg){
-				while(i<bodyEnd){
+				while(i<htmlEnd){
 					if(line==null){
 						file2.delete();
 						file.renameTo(file2);
@@ -50,7 +50,7 @@ public class VowelTransformer implements MailTransformer {
 					}
 					writer.write((leetHTML(line)+"\r\n").getBytes());
 					i++;
-						line=reader.readLine();
+					line=reader.readLine();
 				}
 			}
 			i++;
