@@ -257,34 +257,8 @@ public class Popeye {
 			//System.out.print("Line: "+line);
 			mail.add(line);
 			if(line.equals(END+"\r\n")){
-				mail.parse();
-
-				int bytes = mail.getSize();
-				System.out.println("transformers:"+user.getTransformers().size());
-				for(MailTransformer t: user.getTransformers()){
-					System.out.println(t);
-					t.transform(mail);
-				}
-				//TODO bytes
-				Set<ExternalAppExecuter> apps=user.getApps();
-				//String message=mail.getMessage();
-				System.out.println("external apps:"+apps.size());
-				for(ExternalAppExecuter app: apps){
-					try{
-						//message=app.execute(message);
-						app.execute(mail);
-						System.out.println(app.getPath());
-					}catch(IOException e){
-						//TODO
-						System.out.println("app: \""+app.getPath()+"\" not found");
-					}
-				}
-				writeMail(mail);
-				//out.writeToClient(client, message);
-				//user.getStats().addBytes(bytes);
-				user.getStats().readEmail();
-				//Olivia.addBytes(bytes);
-				Olivia.addEmailsRead();
+				ProcessingThread t = new ProcessingThread(mail,user,out,con);
+				t.start();
 				mail=new Mail();
 			}
 			break;
@@ -343,14 +317,6 @@ public class Popeye {
 		}
 	}
 
-	private void writeMail(Mail mail2) throws IOException, InterruptedException {
-		RandomAccessFile r = new RandomAccessFile("./mails/mail"+mail.id()+".txt", "r");
-		String s;
-		while((s=r.readLine())!=null){
-			out.writeToClient(con, s+"\r\n");
-		}
-	}
-
 	private boolean canErase(Mail aMail) throws ParseException {
 		return user.getEraseConditions().canErase(aMail);
 
@@ -387,5 +353,69 @@ public class Popeye {
 
 	public boolean mustAuthenticate() {
 		return state.equals(State.AUTHORIZATION_USER);
+	}
+	
+	private static class ProcessingThread extends Thread {
+		private User user;
+		private Mail mail;
+		private Writeable out;
+		private Connection con;
+		
+		public ProcessingThread(Mail mail, User user, Writeable out, Connection con){
+			this.user=user;
+			this.mail=mail;
+			this.out=out;
+			this.con=con;
+		}
+		
+		@Override
+		public void run() {
+			try{
+			mail.parse();
+
+			int bytes = mail.getSize();
+			System.out.println("transformers:"+user.getTransformers().size());
+			for(MailTransformer t: user.getTransformers()){
+				System.out.println(t);
+				t.transform(mail);
+			}
+			//TODO bytes
+			Set<ExternalAppExecuter> apps=user.getApps();
+			//String message=mail.getMessage();
+			System.out.println("external apps:"+apps.size());
+			for(ExternalAppExecuter app: apps){
+				try{
+					//message=app.execute(message);
+					app.execute(mail);
+					System.out.println(app.getPath());
+				}catch(IOException e){
+					//TODO
+					System.out.println("app: \""+app.getPath()+"\" not found");
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			writeMail(mail);
+			//out.writeToClient(client, message);
+			//user.getStats().addBytes(bytes);
+			user.getStats().readEmail();
+			//Olivia.addBytes(bytes);
+			Olivia.addEmailsRead();
+			}catch(IOException e){
+				//
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		private void writeMail(Mail mail2) throws IOException, InterruptedException {
+			RandomAccessFile r = new RandomAccessFile("./mails/mail"+mail.id()+".txt", "r");
+			String s;
+			while((s=r.readLine())!=null){
+				out.writeToClient(con, s+"\r\n");
+			}
+		}
 	}
 }
