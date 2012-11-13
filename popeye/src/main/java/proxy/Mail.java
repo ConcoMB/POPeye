@@ -10,12 +10,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import proxy.transform.ImageRotationTransformer;
 import proxy.transform.VowelTransformer;
 
 public class Mail {
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BufferedReader b = new BufferedReader(new FileReader("/Users/Conco/Desktop/mail/borrado/new/alguien"));
+		BufferedReader b = new BufferedReader(new FileReader("./mails/mail0.txt"));
 		Mail m = new Mail();
 		String line;
 
@@ -29,8 +30,8 @@ public class Mail {
 //		}
 		System.out.println(m.header);
 		//AnonymousTransformer.getInstance().transform(m);
-		VowelTransformer.getInstance().transform(m);
-		//ImageRotationTransformer.getInstance().transform(m);
+		//VowelTransformer.getInstance().transform(m);
+		ImageRotationTransformer.getInstance().transform(m);
 		//		ExternalAppExecuter a = new ExternalAppExecuter("./apps/toUpper.o");
 		//		a.execute(m);
 	}

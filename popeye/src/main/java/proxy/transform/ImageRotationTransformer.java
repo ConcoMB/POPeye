@@ -60,7 +60,7 @@ public class ImageRotationTransformer implements MailTransformer{
 			MailImage image = iter.next();
 			int beg = image.getStartLine();
 			int end = image.getEndLine();
-			while( i<beg && (line=reader.readLine())!=null){
+			while( i<beg-1 && (line=reader.readLine())!=null){
 				writer.write((line+"\r\n").getBytes());
 				i++;
 			}
@@ -71,6 +71,7 @@ public class ImageRotationTransformer implements MailTransformer{
 			}
 			String rotated = imageRotation(base64);
 			writer.write((rotated+"\r\n").getBytes());
+			writer.write((line+"\n\r").getBytes());
 		}
 		while((line=reader.readLine())!=null){
 			writer.write((line+"\r\n").getBytes());
