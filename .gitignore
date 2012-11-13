@@ -4,5 +4,8 @@
 /bin1
 *.class
 *~
-./popeye/mails
+/popeye/mails
 popeye/target
+._.DS_Store
+.svn*
+/target
